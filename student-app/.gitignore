@@ -1,0 +1,4 @@
+/db-postgres/data/postgres/*.zip
+.env
+target
+*/.env.test
