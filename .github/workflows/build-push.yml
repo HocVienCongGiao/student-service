@@ -49,11 +49,11 @@ jobs:
         with:
           components: rustfmt
       - uses: actions/checkout@v2
-      -
-        working-directory: student-app
+      - 
+        working-directory: student-lambda
         run: cargo fmt --all -- --check
       -
-        working-directory: student-lambda
+        working-directory: student-app
         run: cargo fmt --all -- --check
   lint:
     runs-on: ubuntu-latest
@@ -95,7 +95,7 @@ jobs:
           POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_DB: dev_hocvien
           POSTGRES_PASSWORD: 123456
-          POSTGRES_student: hocvien_dev
+          POSTGRES_USER: hocvien_dev
         ports:
           - 5432:5432
         # Set health checks to wait until postgres has started
@@ -126,7 +126,7 @@ jobs:
       env:
         DB_NAME: dev_hocvien
         DB_PASSWORD: 123456
-        DB_student: hocvien_dev
+        DB_USER: hocvien_dev
         DB_HOST: 0.0.0.0
       run: |
         echo "prepare"
@@ -144,7 +144,7 @@ jobs:
         ls -l ./lambda/terraform/module/python/
         cd ./lambda/terraform/module/python/ && python -c 'from shared_db_app.migration import migrate; migrate()'
         echo "migrate successfully"
-        psql -h 0.0.0.0 -U hocvien_dev -d dev_hocvien -p 5432 -c 'SELECT * FROM public.student__student_view' -w
+        psql -h 0.0.0.0 -U hocvien_dev -d dev_hocvien -p 5432 -c 'SELECT * FROM public.student__group' -w
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -177,7 +177,7 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v2
-
+        
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -216,6 +216,11 @@ jobs:
         run: |
           chmod +x ./scripts/terraform-enterprise-push.sh
           ./scripts/terraform-enterprise-push.sh student-lambda/terraform HocVienCongGiao/dev-sg-lambda-services-hvcg-student-service
+      - name: DynamoDB Deploy Terraform Config
+        run: |
+          echo TODO
+          chmod +x ./scripts/terraform-enterprise-push.sh
+          ./scripts/terraform-enterprise-push.sh student-dynamodb-lambda/terraform HocVienCongGiao/dev-sg-lambda-processors-dynamodb-student-service
   push_prod:
     if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
@@ -236,7 +241,7 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v2
-
+        
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -269,7 +274,6 @@ jobs:
           cd /home/runner/work/student-service/student-service/student-lambda
           cargo clean
           cargo build --release --target x86_64-unknown-linux-musl
-          cp ./target/x86_64-unknown-linux-musl/release/student ./bootstrap && zip student.zip bootstrap
-
+          cp ./target/x86_64-unknown-linux-musl/release/user ./bootstrap && zip user.zip bootstrap
           aws s3 cp ./student.zip s3://891616054205-ap-southeast-1-aws-lambda/prod-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/student.zip
 
