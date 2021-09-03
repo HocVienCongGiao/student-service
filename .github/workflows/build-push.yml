@@ -216,11 +216,6 @@ jobs:
         run: |
           chmod +x ./scripts/terraform-enterprise-push.sh
           ./scripts/terraform-enterprise-push.sh student-lambda/terraform HocVienCongGiao/dev-sg-lambda-services-hvcg-student-service
-      - name: DynamoDB Deploy Terraform Config
-        run: |
-          echo TODO
-          chmod +x ./scripts/terraform-enterprise-push.sh
-          ./scripts/terraform-enterprise-push.sh student-dynamodb-lambda/terraform HocVienCongGiao/dev-sg-lambda-processors-dynamodb-student-service
   push_prod:
     if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
