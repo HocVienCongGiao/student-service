@@ -28,5 +28,5 @@ async fn integration_works() {
     println!("is it working?");
     let result = 99;
     assert_eq!(result, 99);
-    println!("Trigger build!!!");
+    println!("Trigger build!!!!");
 }
