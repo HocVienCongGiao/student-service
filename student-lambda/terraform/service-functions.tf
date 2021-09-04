@@ -5,7 +5,7 @@ module "students" {
   mutation_api_parent_id = module.student-service.mutation_api_gateway_resource_id
     
   function_name = "students"
-  file_name     = "student"
+  file_name     = var.service_name
 
   depends_on = [
     module.student-service
@@ -25,7 +25,7 @@ module "student_id" {
   mutation_api_parent_id = module.students.mutation_api_gateway_resource_id
     
   function_name = "student_id"
-  file_name     = "student"
+  file_name     = var.service_name
   path_part     = "{id}"
   depends_on = [
     module.students
