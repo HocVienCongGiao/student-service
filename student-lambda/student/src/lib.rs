@@ -21,21 +21,21 @@ struct TokenPayload {
 }
 
 pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, Error> {
-    let studentResponse = controller::get_student_by_id().await;
+    let student_response = controller::get_student_by_id().await;
     let response: Response<Body> = Response::builder()
         .header(CONTENT_TYPE, "application/json")
         .header(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
         .header(ACCESS_CONTROL_ALLOW_HEADERS, "*")
         .header(ACCESS_CONTROL_ALLOW_METHODS, "*")
         .body(
-            serde_json::to_string(&studentResponse)
+            serde_json::to_string(&student_response)
                 .expect("unable to serialize serde_json::Value")
                 .into(),
         )
         .expect("unable to build http::Response");
     println!(
         "test1Response {:?}",
-        serde_json::to_string(&studentResponse)
+        serde_json::to_string(&student_response)
     );
     Ok(response)
     // println!("Request {:?}", request);
