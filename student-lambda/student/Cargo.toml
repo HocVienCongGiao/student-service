@@ -16,3 +16,4 @@ uuid = "0.8"
 
 [dev-dependencies]
 dotenv = "0.15.0"
+hvcg_student_openapi_student = "0.0.2"

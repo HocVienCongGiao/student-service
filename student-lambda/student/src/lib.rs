@@ -20,7 +20,24 @@ struct TokenPayload {
     groups: Vec<String>,
 }
 
-pub async fn student(request: Request, ctx: Context) -> Result<impl IntoResponse, Error> {
+pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, Error> {
+    let studentResponse = controller::get_student_by_id().await;
+    let response: Response<Body> = Response::builder()
+        .header(CONTENT_TYPE, "application/json")
+        .header(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+        .header(ACCESS_CONTROL_ALLOW_HEADERS, "*")
+        .header(ACCESS_CONTROL_ALLOW_METHODS, "*")
+        .body(
+            serde_json::to_string(&studentResponse)
+                .expect("unable to serialize serde_json::Value")
+                .into(),
+        )
+        .expect("unable to build http::Response");
+    println!(
+        "test1Response {:?}",
+        serde_json::to_string(&studentResponse)
+    );
+    Ok(response)
     // println!("Request {:?}", request);
     // println!("path_parameters {:?}", request.path_parameters());
     // println!(
@@ -68,12 +85,13 @@ pub async fn student(request: Request, ctx: Context) -> Result<impl IntoResponse
     //         "message": "Test 2 20210616 is me, how are you?"
     //     }
     // );
-    Ok(Response::builder()
-        .header(CONTENT_TYPE, "application/json")
-        .header(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
-        .header(ACCESS_CONTROL_ALLOW_HEADERS, "*")
-        .header(ACCESS_CONTROL_ALLOW_METHODS, "*")
-        .status(200)
-        .body(Body::Empty)
-        .expect("Hello student!"))
+    //
+    // Ok(Response::builder()
+    //     .header(CONTENT_TYPE, "application/json")
+    //     .header(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+    //     .header(ACCESS_CONTROL_ALLOW_HEADERS, "*")
+    //     .header(ACCESS_CONTROL_ALLOW_METHODS, "*")
+    //     .status(200)
+    //     .body(Body::Empty)
+    //     .expect("Hello student!"))
 }

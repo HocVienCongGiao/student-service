@@ -1,3 +1,8 @@
+use std::collections::HashMap;
+// use pg_embed::postgres::PgEmbed;
+use std::path::PathBuf;
+use std::sync::Once;
+
 use lambda_http::http::header::{
     ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_METHODS, ACCESS_CONTROL_ALLOW_ORIGIN,
     CONTENT_TYPE,
@@ -6,11 +11,8 @@ use lambda_http::http::HeaderValue;
 use lambda_http::{
     handler, http, lambda_runtime, Body, Context, IntoResponse, Request, RequestExt, Response,
 };
-type Error = Box<dyn std::error::Error + Sync + Send + 'static>;
 
-// use pg_embed::postgres::PgEmbed;
-use std::path::PathBuf;
-use std::sync::Once;
+type Error = Box<dyn std::error::Error + Sync + Send + 'static>;
 
 static INIT: Once = Once::new();
 
@@ -23,10 +25,28 @@ fn initialise() {
 }
 
 #[tokio::test]
-async fn integration_works() {
+async fn crud() {
     initialise();
     println!("is it working?");
-    let result = 99;
-    assert_eq!(result, 99);
-    println!("Trigger build!!!!!");
+    let mut query_param = HashMap::new();
+    query_param.insert("count".to_string(), vec!["5".to_string()]);
+    query_param.insert("offset".to_string(), vec!["1".to_string()]);
+    query_param.insert("firstName".to_string(), vec!["test".to_string()]);
+    let request = http::Request::builder()
+        .uri("https://dev-sg.portal.hocvienconggiao.com/query-api/student-service/users?offset=1&count=5")
+        .method("GET")
+        .header("Content-Type", "application/json")
+        .body(Body::Empty)
+        .unwrap()
+        .with_query_string_parameters(query_param);
+
+    // When
+    let response = student::func(request, Context::default())
+        .await
+        .expect("expected Ok(_) value")
+        .into_response();
+    // Then
+    println!("response: {:?}", response);
+    assert_eq!(response.status(), 200);
+    println!("Trigger build!");
 }
