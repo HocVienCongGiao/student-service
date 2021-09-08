@@ -47,5 +47,5 @@ async fn crud() {
     // Then
     println!("response: {:?}", response);
     assert_eq!(response.status(), 200);
-    println!("Trigger build!");
+    println!("Trigger build!!");
 }
