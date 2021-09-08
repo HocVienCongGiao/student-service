@@ -1,5 +1,3 @@
-use domain::test_func;
-
 #[cfg(test)]
 mod tests {
 

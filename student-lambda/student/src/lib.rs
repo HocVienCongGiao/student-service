@@ -1,4 +1,7 @@
-use hvcg_student_openapi_student::models::{Student, StudentCollection};
+use chrono::DateTime;
+use controller::StudentCollectionQuery;
+use domain::boundaries::usecase_boundary::UsecaseError;
+use hvcg_academics_openapi_student::models::{Student, StudentSortCriteria, StudentViewCollection};
 use jsonwebtoken::TokenData;
 use lambda_http::http::header::{
     ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_METHODS, ACCESS_CONTROL_ALLOW_ORIGIN,
@@ -8,6 +11,8 @@ use lambda_http::http::{method, uri::Uri, HeaderValue};
 use lambda_http::{handler, Body, Context, IntoResponse, Request, RequestExt, Response};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use std::env;
+use std::str::FromStr;
 
 type Error = Box<dyn std::error::Error + Sync + Send + 'static>;
 
@@ -22,13 +27,7 @@ struct TokenPayload {
 }
 
 pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, Error> {
-    println!("Request {:?}", request);
-    println!("path_parameters {:?}", request.path_parameters());
-    println!(
-        "query_string_parameters {:?}",
-        request.query_string_parameters()
-    );
-    println!("Request Method {:?}", request.method());
+    print_debug_log(&request);
     if request.method() == method::Method::OPTIONS {
         return Ok(Response::builder()
             .header(CONTENT_TYPE, "application/json")
@@ -39,33 +38,9 @@ pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, E
             .body(Body::Empty)
             .expect("unable to build http::Response"));
     }
-
-    let default_header_value = HeaderValue::from_str("Bearer eyJraWQiOiJaTGpneG41SStaZEpldnJRb0lpMTZEWEZoRHI4eG9UbVZ2b2ZuVm5vb3RFPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJmZDlhN2FmOC1mYTc2LTRiODYtYWYzZC1kOTYzNGVmNTIzNzQiLCJhdWQiOiIxcmF2NDExbmNjbnA3M2h0b3BiaG1sOHM2MSIsImNvZ25pdG86Z3JvdXBzIjpbIk9wZXJhdG9yR3JvdXAiXSwiZXZlbnRfaWQiOiI5NjQ1ZDYyMi0zZjRiLTQyYjctOWI0ZC03MWQzNWRhOTI1NmQiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTYyMzkzNDkyNiwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmFwLXNvdXRoZWFzdC0xLmFtYXpvbmF3cy5jb21cL2FwLXNvdXRoZWFzdC0xXzlRV1NZR3pYayIsInBob25lX251bWJlcl92ZXJpZmllZCI6dHJ1ZSwiY29nbml0bzp1c2VybmFtZSI6ImRldi1vcGVyYXRvciIsInBob25lX251bWJlciI6Iis4NDM2OTE0MDkxNiIsImV4cCI6MTYyMzk0ODAwOCwiaWF0IjoxNjIzOTQ0NDA4fQ.ml3N8J7uw4rbQOneEdnmQW6OwsAY6ycmp5PIrKGZKF3yWQn0oQECIhF2Q_jjWOjWPikpUQEy5IKgghiJLukgKo7q-T4tUauPG3GJxoSGQkfVcglkNu8nZTu7ioxXzlQAWsXLakgkH40mGzI6kl2hkEhRQh_lWGrT7TqDP2yVTsDMKEGJBdtcb-kFCnYHfn9FMoCyVGo4K3tSrkeGno7bzwO_XpFtZRhv9Qs4OtfESXARYCP3St69hyf4JuAop6-Zb38FPWcp6rnpRG3BF64YPGqo0J0MAyWVz_Du7Pk3-H5uZqqrr6iHKoPwoabPPlZxJ3JGdifVt_I54SwTbelbzw").unwrap();
-    let auth_header_value = request
-        .headers()
-        .get("authorization")
-        .unwrap_or(&default_header_value);
-    let auth_header_str = auth_header_value.to_str().unwrap();
-    let username: String;
-    let groups: Vec<String>;
-    if auth_header_str != "anonymous12" {
-        let jwt_token = &auth_header_str.to_string()[7..];
-        let token_data: TokenData<TokenPayload> =
-            jsonwebtoken::dangerous_insecure_decode(jwt_token).unwrap();
-        let token_payload = token_data.claims;
-        username = token_payload.username;
-        groups = token_payload.groups;
-        println!("Groups include {:?}", groups);
-    } else {
-        username = String::from("anonymous");
-    }
-
-    println!("token username {}", username);
-    println!("auth_header is {}", auth_header_str);
-    println!("req.headers() is {:?}", request.headers());
     let status_code: u16;
     let student_response: Option<Student>;
-    let student_collection: Option<StudentCollection>;
+    let student_collection: Option<StudentViewCollection>;
     let mut is_get_students = false;
 
     match *request.method() {
@@ -79,11 +54,7 @@ pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, E
             } else {
                 // get students
                 let query = get_query_from_request(&request);
-                let first_name: Option<String> = query.first_name;
-                let offset: Option<u16> = query.offset;
-                let count: Option<u16> = query.count;
-                student_collection =
-                    Some(controller::get_students(first_name, count, offset).await);
+                student_collection = Some(controller::get_students(query).await);
                 is_get_students = true;
                 student_response = None;
                 status_code = 200;
@@ -91,11 +62,25 @@ pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, E
         }
         method::Method::POST => {
             println!("Handle post method.");
-            // Create student
-            let lambda_student_request: Option<Student> = request.payload().unwrap_or(None);
-            student_response = controller::create_student(lambda_student_request).await;
             student_collection = None;
-            status_code = 200;
+            // Create student
+            if let Some(value) = request.payload().unwrap_or(None) {
+                let lambda_student_request = value;
+                let result = controller::create_student(&lambda_student_request).await;
+                match result {
+                    Ok(_) => status_code = 200,
+                    Err(UsecaseError::UniqueConstraintViolationError(..)) => status_code = 503,
+                    Err(UsecaseError::InvalidInput) => status_code = 405,
+                    _ => status_code = 500,
+                }
+                student_response = result.map(Some).unwrap_or_else(|e| {
+                    println!("error: {:?}", e);
+                    None
+                });
+            } else {
+                student_response = None;
+                status_code = 400;
+            }
         }
         method::Method::PUT => {
             println!("Handle put method.");
@@ -119,8 +104,14 @@ pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, E
         }
     }
 
+    let mut content_type = "application/json";
+    if status_code == 204 {
+        content_type = "";
+        println!("status code is 204, removing application/json in Content-Type header")
+    }
+
     let response: Response<Body> = Response::builder()
-        .header(CONTENT_TYPE, "application/json")
+        .header(CONTENT_TYPE, content_type) // ContentType is automatically set by ApiGateway unless specifically set as an empty string
         .header(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
         .header(ACCESS_CONTROL_ALLOW_HEADERS, "*")
         .header(ACCESS_CONTROL_ALLOW_METHODS, "*")
@@ -159,17 +150,96 @@ pub fn get_id_from_request(req: &Request) -> Option<uuid::Uuid> {
     }
 }
 
-pub fn get_query_from_request(req: &Request) -> StudentQuery {
+pub fn get_query_from_request(req: &Request) -> StudentCollectionQuery {
     let query = req.query_string_parameters();
-    StudentQuery {
-        first_name: query.get("firstName").map(|str| str.to_string()),
+    let param_date_of_birth = query.get("date_of_birth");
+    let param_date_of_birth = match param_date_of_birth {
+        Some(param_date_of_birth) => {
+            let param_date_of_birth =
+                <DateTime<chrono::Utc> as FromStr>::from_str(param_date_of_birth);
+            match param_date_of_birth {
+                Ok(param_date_of_birth) => Some(param_date_of_birth),
+                Err(e) => {
+                    println!("{:?}", e);
+                    None
+                }
+            }
+        }
+        None => None,
+    };
+
+    let sort_criteria_dto: Vec<String> = query
+        .get_all("sorts")
+        .unwrap_or_default()
+        .iter()
+        .map(|e| e.to_string())
+        .collect();
+
+    let mut param_sorts: Option<Vec<StudentSortCriteria>> = None;
+
+    if !sort_criteria_dto.is_empty() {
+        let mut sort_criteria = Vec::new();
+        sort_criteria_dto.iter().for_each(|criterion| {
+            let s: StudentSortCriteria = criterion.parse().unwrap();
+            sort_criteria.push(s);
+        });
+        param_sorts = Option::from(sort_criteria);
+    }
+
+    StudentCollectionQuery {
+        name: from_query_param_to_string(req, "name"),
+        email: from_query_param_to_string(req, "email"),
+        phone: from_query_param_to_string(req, "phone"),
+        undergraduate_school: from_query_param_to_string(req, "undergraduate_school"),
+        date_of_birth: param_date_of_birth,
+        place_of_birth: from_query_param_to_string(req, "place_of_birth"),
+        polity_name: from_query_param_to_string(req, "polity_name"),
+        specialism: from_query_param_to_string(req, "specialism"),
+        sorts: param_sorts,
         offset: query.get("offset").map(|str| str.parse().unwrap()),
         count: query.get("count").map(|str| str.parse().unwrap()),
     }
 }
 
-pub struct StudentQuery {
-    first_name: Option<String>,
-    offset: Option<u16>,
-    count: Option<u16>,
+fn from_query_param_to_string(request: &Request, param: &str) -> Option<String> {
+    let query = request.query_string_parameters();
+    query.get(param).map(|str| str.parse().unwrap())
+}
+
+fn print_debug_log(request: &Request) {
+    println!("Request {:?}", request);
+    println!("path_parameters {:?}", request.path_parameters());
+    println!(
+        "query_string_parameters {:?}",
+        request.query_string_parameters()
+    );
+    println!("Request Method {:?}", request.method());
+
+    let default_header_value = HeaderValue::from_str(&*format!(
+        "Bearer {}",
+        env::var("DEFAULT_JWT_STRING").unwrap()
+    ))
+    .unwrap();
+    let auth_header_value = request
+        .headers()
+        .get("authorization")
+        .unwrap_or(&default_header_value);
+    let auth_header_str = auth_header_value.to_str().unwrap();
+    let username: String;
+    let groups: Vec<String>;
+    if auth_header_str != "anonymous12" {
+        let jwt_token = &auth_header_str.to_string()[7..];
+        let token_data: TokenData<TokenPayload> =
+            jsonwebtoken::dangerous_insecure_decode(jwt_token).unwrap();
+        let token_payload = token_data.claims;
+        username = token_payload.username;
+        groups = token_payload.groups;
+        println!("Groups include {:?}", groups);
+    } else {
+        username = String::from("anonymous");
+    }
+
+    println!("token username {}", username);
+    println!("auth_header is {}", auth_header_str);
+    println!("req.headers() is {:?}", request.headers());
 }

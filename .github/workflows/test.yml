@@ -1,4 +1,4 @@
-name: Build and Push
+name: Lint and Tests
 
 on:
   push:
@@ -155,3 +155,5 @@ jobs:
       run: cargo test
     - name: Test components
       working-directory: ./rust-service/student-app
+      run: cargo test
+

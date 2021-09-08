@@ -1,7 +1,3 @@
-pub fn test_func() {
-    println!("hello");
-}
-
 pub mod boundaries;
 mod entity;
 pub mod interactors;
