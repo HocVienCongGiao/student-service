@@ -1,19 +1,17 @@
 [package]
 name = "student"
-version = "0.1.5"
+version = "0.1.0"
 edition = "2018"
 
-[dependencies]
-tokio = { version = "1", features = ["macros"] }
-lambda_http = "0.3.0"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-serde_json = "1.0"
+[dependencies]
+lambda_http = "0.3.0"
+tokio = { version = "1", features = ["macros"] }
 controller = { path = "../../student-app/controller" }
-domain = {path = "../../student-app/domain"}
 jsonwebtoken = "7.2.0"
 serde = { version = "1.0", features = ["derive"] }
 uuid = "0.8"
-
-[dev-dependencies]
-dotenv = "0.15.0"
 hvcg_student_openapi_student = "0.0.2"
+serde_json = "1.0"
+dotenv = "0.15.0"

@@ -1,8 +1,9 @@
 use hvcg_student_openapi_student::models::{Student, StudentCollection};
+use uuid::Uuid;
 
 pub mod openapi;
 
-pub async fn get_student_by_id() -> Option<Student> {
+pub async fn get_student_by_id(id: Uuid) -> Option<Student> {
     Option::from(Student {
         id: Option::from("53f549b9-99bf-4e12-88e3-c2f868953283".to_string()),
         polity_id: Option::from("4d084b56-54e1-4bd2-878e-c52675497c2b".to_string()),
@@ -19,7 +20,7 @@ pub async fn get_student_by_id() -> Option<Student> {
     })
 }
 
-pub async fn update_student() -> Option<Student> {
+pub async fn update_student(student_request: Option<Student>) -> Option<Student> {
     Option::from(Student {
         id: Option::from("53f549b9-99bf-4e12-88e3-c2f868953283".to_string()),
         polity_id: Option::from("4d084b56-54e1-4bd2-878e-c52675497c2b".to_string()),
@@ -36,7 +37,7 @@ pub async fn update_student() -> Option<Student> {
     })
 }
 
-pub async fn create_student() -> Option<Student> {
+pub async fn create_student(student_request: Option<Student>) -> Option<Student> {
     Option::from(Student {
         id: Option::from("53f549b9-99bf-4e12-88e3-c2f868953283".to_string()),
         polity_id: Option::from("4d084b56-54e1-4bd2-878e-c52675497c2b".to_string()),
@@ -53,7 +54,11 @@ pub async fn create_student() -> Option<Student> {
     })
 }
 
-pub async fn get_students() -> StudentCollection {
+pub async fn get_students(
+    first_name: Option<String>,
+    count: Option<u16>,
+    offset: Option<u16>,
+) -> StudentCollection {
     let mut result: StudentCollection = StudentCollection {
         students: None,
         has_more: None,

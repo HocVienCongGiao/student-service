@@ -10,7 +10,12 @@
       <sourceFolder url="file://$MODULE_DIR$/student-app/presenter/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/student-lambda/student/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/student-lambda/student/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/bak/student-lambda-bak/student/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/bak/student-lambda-bak/student/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/student-lambda/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/student-app/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bak/student-lambda-bak/target" />
+      <excludeFolder url="file://$MODULE_DIR$/student-lambda/target" />
       <excludeFolder url="file://$MODULE_DIR$/student-lambda/target" />
     </content>
     <orderEntry type="inheritedJdk" />

@@ -1,3 +1,4 @@
+use hvcg_student_openapi_student::models::{Student, StudentCollection};
 use jsonwebtoken::TokenData;
 use lambda_http::http::header::{
     ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_METHODS, ACCESS_CONTROL_ALLOW_ORIGIN,
@@ -9,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
 type Error = Box<dyn std::error::Error + Sync + Send + 'static>;
-use hvcg_student_openapi_student::models::{Student, StudentCollection};
+
 #[derive(Deserialize, Serialize)]
 struct TokenPayload {
     // Despite the struct field being named `username`, it is going to come
@@ -40,7 +41,6 @@ pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, E
     }
 
     let default_header_value = HeaderValue::from_str("Bearer eyJraWQiOiJaTGpneG41SStaZEpldnJRb0lpMTZEWEZoRHI4eG9UbVZ2b2ZuVm5vb3RFPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJmZDlhN2FmOC1mYTc2LTRiODYtYWYzZC1kOTYzNGVmNTIzNzQiLCJhdWQiOiIxcmF2NDExbmNjbnA3M2h0b3BiaG1sOHM2MSIsImNvZ25pdG86Z3JvdXBzIjpbIk9wZXJhdG9yR3JvdXAiXSwiZXZlbnRfaWQiOiI5NjQ1ZDYyMi0zZjRiLTQyYjctOWI0ZC03MWQzNWRhOTI1NmQiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTYyMzkzNDkyNiwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmFwLXNvdXRoZWFzdC0xLmFtYXpvbmF3cy5jb21cL2FwLXNvdXRoZWFzdC0xXzlRV1NZR3pYayIsInBob25lX251bWJlcl92ZXJpZmllZCI6dHJ1ZSwiY29nbml0bzp1c2VybmFtZSI6ImRldi1vcGVyYXRvciIsInBob25lX251bWJlciI6Iis4NDM2OTE0MDkxNiIsImV4cCI6MTYyMzk0ODAwOCwiaWF0IjoxNjIzOTQ0NDA4fQ.ml3N8J7uw4rbQOneEdnmQW6OwsAY6ycmp5PIrKGZKF3yWQn0oQECIhF2Q_jjWOjWPikpUQEy5IKgghiJLukgKo7q-T4tUauPG3GJxoSGQkfVcglkNu8nZTu7ioxXzlQAWsXLakgkH40mGzI6kl2hkEhRQh_lWGrT7TqDP2yVTsDMKEGJBdtcb-kFCnYHfn9FMoCyVGo4K3tSrkeGno7bzwO_XpFtZRhv9Qs4OtfESXARYCP3St69hyf4JuAop6-Zb38FPWcp6rnpRG3BF64YPGqo0J0MAyWVz_Du7Pk3-H5uZqqrr6iHKoPwoabPPlZxJ3JGdifVt_I54SwTbelbzw").unwrap();
-
     let auth_header_value = request
         .headers()
         .get("authorization")
@@ -59,6 +59,7 @@ pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, E
     } else {
         username = String::from("anonymous");
     }
+
     println!("token username {}", username);
     println!("auth_header is {}", auth_header_str);
     println!("req.headers() is {:?}", request.headers());
@@ -72,7 +73,7 @@ pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, E
             println!("Handle get method.");
             if let Some(id) = get_id_from_request(&request) {
                 // get student by id
-                student_response = controller::get_student_by_id().await;
+                student_response = controller::get_student_by_id(id).await;
                 student_collection = None;
                 status_code = 200
             } else {
@@ -81,7 +82,8 @@ pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, E
                 let first_name: Option<String> = query.first_name;
                 let offset: Option<u16> = query.offset;
                 let count: Option<u16> = query.count;
-                student_collection = Some(controller::get_students().await);
+                student_collection =
+                    Some(controller::get_students(first_name, count, offset).await);
                 is_get_students = true;
                 student_response = None;
                 status_code = 200;
@@ -90,14 +92,16 @@ pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, E
         method::Method::POST => {
             println!("Handle post method.");
             // Create student
-            student_response = controller::create_student().await;
+            let lambda_student_request: Option<Student> = request.payload().unwrap_or(None);
+            student_response = controller::create_student(lambda_student_request).await;
             student_collection = None;
             status_code = 200;
         }
         method::Method::PUT => {
             println!("Handle put method.");
             // Update student
-            student_response = controller::update_student().await;
+            let lambda_student_request: Option<Student> = request.payload().unwrap_or(None);
+            student_response = controller::update_student(lambda_student_request).await;
             student_collection = None;
             status_code = 200;
         }
@@ -107,6 +111,11 @@ pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, E
             status_code = 204;
             student_response = None;
             student_collection = None;
+        }
+        _ => {
+            student_collection = None;
+            student_response = None;
+            status_code = 404
         }
     }
 
