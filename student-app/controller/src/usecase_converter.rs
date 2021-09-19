@@ -8,7 +8,7 @@ use domain::boundaries::usecase_boundary::{
 use hvcg_academics_openapi_student::models::StudentSortCriteria;
 
 impl StudentCollectionQuery {
-    fn to_usecase_request(&self) -> StudentQueryUsecaseRequest {
+    pub fn to_usecase_request(&self) -> StudentQueryUsecaseRequest {
         StudentQueryUsecaseRequest {
             id: None,
             name: self.name.clone(),

@@ -27,6 +27,14 @@ pub trait StudentDbGateway {
 
 pub struct StudentQueryDbRequest {
     pub id: Option<Uuid>,
+    pub name: Option<String>,
+    pub email: Option<String>,
+    pub phone: Option<String>,
+    pub undergraduate_school: Option<String>,
+    pub date_of_birth: Option<DateTime<Utc>>,
+    pub place_of_birth: Option<String>,
+    pub polity_name: Option<String>,
+    pub specialism: Option<String>,
     pub sort_request: Option<StudentSortDbRequest>,
     pub offset: Option<i64>,
     pub count: Option<i64>,
@@ -64,7 +72,7 @@ pub struct StudentMutationDbRequest {
 
 pub struct StudentDbResponse {
     pub id: Option<Uuid>,
-    pub polity_id: Option<Uuid>,
+    pub polity: Option<PolityDbResponse>,
     pub saint_ids: Option<Vec<uuid::Uuid>>,
     pub title: Option<String>,
     pub first_name: Option<String>,
@@ -79,8 +87,16 @@ pub struct StudentDbResponse {
 
 pub struct StudentCollectionDbResponse {
     pub collection: Vec<StudentDbResponse>,
-    pub has_more: Option<bool>,
+    pub has_more: bool,
     pub total: i64,
+}
+
+pub struct PolityDbResponse {
+    pub id: Uuid,
+    pub name: Option<String>,
+    pub location_name: Option<String>,
+    pub location_address: Option<String>,
+    pub location_email: Option<String>,
 }
 
 #[derive(Debug)]

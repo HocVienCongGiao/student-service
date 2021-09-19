@@ -1,8 +1,8 @@
 use crate::boundaries::db_gateway_boundary::{
-    DbError, StudentDbResponse, StudentMutationDbRequest,
+    DbError, PolityDbResponse, StudentDbResponse, StudentMutationDbRequest,
 };
 use crate::boundaries::usecase_boundary::{
-    StudentMutationUsecaseRequest, StudentUsecaseResponse, UsecaseError,
+    PolityUsecaseResponse, StudentMutationUsecaseRequest, StudentUsecaseResponse, UsecaseError,
 };
 use crate::entity::student::Student as StudentEntity;
 use crate::interactors::ToEntity;
@@ -58,9 +58,16 @@ impl StudentEntity {
 
 impl StudentDbResponse {
     pub(crate) fn to_usecase_response(&self) -> StudentUsecaseResponse {
+        let polity_usecase_response: Option<PolityUsecaseResponse>;
+        let polity_db_response = &self.polity;
+        if let Some(polity_db_response) = polity_db_response {
+            polity_usecase_response = Option::from(polity_db_response.to_usecase_response());
+        } else {
+            polity_usecase_response = None;
+        }
         StudentUsecaseResponse {
             id: self.id,
-            polity_id: self.polity_id,
+            polity: polity_usecase_response,
             saint_ids: self.saint_ids.clone(),
             title: self.title.clone(),
             first_name: self.first_name.clone(),
@@ -71,6 +78,18 @@ impl StudentDbResponse {
             email: self.email.clone(),
             phone: self.phone.clone(),
             undergraduate_school: self.undergraduate_school.clone(),
+        }
+    }
+}
+
+impl PolityDbResponse {
+    pub(crate) fn to_usecase_response(&self) -> PolityUsecaseResponse {
+        PolityUsecaseResponse {
+            id: self.id,
+            name: self.name.clone(),
+            location_name: self.location_name.clone(),
+            location_address: self.location_address.clone(),
+            location_email: self.location_email.clone(),
         }
     }
 }

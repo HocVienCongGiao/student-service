@@ -90,7 +90,7 @@ pub struct StudentCollectionUsecaseResponse {
 
 pub struct StudentUsecaseResponse {
     pub id: Option<Uuid>,
-    pub polity_id: Option<Uuid>,
+    pub polity: Option<PolityUsecaseResponse>,
     pub saint_ids: Option<Vec<Uuid>>,
     pub title: Option<String>,
     pub first_name: Option<String>,
@@ -101,6 +101,14 @@ pub struct StudentUsecaseResponse {
     pub email: Option<String>,
     pub phone: Option<String>,
     pub undergraduate_school: Option<String>,
+}
+
+pub struct PolityUsecaseResponse {
+    pub id: Uuid,
+    pub name: Option<String>,
+    pub location_name: Option<String>,
+    pub location_address: Option<String>,
+    pub location_email: Option<String>,
 }
 
 #[derive(Debug)]

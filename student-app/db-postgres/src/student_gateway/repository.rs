@@ -1,8 +1,10 @@
 use async_trait::async_trait;
+use chrono::DateTime;
 use domain::boundaries::db_gateway_boundary::{
-    DbError, StudentCollectionDbResponse, StudentDbGateway, StudentDbResponse,
+    DbError, PolityDbResponse, StudentCollectionDbResponse, StudentDbGateway, StudentDbResponse,
     StudentMutationDbRequest, StudentQueryDbRequest,
 };
+use std::str::FromStr;
 use tokio_postgres::{Client, Error, Row};
 use uuid::Uuid;
 
@@ -27,7 +29,7 @@ impl StudentDbGateway for StudentRepository {
         println!("Inserting to DB");
         Ok(StudentDbResponse {
             id: None,
-            polity_id: None,
+            polity: None,
             saint_ids: None,
             title: None,
             first_name: None,
@@ -56,6 +58,57 @@ impl StudentDbGateway for StudentRepository {
         &self,
         db_request: StudentQueryDbRequest,
     ) -> StudentCollectionDbResponse {
-        todo!()
+        let mut result = StudentCollectionDbResponse {
+            collection: vec![],
+            has_more: false,
+            total: 3,
+        };
+
+        let mut students = vec![
+            StudentDbResponse {
+                id: Option::from(Uuid::from_str("53f549b9-99bf-4e12-88e3-c2f868953283").unwrap()),
+                polity: Option::from(PolityDbResponse {
+                    id: Default::default(),
+                    name: Some("Empty".to_string()),
+                    location_name: None,
+                    location_address: None,
+                    location_email: None,
+                }),
+                title: Some("PRIEST".to_string()),
+                first_name: None,
+                middle_name: None,
+                date_of_birth: Option::from(
+                    DateTime::from_str("1990-10-29 00:00:00+00:00").unwrap(),
+                ),
+                place_of_birth: Option::from("Tra Vinh".to_string()),
+                email: Option::from("binh@sunrise.vn".to_string()),
+                phone: Option::from("84 1228019700".to_string()),
+                undergraduate_school: Option::from(
+                    "Dai Chung Vien Thanh Quy - Can Tho".to_string(),
+                ),
+                saint_ids: None,
+                last_name: None,
+            },
+            StudentDbResponse {
+                id: Option::from(Uuid::from_str("53f549b9-99bf-4e12-88e3-c2f868953283").unwrap()),
+                polity: None,
+                title: Option::from("PRIEST".to_string()),
+                first_name: None,
+                middle_name: None,
+                date_of_birth: Option::from(
+                    DateTime::from_str("1990-10-29 00:00:00+00:00").unwrap(),
+                ),
+                place_of_birth: Option::from("Tra Vinh".to_string()),
+                email: Option::from("binh@sunrise.vn".to_string()),
+                phone: Option::from("84 1228019700".to_string()),
+                undergraduate_school: Option::from(
+                    "Dai Chung Vien Thanh Quy - Can Tho".to_string(),
+                ),
+                saint_ids: None,
+                last_name: None,
+            },
+        ];
+        result.collection.append(&mut students);
+        result
     }
 }

@@ -7,9 +7,9 @@ use uuid::Uuid;
 
 pub mod openapi;
 
-mod converter;
 mod create_student;
 mod get_students;
+mod usecase_converter;
 
 pub async fn get_student_by_id(id: Uuid) -> Option<StudentOpenApi> {
     None
@@ -26,11 +26,7 @@ pub async fn create_student(
 }
 
 pub async fn get_students(query: StudentCollectionQuery) -> StudentViewCollection {
-    StudentViewCollection {
-        students: None,
-        has_more: None,
-        total: None,
-    }
+    get_students::from_usecase_request(query.to_usecase_request()).await
 }
 
 pub struct StudentCollectionQuery {
