@@ -3,8 +3,7 @@ use chrono::{DateTime, Utc};
 use db_postgres::student_gateway::repository::StudentRepository;
 use domain::boundaries::db_gateway_boundary::{StudentDbGateway, StudentQueryDbRequest};
 use domain::boundaries::usecase_boundary::{
-    StudentMutationInteraction, StudentMutationUsecaseRequest, StudentQueryUsecaseRequest,
-    UsecaseError,
+    StudentMutationInteraction, StudentMutationUsecaseInput, StudentQueryUsecaseInput, UsecaseError,
 };
 use domain::interactors::student_mutation::StudentMutationInteractor;
 use hvcg_academics_openapi_student::models::{
@@ -12,7 +11,7 @@ use hvcg_academics_openapi_student::models::{
 };
 
 pub(crate) async fn from_usecase_request(
-    request: StudentQueryUsecaseRequest,
+    request: StudentQueryUsecaseInput,
 ) -> StudentViewCollection {
     // Init dependencies
     let client = db_postgres::connect().await;

@@ -2,14 +2,14 @@ use crate::StudentCollectionQuery;
 use chrono::{DateTime, Utc};
 use domain::boundaries::shared_boundary::SortDirectionRequest;
 use domain::boundaries::usecase_boundary::{
-    StudentQueryUsecaseRequest, StudentSortCriteriaUsecaseRequest, StudentSortFieldUsecaseRequest,
-    StudentSortUsecaseRequest,
+    StudentQueryUsecaseInput, StudentSortCriteriaUsecaseInput, StudentSortFieldUsecaseInput,
+    StudentSortUsecaseInput,
 };
 use hvcg_academics_openapi_student::models::StudentSortCriteria;
 
 impl StudentCollectionQuery {
-    pub fn to_usecase_request(&self) -> StudentQueryUsecaseRequest {
-        StudentQueryUsecaseRequest {
+    pub fn to_usecase_request(&self) -> StudentQueryUsecaseInput {
+        StudentQueryUsecaseInput {
             id: None,
             name: self.name.clone(),
             email: self.email.clone(),
@@ -28,8 +28,8 @@ impl StudentCollectionQuery {
 
 pub fn from_openapi_to_usecase_request(
     openapi: Option<Vec<StudentSortCriteria>>,
-) -> Option<StudentSortUsecaseRequest> {
-    let sort_request: Option<StudentSortUsecaseRequest>;
+) -> Option<StudentSortUsecaseInput> {
+    let sort_request: Option<StudentSortUsecaseInput>;
     let sort_criteria_dto = openapi;
 
     if let Some(sort_criteria_dto) = sort_criteria_dto {
@@ -37,50 +37,50 @@ pub fn from_openapi_to_usecase_request(
         sort_criteria_dto.iter().for_each(|criterion| {
             let sort_criteria_request = match criterion {
                 StudentSortCriteria::NAME_ASC => build_sort_criteria_request(
-                    StudentSortFieldUsecaseRequest::Name,
+                    StudentSortFieldUsecaseInput::Name,
                     SortDirectionRequest::Asc,
                 ),
                 StudentSortCriteria::NAME_DESC => build_sort_criteria_request(
-                    StudentSortFieldUsecaseRequest::Name,
+                    StudentSortFieldUsecaseInput::Name,
                     SortDirectionRequest::Desc,
                 ),
                 StudentSortCriteria::CHRISTIAN_NAME_ASC => build_sort_criteria_request(
-                    StudentSortFieldUsecaseRequest::ChristianName,
+                    StudentSortFieldUsecaseInput::ChristianName,
                     SortDirectionRequest::Asc,
                 ),
                 StudentSortCriteria::CHRISTIAN_NAME_DESC => build_sort_criteria_request(
-                    StudentSortFieldUsecaseRequest::ChristianName,
+                    StudentSortFieldUsecaseInput::ChristianName,
                     SortDirectionRequest::Desc,
                 ),
                 StudentSortCriteria::POLITY_NAME_ASC => build_sort_criteria_request(
-                    StudentSortFieldUsecaseRequest::PolityName,
+                    StudentSortFieldUsecaseInput::PolityName,
                     SortDirectionRequest::Asc,
                 ),
                 StudentSortCriteria::POLITY_NAME_DESC => build_sort_criteria_request(
-                    StudentSortFieldUsecaseRequest::PolityName,
+                    StudentSortFieldUsecaseInput::PolityName,
                     SortDirectionRequest::Desc,
                 ),
                 StudentSortCriteria::LOCATION_NAME_ASC => build_sort_criteria_request(
-                    StudentSortFieldUsecaseRequest::LocationName,
+                    StudentSortFieldUsecaseInput::LocationName,
                     SortDirectionRequest::Asc,
                 ),
                 StudentSortCriteria::LOCATION_NAME_DESC => build_sort_criteria_request(
-                    StudentSortFieldUsecaseRequest::LocationName,
+                    StudentSortFieldUsecaseInput::LocationName,
                     SortDirectionRequest::Desc,
                 ),
                 StudentSortCriteria::PLACE_OF_BIRTH_ASC => build_sort_criteria_request(
-                    StudentSortFieldUsecaseRequest::PlaceOfBirth,
+                    StudentSortFieldUsecaseInput::PlaceOfBirth,
                     SortDirectionRequest::Asc,
                 ),
                 StudentSortCriteria::PLACE_OF_BIRTH_DESC => build_sort_criteria_request(
-                    StudentSortFieldUsecaseRequest::PlaceOfBirth,
+                    StudentSortFieldUsecaseInput::PlaceOfBirth,
                     SortDirectionRequest::Desc,
                 ),
             };
             sort_criteria.push(sort_criteria_request);
         });
 
-        sort_request = Option::from(StudentSortUsecaseRequest { sort_criteria });
+        sort_request = Option::from(StudentSortUsecaseInput { sort_criteria });
     } else {
         sort_request = None;
     }
@@ -88,8 +88,8 @@ pub fn from_openapi_to_usecase_request(
 }
 
 fn build_sort_criteria_request(
-    field: StudentSortFieldUsecaseRequest,
+    field: StudentSortFieldUsecaseInput,
     direction: SortDirectionRequest,
-) -> StudentSortCriteriaUsecaseRequest {
-    StudentSortCriteriaUsecaseRequest { field, direction }
+) -> StudentSortCriteriaUsecaseInput {
+    StudentSortCriteriaUsecaseInput { field, direction }
 }

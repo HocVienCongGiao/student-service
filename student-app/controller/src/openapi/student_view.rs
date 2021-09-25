@@ -1,9 +1,9 @@
 use crate::openapi::ToOpenApi;
-use domain::boundaries::usecase_boundary::StudentUsecaseResponse;
+use domain::boundaries::usecase_boundary::StudentUsecaseOutput;
 use hvcg_academics_openapi_student::models::{Student, StudentView};
 use uuid::Uuid;
 
-impl ToOpenApi<StudentView> for StudentUsecaseResponse {
+impl ToOpenApi<StudentView> for StudentUsecaseOutput {
     fn to_openapi(self) -> StudentView {
         // TODO Optimise
         let polity_name: Option<String>;

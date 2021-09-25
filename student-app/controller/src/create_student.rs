@@ -1,7 +1,7 @@
 use crate::openapi::ToOpenApi;
 use db_postgres::student_gateway::repository::StudentRepository;
 use domain::boundaries::usecase_boundary::{
-    StudentMutationInteraction, StudentMutationUsecaseRequest, UsecaseError,
+    StudentMutationInteraction, StudentMutationUsecaseInput, UsecaseError,
 };
 use domain::interactors::student_mutation::StudentMutationInteractor;
 use hvcg_academics_openapi_student::models::Student as StudentOpenApi;
@@ -13,7 +13,7 @@ pub(crate) async fn from_openapi(student: &StudentOpenApi) -> Result<StudentOpen
 
     // Inject dependencies to Interactor and invoke func
     let response = StudentMutationInteractor::new(student_repository)
-        .create_student(StudentMutationUsecaseRequest {
+        .create_student(StudentMutationUsecaseInput {
             id: None,
             polity_id: student.polity_id,
             saint_ids: student.saint_id_array.clone(),

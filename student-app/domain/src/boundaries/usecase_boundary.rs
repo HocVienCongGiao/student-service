@@ -6,14 +6,11 @@ use uuid::Uuid;
 #[async_trait]
 pub trait StudentQueryInteraction {
     // InputBoundary
-    async fn get_student(
-        &self,
-        request: StudentQueryUsecaseRequest,
-    ) -> Option<StudentUsecaseResponse>;
+    async fn get_student(&self, request: StudentQueryUsecaseInput) -> Option<StudentUsecaseOutput>;
     async fn get_students(
         &self,
-        request: StudentQueryUsecaseRequest,
-    ) -> StudentCollectionUsecaseResponse;
+        request: StudentQueryUsecaseInput,
+    ) -> StudentCollectionUsecaseOutput;
 }
 
 #[async_trait]
@@ -21,19 +18,19 @@ pub trait StudentMutationInteraction {
     // InputBoundary
     async fn create_student(
         &mut self,
-        request: StudentMutationUsecaseRequest,
-    ) -> Result<StudentUsecaseResponse, UsecaseError>;
+        request: StudentMutationUsecaseInput,
+    ) -> Result<StudentUsecaseOutput, UsecaseError>;
     async fn update_student(
         &mut self,
-        request: StudentMutationUsecaseRequest,
-    ) -> Result<StudentUsecaseResponse, UsecaseError>;
+        request: StudentMutationUsecaseInput,
+    ) -> Result<StudentUsecaseOutput, UsecaseError>;
     async fn delete_student(
         &mut self,
-        request: StudentMutationUsecaseRequest,
+        request: StudentMutationUsecaseInput,
     ) -> Result<(), UsecaseError>;
 }
 
-pub struct StudentQueryUsecaseRequest {
+pub struct StudentQueryUsecaseInput {
     pub id: Option<Uuid>,
     pub name: Option<String>,
     pub email: Option<String>,
@@ -43,23 +40,23 @@ pub struct StudentQueryUsecaseRequest {
     pub place_of_birth: Option<String>,
     pub polity_name: Option<String>,
     pub specialism: Option<String>,
-    pub sort_request: Option<StudentSortUsecaseRequest>,
+    pub sort_request: Option<StudentSortUsecaseInput>,
     pub offset: Option<i32>,
     pub count: Option<i32>,
 }
 
-pub struct StudentSortUsecaseRequest {
-    pub sort_criteria: Vec<StudentSortCriteriaUsecaseRequest>,
+pub struct StudentSortUsecaseInput {
+    pub sort_criteria: Vec<StudentSortCriteriaUsecaseInput>,
 }
 
 #[derive(PartialEq, Clone)]
-pub struct StudentSortCriteriaUsecaseRequest {
-    pub field: StudentSortFieldUsecaseRequest,
+pub struct StudentSortCriteriaUsecaseInput {
+    pub field: StudentSortFieldUsecaseInput,
     pub direction: SortDirectionRequest,
 }
 
 #[derive(PartialEq, Clone)]
-pub enum StudentSortFieldUsecaseRequest {
+pub enum StudentSortFieldUsecaseInput {
     Name,
     ChristianName,
     PolityName,
@@ -67,7 +64,7 @@ pub enum StudentSortFieldUsecaseRequest {
     PlaceOfBirth,
 }
 
-pub struct StudentMutationUsecaseRequest {
+pub struct StudentMutationUsecaseInput {
     pub id: Option<Uuid>,
     pub polity_id: Option<Uuid>,
     pub saint_ids: Option<Vec<uuid::Uuid>>,
@@ -82,15 +79,15 @@ pub struct StudentMutationUsecaseRequest {
     pub undergraduate_school: Option<String>,
 }
 
-pub struct StudentCollectionUsecaseResponse {
-    pub collection: Vec<StudentUsecaseResponse>,
+pub struct StudentCollectionUsecaseOutput {
+    pub collection: Vec<StudentUsecaseOutput>,
     pub has_more: Option<bool>,
     pub total: i64,
 }
 
-pub struct StudentUsecaseResponse {
+pub struct StudentUsecaseOutput {
     pub id: Option<Uuid>,
-    pub polity: Option<PolityUsecaseResponse>,
+    pub polity: Option<PolityUsecaseOutput>,
     pub saint_ids: Option<Vec<Uuid>>,
     pub title: Option<String>,
     pub first_name: Option<String>,
@@ -103,7 +100,7 @@ pub struct StudentUsecaseResponse {
     pub undergraduate_school: Option<String>,
 }
 
-pub struct PolityUsecaseResponse {
+pub struct PolityUsecaseOutput {
     pub id: Uuid,
     pub name: Option<String>,
     pub location_name: Option<String>,

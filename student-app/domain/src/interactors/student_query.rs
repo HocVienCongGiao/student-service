@@ -1,7 +1,7 @@
 use crate::boundaries::db_gateway_boundary::StudentDbGateway;
 use crate::boundaries::usecase_boundary::{
-    StudentCollectionUsecaseResponse, StudentQueryInteraction, StudentQueryUsecaseRequest,
-    StudentUsecaseResponse,
+    StudentCollectionUsecaseOutput, StudentQueryInteraction, StudentQueryUsecaseInput,
+    StudentUsecaseOutput,
 };
 use async_trait::async_trait;
 
@@ -14,17 +14,14 @@ impl<A> StudentQueryInteraction for StudentQueryInteractor<A>
 where
     A: StudentDbGateway + Sync + Send,
 {
-    async fn get_student(
-        &self,
-        request: StudentQueryUsecaseRequest,
-    ) -> Option<StudentUsecaseResponse> {
+    async fn get_student(&self, request: StudentQueryUsecaseInput) -> Option<StudentUsecaseOutput> {
         todo!()
     }
 
     async fn get_students(
         &self,
-        request: StudentQueryUsecaseRequest,
-    ) -> StudentCollectionUsecaseResponse {
+        request: StudentQueryUsecaseInput,
+    ) -> StudentCollectionUsecaseOutput {
         todo!()
     }
 }

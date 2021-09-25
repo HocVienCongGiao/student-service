@@ -2,7 +2,7 @@ use crate::boundaries::db_gateway_boundary::{
     DbError, PolityDbResponse, StudentDbResponse, StudentMutationDbRequest,
 };
 use crate::boundaries::usecase_boundary::{
-    PolityUsecaseResponse, StudentMutationUsecaseRequest, StudentUsecaseResponse, UsecaseError,
+    PolityUsecaseOutput, StudentMutationUsecaseInput, StudentUsecaseOutput, UsecaseError,
 };
 use crate::entity::student::Student as StudentEntity;
 use crate::interactors::ToEntity;
@@ -18,7 +18,7 @@ impl DbError {
     }
 }
 
-impl ToEntity<StudentEntity> for StudentMutationUsecaseRequest {
+impl ToEntity<StudentEntity> for StudentMutationUsecaseInput {
     fn to_entity(self) -> StudentEntity {
         StudentEntity {
             id: self.id,
@@ -57,15 +57,15 @@ impl StudentEntity {
 }
 
 impl StudentDbResponse {
-    pub(crate) fn to_usecase_response(&self) -> StudentUsecaseResponse {
-        let polity_usecase_response: Option<PolityUsecaseResponse>;
+    pub(crate) fn to_usecase_response(&self) -> StudentUsecaseOutput {
+        let polity_usecase_response: Option<PolityUsecaseOutput>;
         let polity_db_response = &self.polity;
         if let Some(polity_db_response) = polity_db_response {
             polity_usecase_response = Option::from(polity_db_response.to_usecase_response());
         } else {
             polity_usecase_response = None;
         }
-        StudentUsecaseResponse {
+        StudentUsecaseOutput {
             id: self.id,
             polity: polity_usecase_response,
             saint_ids: self.saint_ids.clone(),
@@ -83,8 +83,8 @@ impl StudentDbResponse {
 }
 
 impl PolityDbResponse {
-    pub(crate) fn to_usecase_response(&self) -> PolityUsecaseResponse {
-        PolityUsecaseResponse {
+    pub(crate) fn to_usecase_response(&self) -> PolityUsecaseOutput {
+        PolityUsecaseOutput {
             id: self.id,
             name: self.name.clone(),
             location_name: self.location_name.clone(),
