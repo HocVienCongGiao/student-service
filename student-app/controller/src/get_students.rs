@@ -1,5 +1,9 @@
+use crate::StudentCollectionQuery;
 use chrono::{DateTime, Utc};
-use domain::usecases::query_student_usecase::{QueryStudentUsecaseInput, QueryStudentUsecaseInputSort, QueryStudentUsecaseOutput, QueryStudentUsecaseInputSortField, QueryStudentUsecaseInputSortCriteria};
+use domain::usecases::query_student_usecase::{
+    QueryStudentUsecaseInput, QueryStudentUsecaseInputSort, QueryStudentUsecaseInputSortCriteria,
+    QueryStudentUsecaseInputSortField, QueryStudentUsecaseOutput,
+};
 use domain::SortDirection;
 use hvcg_academics_openapi_student::models::{
     Student as StudentOpenApi, StudentSortCriteria, StudentViewCollection,
@@ -14,20 +18,6 @@ pub(crate) async fn from_usecase_input(request: QueryStudentUsecaseInput) -> Stu
         has_more: None,
         total: None,
     }
-}
-
-pub struct StudentCollectionQuery {
-    pub name: Option<String>,
-    pub email: Option<String>,
-    pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
-    pub place_of_birth: Option<String>,
-    pub polity_name: Option<String>,
-    pub specialism: Option<String>,
-    pub sorts: Option<Vec<StudentSortCriteria>>,
-    pub offset: Option<i32>,
-    pub count: Option<i32>,
 }
 
 impl StudentCollectionQuery {

@@ -1,6 +1,6 @@
 use chrono::DateTime;
 use controller::StudentCollectionQuery;
-use domain::boundaries::usecase_boundary::UsecaseError;
+use domain::usecases::UsecaseError;
 use hvcg_academics_openapi_student::models::{Student, StudentSortCriteria, StudentViewCollection};
 use jsonwebtoken::TokenData;
 use lambda_http::http::header::{
