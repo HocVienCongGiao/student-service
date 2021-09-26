@@ -1,28 +1,46 @@
+use crate::openapi::ToOpenApi;
 use crate::StudentCollectionQuery;
-use chrono::{DateTime, Utc};
-use domain::usecases::query_student_usecase::{
-    QueryStudentUsecaseInput, QueryStudentUsecaseInputSort, QueryStudentUsecaseInputSortCriteria,
-    QueryStudentUsecaseInputSortField, QueryStudentUsecaseOutput,
+use db_postgres::student_gateway::repository::StudentRepository;
+use domain::usecases::query_student_collection_usecase::{
+    QueryStudentCollectionUsecase, QueryStudentCollectionUsecaseInput,
+    QueryStudentCollectionUsecaseInputSort, QueryStudentCollectionUsecaseInputSortCriteria,
+    QueryStudentCollectionUsecaseInputSortField, QueryStudentCollectionUsecaseInteractor,
 };
 use domain::SortDirection;
-use hvcg_academics_openapi_student::models::{
-    Student as StudentOpenApi, StudentSortCriteria, StudentViewCollection,
-};
+use hvcg_academics_openapi_student::models::{StudentSortCriteria, StudentViewCollection};
 
-pub(crate) async fn from_usecase_input(request: QueryStudentUsecaseInput) -> StudentViewCollection {
+pub(crate) async fn from_usecase_input(
+    request: QueryStudentCollectionUsecaseInput,
+) -> StudentViewCollection {
     // Init dependencies
     let client = db_postgres::connect().await;
+    let student_repository = StudentRepository { client };
 
-    StudentViewCollection {
-        students: None,
-        has_more: None,
-        total: None,
-    }
+    // Inject dependencies to Interactor and invoke func
+    let query_students_usecase_output =
+        QueryStudentCollectionUsecaseInteractor::new(student_repository)
+            .execute(QueryStudentCollectionUsecaseInput {
+                id: None,
+                name: None,
+                email: None,
+                phone: None,
+                undergraduate_school: None,
+                date_of_birth: None,
+                place_of_birth: None,
+                polity_name: None,
+                specialism: None,
+                sort_request: None,
+                offset: None,
+                count: None,
+            })
+            .await;
+
+    query_students_usecase_output.to_openapi()
 }
 
 impl StudentCollectionQuery {
-    pub fn to_usecase_input(&self) -> QueryStudentUsecaseInput {
-        QueryStudentUsecaseInput {
+    pub fn to_usecase_input(&self) -> QueryStudentCollectionUsecaseInput {
+        QueryStudentCollectionUsecaseInput {
             id: None,
             name: self.name.clone(),
             email: self.email.clone(),
@@ -41,8 +59,8 @@ impl StudentCollectionQuery {
 
 pub fn from_openapi_to_usecase_input(
     openapi: Option<Vec<StudentSortCriteria>>,
-) -> Option<QueryStudentUsecaseInputSort> {
-    let sort_request: Option<QueryStudentUsecaseInputSort>;
+) -> Option<QueryStudentCollectionUsecaseInputSort> {
+    let sort_request: Option<QueryStudentCollectionUsecaseInputSort>;
     let sort_criteria_dto = openapi;
 
     if let Some(sort_criteria_dto) = sort_criteria_dto {
@@ -50,50 +68,50 @@ pub fn from_openapi_to_usecase_input(
         sort_criteria_dto.iter().for_each(|criterion| {
             let sort_criteria_request = match criterion {
                 StudentSortCriteria::NAME_ASC => build_sort_criteria_request(
-                    QueryStudentUsecaseInputSortField::Name,
+                    QueryStudentCollectionUsecaseInputSortField::Name,
                     SortDirection::Asc,
                 ),
                 StudentSortCriteria::NAME_DESC => build_sort_criteria_request(
-                    QueryStudentUsecaseInputSortField::Name,
+                    QueryStudentCollectionUsecaseInputSortField::Name,
                     SortDirection::Desc,
                 ),
                 StudentSortCriteria::CHRISTIAN_NAME_ASC => build_sort_criteria_request(
-                    QueryStudentUsecaseInputSortField::ChristianName,
+                    QueryStudentCollectionUsecaseInputSortField::ChristianName,
                     SortDirection::Asc,
                 ),
                 StudentSortCriteria::CHRISTIAN_NAME_DESC => build_sort_criteria_request(
-                    QueryStudentUsecaseInputSortField::ChristianName,
+                    QueryStudentCollectionUsecaseInputSortField::ChristianName,
                     SortDirection::Desc,
                 ),
                 StudentSortCriteria::POLITY_NAME_ASC => build_sort_criteria_request(
-                    QueryStudentUsecaseInputSortField::PolityName,
+                    QueryStudentCollectionUsecaseInputSortField::PolityName,
                     SortDirection::Asc,
                 ),
                 StudentSortCriteria::POLITY_NAME_DESC => build_sort_criteria_request(
-                    QueryStudentUsecaseInputSortField::PolityName,
+                    QueryStudentCollectionUsecaseInputSortField::PolityName,
                     SortDirection::Desc,
                 ),
                 StudentSortCriteria::LOCATION_NAME_ASC => build_sort_criteria_request(
-                    QueryStudentUsecaseInputSortField::LocationName,
+                    QueryStudentCollectionUsecaseInputSortField::LocationName,
                     SortDirection::Asc,
                 ),
                 StudentSortCriteria::LOCATION_NAME_DESC => build_sort_criteria_request(
-                    QueryStudentUsecaseInputSortField::LocationName,
+                    QueryStudentCollectionUsecaseInputSortField::LocationName,
                     SortDirection::Desc,
                 ),
                 StudentSortCriteria::PLACE_OF_BIRTH_ASC => build_sort_criteria_request(
-                    QueryStudentUsecaseInputSortField::PlaceOfBirth,
+                    QueryStudentCollectionUsecaseInputSortField::PlaceOfBirth,
                     SortDirection::Asc,
                 ),
                 StudentSortCriteria::PLACE_OF_BIRTH_DESC => build_sort_criteria_request(
-                    QueryStudentUsecaseInputSortField::PlaceOfBirth,
+                    QueryStudentCollectionUsecaseInputSortField::PlaceOfBirth,
                     SortDirection::Desc,
                 ),
             };
             sort_criteria.push(sort_criteria_request);
         });
 
-        sort_request = Option::from(QueryStudentUsecaseInputSort { sort_criteria });
+        sort_request = Option::from(QueryStudentCollectionUsecaseInputSort { sort_criteria });
     } else {
         sort_request = None;
     }
@@ -101,8 +119,8 @@ pub fn from_openapi_to_usecase_input(
 }
 
 fn build_sort_criteria_request(
-    field: QueryStudentUsecaseInputSortField,
+    field: QueryStudentCollectionUsecaseInputSortField,
     direction: SortDirection,
-) -> QueryStudentUsecaseInputSortCriteria {
-    QueryStudentUsecaseInputSortCriteria { field, direction }
+) -> QueryStudentCollectionUsecaseInputSortCriteria {
+    QueryStudentCollectionUsecaseInputSortCriteria { field, direction }
 }

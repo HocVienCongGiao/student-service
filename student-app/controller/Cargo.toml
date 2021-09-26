@@ -12,7 +12,7 @@ tokio-postgres = "0.7.2"
 db-postgres = { path = "../db-postgres", version = "0.1.5" }
 uuid = "0.8"
 tokio = { version = "1.6.0", features = ["full"] }
-hvcg_academics_openapi_student = "0.2.2"
+hvcg_academics_openapi_student = "0.2.3"
 chrono = { version = "0.4", features = ["serde"] }
 
 [dev-dependencies]
