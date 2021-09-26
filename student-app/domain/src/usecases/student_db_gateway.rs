@@ -1,4 +1,6 @@
-use crate::boundaries::shared_boundary::SortDirectionRequest;
+use crate::entities::student::Student;
+use crate::usecases::UsecaseError;
+use crate::SortDirection;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
@@ -46,7 +48,7 @@ pub struct StudentSortDbRequest {
 
 pub struct StudentSortCriteriaDbRequest {
     pub field: StudentSortFieldDbRequest,
-    pub direction: SortDirectionRequest,
+    pub direction: SortDirection,
 }
 
 pub enum StudentSortFieldDbRequest {
@@ -72,7 +74,7 @@ pub struct StudentMutationDbRequest {
 
 pub struct StudentDbResponse {
     pub id: Option<Uuid>,
-    pub polity: Option<PolityDbResponse>,
+    pub polity_id: Option<uuid::Uuid>,
     pub saint_ids: Option<Vec<uuid::Uuid>>,
     pub title: Option<String>,
     pub first_name: Option<String>,
@@ -103,4 +105,34 @@ pub struct PolityDbResponse {
 pub enum DbError {
     UniqueConstraintViolationError(String),
     UnknownError(String),
+}
+
+impl DbError {
+    pub(crate) fn to_usecase_error(&self) -> UsecaseError {
+        match self {
+            DbError::UniqueConstraintViolationError(field) => {
+                UsecaseError::UniqueConstraintViolationError(field.to_string())
+            }
+            DbError::UnknownError(msg) => UsecaseError::UnknownError(msg.to_string()),
+        }
+    }
+}
+
+impl Student {
+    pub fn to_mutation_db_request(&self) -> StudentMutationDbRequest {
+        StudentMutationDbRequest {
+            id: self.id,
+            polity_id: self.polity_id,
+            saint_ids: self.saint_ids.clone(),
+            title: self.title.clone(),
+            first_name: self.first_name.clone(),
+            middle_name: self.middle_name.clone(),
+            last_name: self.last_name.clone(),
+            date_of_birth: self.date_of_birth,
+            place_of_birth: self.place_of_birth.clone(),
+            email: self.email.clone(),
+            phone: self.phone.clone(),
+            undergraduate_school: self.undergraduate_school.clone(),
+        }
+    }
 }

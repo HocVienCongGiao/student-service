@@ -1,17 +1,17 @@
 use crate::openapi::ToOpenApi;
-use domain::boundaries::usecase_boundary::StudentUsecaseOutput;
+use domain::usecases::create_student_usecase::CreateStudentUsecaseOutput;
 use hvcg_academics_openapi_student::models::{Student, StudentView};
 use uuid::Uuid;
 
-impl ToOpenApi<Student> for StudentUsecaseOutput {
+impl ToOpenApi<Student> for CreateStudentUsecaseOutput {
     fn to_openapi(self) -> Student {
         // TODO Optimise
-        let polity_id: Option<Uuid>;
-        if self.polity.is_some() {
-            polity_id = Some(self.polity.unwrap().id);
-        } else {
-            polity_id = None;
-        }
+        let polity_id: Option<Uuid> = self.polity_id;
+        // if self.polity.is_some() {
+        //     polity_id = Some(self.polity.unwrap().id);
+        // } else {
+        //     polity_id = None;
+        // }
 
         Student {
             id: self.id,

@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use chrono::DateTime;
-use domain::boundaries::db_gateway_boundary::{
-    DbError, PolityDbResponse, StudentCollectionDbResponse, StudentDbGateway, StudentDbResponse,
+use domain::usecases::student_db_gateway::{
+    DbError, StudentCollectionDbResponse, StudentDbGateway, StudentDbResponse,
     StudentMutationDbRequest, StudentQueryDbRequest,
 };
 use std::str::FromStr;
@@ -29,7 +29,7 @@ impl StudentDbGateway for StudentRepository {
         println!("Inserting to DB");
         Ok(StudentDbResponse {
             id: None,
-            polity: None,
+            polity_id: None,
             saint_ids: None,
             title: None,
             first_name: None,
@@ -67,13 +67,14 @@ impl StudentDbGateway for StudentRepository {
         let mut students = vec![
             StudentDbResponse {
                 id: Option::from(Uuid::from_str("53f549b9-99bf-4e12-88e3-c2f868953283").unwrap()),
-                polity: Option::from(PolityDbResponse {
-                    id: Default::default(),
-                    name: Some("Empty".to_string()),
-                    location_name: None,
-                    location_address: None,
-                    location_email: None,
-                }),
+                // polity: Option::from(PolityDbResponse {
+                //     id: Default::default(),
+                //     name: Some("Empty".to_string()),
+                //     location_name: None,
+                //     location_address: None,
+                //     location_email: None,
+                // }),
+                polity_id: None,
                 title: Some("PRIEST".to_string()),
                 first_name: None,
                 middle_name: None,
@@ -91,7 +92,7 @@ impl StudentDbGateway for StudentRepository {
             },
             StudentDbResponse {
                 id: Option::from(Uuid::from_str("53f549b9-99bf-4e12-88e3-c2f868953283").unwrap()),
-                polity: None,
+                polity_id: None,
                 title: Option::from("PRIEST".to_string()),
                 first_name: None,
                 middle_name: None,

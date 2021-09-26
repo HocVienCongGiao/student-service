@@ -1,6 +1,11 @@
-pub mod boundaries;
-mod entity;
-pub mod interactors;
+mod entities;
+pub mod usecases;
+
+#[derive(PartialEq, Clone)]
+pub enum SortDirection {
+    Asc,
+    Desc,
+}
 
 #[cfg(test)]
 mod tests {
