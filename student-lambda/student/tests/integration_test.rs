@@ -15,18 +15,34 @@ fn initialise() {
 }
 
 #[tokio::test]
-async fn crud_should_work() {
+async fn when_post_a_student_then_student_is_correctly_saved_and_returned() {
     initialise();
     println!("is it working?");
-    let request = build_http_get_request("1".to_string(), 5);
+    // let request = build_http_get_request("1".to_string(), 5);
     // // When
     // let response = student::func(request, Context::default())
     //     .await
     //     .expect("expected Ok(_) value")
     //     .into_response();
     // // Then
-    // println!("response: {:?}", response);
-    // assert_eq!(response.status(), 200);
+    println!("response: {:?}", response);
+    assert_eq!(response.status(), 200);
+    println!("Trigger build!!");
+}
+
+// #[tokio::test]
+async fn given_3_students_when_find_without_filtering_then_return_collection_with_the_right_size() {
+    initialise();
+    println!("is it working?");
+    let request = build_http_get_request("1".to_string(), 5);
+    // When
+    let response = student::func(request, Context::default())
+        .await
+        .expect("expected Ok(_) value")
+        .into_response();
+    // Then
+    println!("response: {:?}", response);
+    assert_eq!(response.status(), 200);
     println!("Trigger build!!");
 }
 
