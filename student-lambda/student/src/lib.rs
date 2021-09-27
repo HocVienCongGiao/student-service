@@ -50,7 +50,7 @@ pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, E
                 // get student by id
                 student_response = controller::get_student_by_id(id).await;
                 student_collection = None;
-                status_code = 200
+                status_code = 200;
             } else {
                 // get students
                 let query = get_query_from_request(&request);

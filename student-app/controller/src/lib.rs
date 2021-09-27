@@ -10,11 +10,11 @@ mod get_students;
 pub mod openapi;
 
 pub async fn get_student_by_id(id: Uuid) -> Option<StudentOpenApi> {
-    None
+    todo!()
 }
 
 pub async fn update_student(student_request: Option<StudentOpenApi>) -> Option<StudentOpenApi> {
-    None
+    todo!()
 }
 
 pub async fn create_student(
