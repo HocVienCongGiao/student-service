@@ -1,7 +1,5 @@
 pub mod create_student_usecase;
 pub mod query_student_collection_usecase;
-pub mod student_db_gateway;
-
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 

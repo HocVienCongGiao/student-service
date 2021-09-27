@@ -1,5 +1,5 @@
 use crate::entities::student::Student as StudentEntity;
-use crate::usecases::student_db_gateway::{StudentDbGateway, StudentDbResponse};
+use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
 use crate::usecases::{ToEntity, UsecaseError};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};

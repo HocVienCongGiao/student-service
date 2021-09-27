@@ -1,4 +1,9 @@
 use crate::entities::student::Student;
+use crate::ports::delete_student_port::DeleteStudentPort;
+use crate::ports::find_one_student_by_id::FindOneStudentById;
+use crate::ports::find_student_collection_port::FindStudentCollectionPort;
+use crate::ports::insert_student_port::InsertStudentPort;
+use crate::ports::update_student_port::UpdateStudentPort;
 use crate::usecases::UsecaseError;
 use crate::SortDirection;
 use async_trait::async_trait;
@@ -6,25 +11,13 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 #[async_trait]
-pub trait StudentDbGateway {
-    async fn find_one_by_id(&self, id: Uuid) -> Option<StudentDbResponse>;
-    async fn exists_by_id(&self, id: Uuid) -> bool;
-    async fn insert(
-        &mut self,
-        db_request: StudentMutationDbRequest,
-    ) -> Result<StudentDbResponse, DbError>;
-
-    async fn update(
-        &mut self,
-        db_request: StudentMutationDbRequest,
-    ) -> Result<StudentDbResponse, DbError>;
-
-    async fn delete(&mut self, id: Uuid) -> Result<(), DbError>;
-
-    async fn find_collection_by(
-        &self,
-        db_request: StudentQueryDbRequest,
-    ) -> StudentCollectionDbResponse;
+pub trait StudentDbGateway:
+    InsertStudentPort
+    + UpdateStudentPort
+    + DeleteStudentPort
+    + FindStudentCollectionPort
+    + FindOneStudentById
+{
 }
 
 pub struct StudentQueryDbRequest {

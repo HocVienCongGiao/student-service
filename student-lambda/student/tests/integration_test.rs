@@ -1,4 +1,4 @@
-use lambda_http::http::HeaderValue;
+use lambda_http::http::{HeaderValue, Request};
 use lambda_http::{http, Body, Context, IntoResponse, RequestExt};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -15,28 +15,35 @@ fn initialise() {
 }
 
 #[tokio::test]
-async fn crud() {
+async fn crud_should_work() {
     initialise();
     println!("is it working?");
+    let request = build_http_get_request("1".to_string(), 5);
+    // // When
+    // let response = student::func(request, Context::default())
+    //     .await
+    //     .expect("expected Ok(_) value")
+    //     .into_response();
+    // // Then
+    // println!("response: {:?}", response);
+    // assert_eq!(response.status(), 200);
+    println!("Trigger build!!");
+}
+
+fn build_http_get_request(offset: String, count: i32) -> Request<Body> {
     let mut query_param = HashMap::new();
-    query_param.insert("count".to_string(), vec!["5".to_string()]);
-    query_param.insert("offset".to_string(), vec!["1".to_string()]);
+    query_param.insert("count".to_string(), vec![count.to_string()]);
+    query_param.insert("offset".to_string(), vec![offset]);
     query_param.insert("firstName".to_string(), vec!["test".to_string()]);
-    let request = http::Request::builder()
-        .uri("https://dev-sg.portal.hocvienconggiao.com/query-api/student-service/students?offset=1&count=5")
-        .method("GET")
+    build_http_request("GET".to_string(), query_param)
+}
+
+fn build_http_request(method: String, query_param: HashMap<String, Vec<String>>) -> Request<Body> {
+    http::Request::builder()
+        .uri("https://dev-sg.portal.hocvienconggiao.com/query-api/student-service/students")
+        .method(method.as_str())
         .header("Content-Type", "application/json")
         .body(Body::Empty)
         .unwrap()
-        .with_query_string_parameters(query_param);
-
-    // When
-    let response = student::func(request, Context::default())
-        .await
-        .expect("expected Ok(_) value")
-        .into_response();
-    // Then
-    println!("response: {:?}", response);
-    assert_eq!(response.status(), 200);
-    println!("Trigger build!!");
+        .with_query_string_parameters(query_param)
 }

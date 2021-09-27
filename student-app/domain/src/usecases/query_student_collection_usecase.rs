@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
-use crate::usecases::student_db_gateway::StudentDbGateway;
+use crate::ports::student_db_gateway::StudentDbGateway;
 use crate::usecases::QueryStudentUsecaseOutput;
 use crate::SortDirection;
 use async_trait::async_trait;
