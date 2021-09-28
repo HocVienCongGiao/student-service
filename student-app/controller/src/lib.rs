@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use domain::usecases::UsecaseError;
 use hvcg_academics_openapi_student::models::{
-    Student as StudentOpenApi, StudentSortCriteria, StudentViewCollection,
+    StudentSortCriteria, StudentUpsert as StudentUpsertOpenApi, StudentViewCollection,
 };
 use uuid::Uuid;
 
@@ -9,17 +9,19 @@ mod create_student;
 mod get_students;
 pub mod openapi;
 
-pub async fn get_student_by_id(id: Uuid) -> Option<StudentOpenApi> {
+pub async fn get_student_by_id(id: Uuid) -> Option<StudentUpsertOpenApi> {
     todo!()
 }
 
-pub async fn update_student(student_request: Option<StudentOpenApi>) -> Option<StudentOpenApi> {
+pub async fn update_student(
+    student_request: Option<StudentUpsertOpenApi>,
+) -> Option<StudentUpsertOpenApi> {
     todo!()
 }
 
 pub async fn create_student(
-    student_request: &StudentOpenApi,
-) -> Result<StudentOpenApi, UsecaseError> {
+    student_request: &StudentUpsertOpenApi,
+) -> Result<StudentUpsertOpenApi, UsecaseError> {
     create_student::from_openapi(student_request).await
 }
 

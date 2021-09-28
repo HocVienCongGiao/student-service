@@ -1,7 +1,7 @@
 use crate::openapi::ToOpenApi;
 use domain::usecases::query_student_collection_usecase::QueryStudentCollectionUsecaseOutput;
 use domain::usecases::QueryStudentUsecaseOutput;
-use hvcg_academics_openapi_student::models::{Student, StudentView, StudentViewCollection};
+use hvcg_academics_openapi_student::models::{StudentView, StudentViewCollection};
 
 impl ToOpenApi<StudentViewCollection> for QueryStudentCollectionUsecaseOutput {
     fn to_openapi(self) -> StudentViewCollection {
@@ -53,7 +53,6 @@ impl ToOpenApi<StudentView> for QueryStudentUsecaseOutput {
                 self.middle_name.clone().unwrap(),
                 self.last_name.unwrap(),
             )),
-            specialism: None,
         }
     }
 }

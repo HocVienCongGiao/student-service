@@ -17,7 +17,7 @@ pub enum UsecaseError {
 }
 
 pub struct QueryStudentUsecaseOutput {
-    pub id: Option<Uuid>,
+    pub id: Uuid,
     pub polity_id: Option<Uuid>,
     pub saint_ids: Option<Vec<Uuid>>,
     pub title: Option<String>,

@@ -1,4 +1,4 @@
-use crate::request_builder;
+use crate::common::request_builder;
 use hvcg_academics_openapi_student::models::StudentView;
 use lambda_http::{http, Body, Context, IntoResponse, RequestExt, Response};
 

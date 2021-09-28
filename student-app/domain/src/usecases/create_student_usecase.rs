@@ -75,7 +75,6 @@ where
 }
 
 pub struct CreateStudentUsecaseInput {
-    pub id: Option<Uuid>,
     pub polity_id: Option<Uuid>,
     pub saint_ids: Option<Vec<uuid::Uuid>>,
     pub title: Option<String>,
@@ -107,7 +106,7 @@ pub struct CreateStudentUsecaseOutput {
 impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
     fn to_entity(self) -> StudentEntity {
         StudentEntity {
-            id: self.id,
+            id: Some(Uuid::new_v4()),
             polity_id: self.polity_id,
             saint_ids: self.saint_ids,
             title: self.title,

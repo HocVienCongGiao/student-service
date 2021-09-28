@@ -9,9 +9,9 @@ use std::str::FromStr;
 use std::sync::Once;
 use uuid::Uuid;
 
-mod getter;
-mod request_builder;
-mod test_double;
+mod common;
+use crate::common::getter;
+use common::test_data;
 
 static INIT: Once = Once::new();
 
@@ -31,8 +31,8 @@ async fn crud_should_work() {
 
 async fn given_a_student_when_get_one_by_id_then_return_correct_student_view_openapi() {
     // Given
-    let expected_student_view_openapi: StudentView = test_double::prepare_student_view_openapi();
-    let given_uuid = expected_student_view_openapi.id.unwrap().to_string();
+    let expected_student_view_openapi: StudentView = test_data::prepare_student_view_openapi();
+    let given_uuid = expected_student_view_openapi.id.to_string();
 
     // When
     let actual_student_view_openapi = getter::get_one_student_by_id(given_uuid).await;

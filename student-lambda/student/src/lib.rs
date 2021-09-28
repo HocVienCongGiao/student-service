@@ -1,7 +1,9 @@
 use chrono::DateTime;
 use controller::StudentCollectionQuery;
 use domain::usecases::UsecaseError;
-use hvcg_academics_openapi_student::models::{Student, StudentSortCriteria, StudentViewCollection};
+use hvcg_academics_openapi_student::models::{
+    StudentSortCriteria, StudentUpsert, StudentViewCollection,
+};
 use jsonwebtoken::TokenData;
 use lambda_http::http::header::{
     ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_METHODS, ACCESS_CONTROL_ALLOW_ORIGIN,
@@ -39,7 +41,7 @@ pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, E
             .expect("unable to build http::Response"));
     }
     let status_code: u16;
-    let student_response: Option<Student>;
+    let student_response: Option<StudentUpsert>;
     let student_collection: Option<StudentViewCollection>;
     let mut is_get_students = false;
 
@@ -85,7 +87,7 @@ pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, E
         method::Method::PUT => {
             println!("Handle put method.");
             // Update student
-            let lambda_student_request: Option<Student> = request.payload().unwrap_or(None);
+            let lambda_student_request: Option<StudentUpsert> = request.payload().unwrap_or(None);
             student_response = controller::update_student(lambda_student_request).await;
             student_collection = None;
             status_code = 200;
