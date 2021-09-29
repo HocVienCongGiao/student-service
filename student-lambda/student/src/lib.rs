@@ -1,3 +1,6 @@
+use std::env;
+use std::str::FromStr;
+
 use chrono::DateTime;
 use controller::StudentCollectionQuery;
 use domain::usecases::UsecaseError;
@@ -13,8 +16,13 @@ use lambda_http::http::{method, uri::Uri, HeaderValue};
 use lambda_http::{handler, Body, Context, IntoResponse, Request, RequestExt, Response};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use std::env;
-use std::str::FromStr;
+
+mod build_response;
+mod get_students;
+mod parse_request;
+mod post_student;
+// pub mod delete_student;
+// pub mod put_student;
 
 type Error = Box<dyn std::error::Error + Sync + Send + 'static>;
 
@@ -30,182 +38,16 @@ struct TokenPayload {
 
 pub async fn func(request: Request, ctx: Context) -> Result<impl IntoResponse, Error> {
     print_debug_log(&request);
-    if request.method() == method::Method::OPTIONS {
-        return Ok(Response::builder()
-            .header(CONTENT_TYPE, "application/json")
-            .header(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
-            .header(ACCESS_CONTROL_ALLOW_HEADERS, "*")
-            .header(ACCESS_CONTROL_ALLOW_METHODS, "*")
-            .status(200)
-            .body(Body::Empty)
-            .expect("unable to build http::Response"));
-    }
-    let status_code: u16;
-    let student_response: Option<StudentUpsert>;
-    let student_collection: Option<StudentViewCollection>;
-    let mut is_get_students = false;
 
-    match *request.method() {
-        method::Method::GET => {
-            println!("Handle get method.");
-            if let Some(id) = get_id_from_request(&request) {
-                // get student by id
-                student_response = controller::get_student_by_id(id).await;
-                student_collection = None;
-                status_code = 200;
-            } else {
-                // get students
-                let query = get_query_from_request(&request);
-                student_collection = Some(controller::get_students(query).await);
-                is_get_students = true;
-                student_response = None;
-                status_code = 200;
-            }
-        }
-        method::Method::POST => {
-            println!("Handle post method.");
-            student_collection = None;
-            // Create student
-            if let Some(value) = request.payload().unwrap_or(None) {
-                let lambda_student_request = value;
-                let result = controller::create_student(&lambda_student_request).await;
-                match result {
-                    Ok(_) => status_code = 200,
-                    Err(UsecaseError::UniqueConstraintViolationError(..)) => status_code = 503,
-                    Err(UsecaseError::InvalidInput) => status_code = 405,
-                    _ => status_code = 500,
-                }
-                student_response = result.map(Some).unwrap_or_else(|e| {
-                    println!("error: {:?}", e);
-                    None
-                });
-            } else {
-                student_response = None;
-                status_code = 400;
-            }
-        }
-        method::Method::PUT => {
-            println!("Handle put method.");
-            // Update student
-            let lambda_student_request: Option<StudentUpsert> = request.payload().unwrap_or(None);
-            student_response = controller::update_student(lambda_student_request).await;
-            student_collection = None;
-            status_code = 200;
-        }
-        method::Method::DELETE => {
-            println!("Handle delete method.");
-            // Delete student
-            status_code = 204;
-            student_response = None;
-            student_collection = None;
-        }
-        _ => {
-            student_collection = None;
-            student_response = None;
-            status_code = 404
-        }
-    }
-
-    let mut content_type = "application/json";
-    if status_code == 204 {
-        content_type = "";
-        println!("status code is 204, removing application/json in Content-Type header")
-    }
-
-    let response: Response<Body> = Response::builder()
-        .header(CONTENT_TYPE, content_type) // ContentType is automatically set by ApiGateway unless specifically set as an empty string
-        .header(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
-        .header(ACCESS_CONTROL_ALLOW_HEADERS, "*")
-        .header(ACCESS_CONTROL_ALLOW_METHODS, "*")
-        .status(status_code)
-        .body(
-            if student_response.is_none() && student_collection.is_none() {
-                Body::Empty
-            } else {
-                if is_get_students {
-                    serde_json::to_string(&student_collection)
-                } else {
-                    serde_json::to_string(&student_response)
-                }
-                .expect("unable to serialize serde_json::Value")
-                .into()
-            },
-        )
-        .expect("unable to build http::Response");
-    println!(
-        "final user response{:?}",
-        serde_json::to_string(&student_response)
-    );
-
-    Ok(response)
-}
-
-pub fn get_id_from_request(req: &Request) -> Option<uuid::Uuid> {
-    let path_parameters = req.path_parameters();
-    let id_param = path_parameters.get("id");
-    if let Some(id) = id_param {
-        println!("id found");
-        Some(uuid::Uuid::parse_str(id).unwrap())
-    } else {
-        println!("id not found");
-        None
-    }
-}
-
-pub fn get_query_from_request(req: &Request) -> StudentCollectionQuery {
-    let query = req.query_string_parameters();
-    let param_date_of_birth = query.get("date_of_birth");
-    let param_date_of_birth = match param_date_of_birth {
-        Some(param_date_of_birth) => {
-            let param_date_of_birth =
-                <DateTime<chrono::Utc> as FromStr>::from_str(param_date_of_birth);
-            match param_date_of_birth {
-                Ok(param_date_of_birth) => Some(param_date_of_birth),
-                Err(e) => {
-                    println!("{:?}", e);
-                    None
-                }
-            }
-        }
-        None => None,
+    let response = match *request.method() {
+        method::Method::GET => get_students::execute(request).await,
+        method::Method::POST => post_student::execute(request).await,
+        method::Method::PUT => build_response::default_response(request), //put_student::execute(request).await,
+        method::Method::DELETE => build_response::default_response(request), // delete_student::execute(request).await,
+        _ => build_response::default_response(request),
     };
 
-    let sort_criteria_dto: Vec<String> = query
-        .get_all("sorts")
-        .unwrap_or_default()
-        .iter()
-        .map(|e| e.to_string())
-        .collect();
-
-    let mut param_sorts: Option<Vec<StudentSortCriteria>> = None;
-
-    if !sort_criteria_dto.is_empty() {
-        let mut sort_criteria = Vec::new();
-        sort_criteria_dto.iter().for_each(|criterion| {
-            let s: StudentSortCriteria = criterion.parse().unwrap();
-            sort_criteria.push(s);
-        });
-        param_sorts = Option::from(sort_criteria);
-    }
-
-    StudentCollectionQuery {
-        name: from_query_param_to_string(req, "name"),
-        email: from_query_param_to_string(req, "email"),
-        phone: from_query_param_to_string(req, "phone"),
-        undergraduate_school: from_query_param_to_string(req, "undergraduate_school"),
-        date_of_birth: param_date_of_birth,
-        place_of_birth: from_query_param_to_string(req, "place_of_birth"),
-        polity_name: from_query_param_to_string(req, "polity_name"),
-        specialism: from_query_param_to_string(req, "specialism"),
-        sorts: param_sorts,
-        offset: query.get("offset").map(|str| str.parse().unwrap()),
-        count: query.get("count").map(|str| str.parse().unwrap()),
-    }
-}
-
-fn from_query_param_to_string(request: &Request, param: &str) -> Option<String> {
-    let query = request.query_string_parameters();
-    query.get(param).map(|str| str.parse().unwrap())
+    Ok(response)
 }
 
 fn print_debug_log(request: &Request) {

@@ -1,5 +1,5 @@
 use chrono::DateTime;
-use hvcg_academics_openapi_student::models::StudentView;
+use hvcg_academics_openapi_student::models::{StudentUpsert, StudentView};
 use lambda_http::http::{HeaderValue, Request};
 use lambda_http::{http, Body, Context, IntoResponse, RequestExt, Response};
 use std::collections::HashMap;
@@ -10,7 +10,9 @@ use std::sync::Once;
 use uuid::Uuid;
 
 mod common;
-use crate::common::getter;
+use crate::common::poster::post_student_upsert;
+use common::getter;
+use common::poster;
 use common::test_data;
 
 static INIT: Once = Once::new();
@@ -27,11 +29,12 @@ fn initialise() {
 async fn crud_should_work() {
     initialise();
     // given_a_student_when_get_one_by_id_then_return_correct_student_view_openapi().await;
+    when_post_a_student_upsert_then_student_is_correctly_saved_and_student_view_returned().await;
 }
 
 async fn given_a_student_when_get_one_by_id_then_return_correct_student_view_openapi() {
     // Given
-    let expected_student_view_openapi: StudentView = test_data::prepare_student_view_openapi();
+    let expected_student_view_openapi: StudentView = test_data::prepare_student_view_openapi(None);
     let given_uuid = expected_student_view_openapi.id.to_string();
 
     // When
@@ -44,33 +47,24 @@ async fn given_a_student_when_get_one_by_id_then_return_correct_student_view_ope
     );
 }
 
-async fn when_post_a_student_then_student_is_correctly_saved_and_returned() {
-    println!("is it working?");
-    // let request = build_http_get_request("1".to_string(), 5);
-    // // When
-    // let response = student::func(request, Context::default())
-    //     .await
-    //     .expect("expected Ok(_) value")
-    //     .into_response();
-    // // Then
-    // println!("response: {:?}", response);
-    // assert_eq!(response.status(), 200);
-    // Init dependencies
+async fn when_post_a_student_upsert_then_student_is_correctly_saved_and_student_view_returned() {
+    // Given
+    let given_student_upsert_openapi: StudentUpsert = test_data::prepare_student_upsert_openapi();
 
-    println!("Trigger build!!");
+    // When
+    let actual_student_view_openapi =
+        poster::post_student_upsert(given_student_upsert_openapi).await;
+
+    // Then
+    // assert_eq!(actual_student_view_openapi.is_some());
+    let mut actual_id: Option<Uuid> = actual_student_view_openapi.clone().map(|t| t.id);
+    let expected_student_view_openapi = test_data::prepare_student_view_openapi(actual_id);
+    assert_eq!(
+        expected_student_view_openapi,
+        actual_student_view_openapi.unwrap()
+    );
 }
 
 async fn given_3_students_when_find_without_filtering_then_return_collection_with_the_right_size() {
-    initialise();
-    // println!("is it working?");
-    // let request = build_http_get_request();
-    // // When
-    // let response = student::func(request, Context::default())
-    //     .await
-    //     .expect("expected Ok(_) value")
-    //     .into_response();
-    // // Then
-    // println!("response: {:?}", response);
-    // assert_eq!(response.status(), 200);
-    // println!("Trigger build!!");
+    todo!()
 }

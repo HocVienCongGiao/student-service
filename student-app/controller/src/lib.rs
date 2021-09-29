@@ -4,10 +4,14 @@ use hvcg_academics_openapi_student::models::{
     StudentSortCriteria, StudentUpsert as StudentUpsertOpenApi, StudentViewCollection,
 };
 use uuid::Uuid;
-
 mod create_student;
 mod get_students;
+
 pub mod openapi;
+
+pub(crate) trait ToUsecaseInput<T> {
+    fn to_usecase_input(self) -> T;
+}
 
 pub async fn get_student_by_id(id: Uuid) -> Option<StudentUpsertOpenApi> {
     todo!()
@@ -20,7 +24,7 @@ pub async fn update_student(
 }
 
 pub async fn create_student(
-    student_request: &StudentUpsertOpenApi,
+    student_request: StudentUpsertOpenApi,
 ) -> Result<StudentUpsertOpenApi, UsecaseError> {
     create_student::from_openapi(student_request).await
 }

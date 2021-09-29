@@ -1,6 +1,7 @@
-use crate::entities::student::Student as StudentEntity;
+use crate::entities::student::{Student as StudentEntity, StudentTitle};
 use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
-use crate::usecases::{ToEntity, UsecaseError};
+use crate::usecases::student_usecase_shared_models::StudentUsecaseSharedTitle;
+use crate::usecases::{ToEntity, ToUsecaseOutput, UsecaseError};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
@@ -77,7 +78,7 @@ where
 pub struct CreateStudentUsecaseInput {
     pub polity_id: Option<Uuid>,
     pub saint_ids: Option<Vec<uuid::Uuid>>,
-    pub title: Option<String>,
+    pub title: Option<StudentUsecaseSharedTitle>,
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
@@ -92,7 +93,7 @@ pub struct CreateStudentUsecaseOutput {
     pub id: Option<Uuid>,
     pub polity_id: Option<Uuid>,
     pub saint_ids: Option<Vec<Uuid>>,
-    pub title: Option<String>,
+    pub title: Option<StudentUsecaseSharedTitle>,
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
@@ -105,11 +106,16 @@ pub struct CreateStudentUsecaseOutput {
 
 impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
     fn to_entity(self) -> StudentEntity {
+        let title_usecase_input = self.title;
+        let mut title: Option<StudentTitle> = None;
+        if let Some(title_usecase_input) = title_usecase_input {
+            title = Some(title_usecase_input.to_entity());
+        }
         StudentEntity {
             id: Some(Uuid::new_v4()),
             polity_id: self.polity_id,
             saint_ids: self.saint_ids,
-            title: self.title,
+            title,
             first_name: self.first_name,
             middle_name: self.middle_name,
             last_name: self.last_name,
@@ -122,20 +128,23 @@ impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
     }
 }
 
-impl StudentDbResponse {
-    pub(crate) fn to_usecase_output(&self) -> CreateStudentUsecaseOutput {
-        // let polity_usecase_output: Option<PolityUsecaseOutput>;
-        // let polity_db_response = &self.polity;
-        // if let Some(polity_db_response) = polity_db_response {
-        //     polity_usecase_output = Option::from(polity_db_response.to_usecase_output());
-        // } else {
-        //     polity_usecase_output = None;
-        // }
+impl ToEntity<StudentTitle> for StudentUsecaseSharedTitle {
+    fn to_entity(self) -> StudentTitle {
+        match self {
+            StudentUsecaseSharedTitle::Monk => StudentTitle::Monk,
+            StudentUsecaseSharedTitle::Nun => StudentTitle::Nun,
+            StudentUsecaseSharedTitle::Priest => StudentTitle::Priest,
+        }
+    }
+}
+
+impl ToUsecaseOutput<CreateStudentUsecaseOutput> for StudentDbResponse {
+    fn to_usecase_output(self) -> CreateStudentUsecaseOutput {
         CreateStudentUsecaseOutput {
             id: self.id,
             polity_id: self.polity_id,
             saint_ids: self.saint_ids.clone(),
-            title: self.title.clone(),
+            title: self.title.map(|t| t.parse().unwrap()),
             first_name: self.first_name.clone(),
             middle_name: self.middle_name.clone(),
             last_name: self.last_name.clone(),
@@ -143,7 +152,7 @@ impl StudentDbResponse {
             place_of_birth: self.place_of_birth.clone(),
             email: self.email.clone(),
             phone: self.phone.clone(),
-            undergraduate_school: self.undergraduate_school.clone(),
+            undergraduate_school: self.undergraduate_school,
         }
     }
 }

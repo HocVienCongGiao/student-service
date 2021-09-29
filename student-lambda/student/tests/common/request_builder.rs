@@ -1,5 +1,5 @@
 use chrono::DateTime;
-use hvcg_academics_openapi_student::models::StudentView;
+use hvcg_academics_openapi_student::models::{StudentUpsert, StudentView};
 use lambda_http::http::{HeaderValue, Request};
 use lambda_http::{http, Body, Context, IntoResponse, RequestExt, Response};
 use std::collections::HashMap;
@@ -8,6 +8,18 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use std::sync::Once;
 use uuid::Uuid;
+
+pub fn build_http_request_to_post_student_upsert(student_upsert: StudentUpsert) -> Request<Body> {
+    let mut query_param = HashMap::new();
+    let mut path_param = HashMap::new();
+
+    let uri = "https://dev-sg.portal.hocvienconggiao.com/mutation-api/student-service/students"
+        .to_string();
+
+    let serialized = serde_json::to_string(&student_upsert).unwrap();
+
+    build_http_post_request(uri, query_param, path_param, Some(serialized))
+}
 
 pub fn build_http_request_to_get_one_student(uuid: String) -> Request<Body> {
     let mut query_param = HashMap::new();
@@ -40,7 +52,16 @@ fn build_http_get_request(
     query_param: HashMap<String, Vec<String>>,
     path_param: HashMap<String, Vec<String>>,
 ) -> Request<Body> {
-    build_http_request("GET".to_string(), uri, query_param, path_param)
+    build_http_request("GET".to_string(), uri, query_param, path_param, None)
+}
+
+fn build_http_post_request(
+    uri: String,
+    query_param: HashMap<String, Vec<String>>,
+    path_param: HashMap<String, Vec<String>>,
+    body: Option<String>,
+) -> Request<Body> {
+    build_http_request("POST".to_string(), uri, query_param, path_param, body)
 }
 
 fn build_http_request(
@@ -48,12 +69,17 @@ fn build_http_request(
     uri: String,
     query_param: HashMap<String, Vec<String>>,
     path_param: HashMap<String, Vec<String>>,
+    body: Option<String>,
 ) -> Request<Body> {
+    let mut request_body = Body::Empty;
+    if let Some(body) = body {
+        request_body = Body::from(body);
+    }
     http::Request::builder()
         .uri(uri)
         .method(method.as_str())
         .header("Content-Type", "application/json")
-        .body(Body::Empty)
+        .body(request_body)
         .unwrap()
         .with_query_string_parameters(query_param)
         .with_path_parameters(path_param)

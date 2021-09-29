@@ -1,6 +1,6 @@
 use crate::openapi::ToOpenApi;
 use domain::usecases::query_student_collection_usecase::QueryStudentCollectionUsecaseOutput;
-use domain::usecases::QueryStudentUsecaseOutput;
+use domain::usecases::student_usecase_shared_models::QueryStudentUsecaseOutput;
 use hvcg_academics_openapi_student::models::{StudentView, StudentViewCollection};
 
 impl ToOpenApi<StudentViewCollection> for QueryStudentCollectionUsecaseOutput {
@@ -40,7 +40,7 @@ impl ToOpenApi<StudentView> for QueryStudentUsecaseOutput {
             polity_location_name: None,
             polity_location_address: None,
             polity_location_email: None,
-            title: self.title,
+            title: self.title.map(|t| t.parse().unwrap()),
             date_of_birth: self.date_of_birth,
             place_of_birth: self.place_of_birth,
             email: self.email,

@@ -1,6 +1,7 @@
 use crate::openapi::ToOpenApi;
 use domain::usecases::create_student_usecase::CreateStudentUsecaseOutput;
-use hvcg_academics_openapi_student::models::StudentUpsert;
+use domain::usecases::student_usecase_shared_models::StudentUsecaseSharedTitle;
+use hvcg_academics_openapi_student::models::{StudentTitle as StudentTitleOpenApi, StudentUpsert};
 use uuid::Uuid;
 
 impl ToOpenApi<StudentUpsert> for CreateStudentUsecaseOutput {
@@ -16,7 +17,7 @@ impl ToOpenApi<StudentUpsert> for CreateStudentUsecaseOutput {
         StudentUpsert {
             polity_id,
             saint_id_array: self.saint_ids,
-            title: self.title,
+            title: self.title.map(|t| t.to_openapi()),
             first_name: self.first_name,
             middle_name: self.middle_name,
             last_name: self.last_name,
@@ -25,6 +26,16 @@ impl ToOpenApi<StudentUpsert> for CreateStudentUsecaseOutput {
             email: self.email,
             phone: self.phone,
             undergraduate_school: self.undergraduate_school,
+        }
+    }
+}
+
+impl ToOpenApi<StudentTitleOpenApi> for StudentUsecaseSharedTitle {
+    fn to_openapi(self) -> StudentTitleOpenApi {
+        match self {
+            StudentUsecaseSharedTitle::Monk => StudentTitleOpenApi::MONK,
+            StudentUsecaseSharedTitle::Nun => StudentTitleOpenApi::NUN,
+            StudentUsecaseSharedTitle::Priest => StudentTitleOpenApi::PRIEST,
         }
     }
 }

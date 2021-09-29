@@ -117,7 +117,7 @@ impl Student {
             id: self.id,
             polity_id: self.polity_id,
             saint_ids: self.saint_ids.clone(),
-            title: self.title.clone(),
+            title: self.title.clone().map(|title| title.to_string()),
             first_name: self.first_name.clone(),
             middle_name: self.middle_name.clone(),
             last_name: self.last_name.clone(),
