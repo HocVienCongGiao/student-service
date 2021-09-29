@@ -7,10 +7,12 @@ use domain::usecases::create_student_usecase::{
 use domain::usecases::student_usecase_shared_models::StudentUsecaseSharedTitle;
 use domain::usecases::UsecaseError;
 use hvcg_academics_openapi_student::models::{
-    StudentTitle, StudentUpsert as StudentOpenApi, StudentUpsert,
+    StudentTitle, StudentUpsert as StudentUpsertOpenApi, StudentView as StudentViewOpenApi,
 };
 
-pub(crate) async fn from_openapi(student: StudentOpenApi) -> Result<StudentOpenApi, UsecaseError> {
+pub(crate) async fn from_openapi(
+    student: StudentUpsertOpenApi,
+) -> Result<StudentViewOpenApi, UsecaseError> {
     // Init dependencies
     let client = db_postgres::connect().await;
     let student_repository = StudentRepository { client };
@@ -22,7 +24,7 @@ pub(crate) async fn from_openapi(student: StudentOpenApi) -> Result<StudentOpenA
     result.map(|res| res.to_openapi())
 }
 
-impl ToUsecaseInput<CreateStudentUsecaseInput> for StudentUpsert {
+impl ToUsecaseInput<CreateStudentUsecaseInput> for StudentUpsertOpenApi {
     fn to_usecase_input(self) -> CreateStudentUsecaseInput {
         let mut title: Option<StudentUsecaseSharedTitle> = None;
         let title_openapi = self.title;

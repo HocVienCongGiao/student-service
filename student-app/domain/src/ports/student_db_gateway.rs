@@ -66,7 +66,7 @@ pub struct StudentMutationDbRequest {
 }
 
 pub struct StudentDbResponse {
-    pub id: Option<Uuid>,
+    pub id: Uuid,
     pub polity_id: Option<uuid::Uuid>,
     pub saint_ids: Option<Vec<uuid::Uuid>>,
     pub title: Option<String>,

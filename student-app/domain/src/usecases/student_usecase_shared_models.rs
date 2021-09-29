@@ -1,6 +1,20 @@
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
+pub(crate) trait WithPolity<T> {
+    fn with_polity(
+        self,
+        name: Option<String>,
+        location_name: Option<String>,
+        location_address: Option<String>,
+        location_email: Option<String>,
+    ) -> T;
+}
+
+pub(crate) trait WithChristianName<T> {
+    fn with_christian_name(self, name: Option<String>) -> T;
+}
+
 #[derive(PartialEq, Clone)]
 #[allow(non_camel_case_types)]
 #[repr(C)]

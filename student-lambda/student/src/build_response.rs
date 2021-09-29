@@ -2,7 +2,7 @@ use chrono::DateTime;
 use controller::StudentCollectionQuery;
 use domain::usecases::UsecaseError;
 use hvcg_academics_openapi_student::models::{
-    StudentSortCriteria, StudentUpsert, StudentViewCollection,
+    StudentSortCriteria, StudentView, StudentViewCollection,
 };
 use jsonwebtoken::TokenData;
 use lambda_http::http::header::{
@@ -20,7 +20,7 @@ type Error = Box<dyn std::error::Error + Sync + Send + 'static>;
 
 pub fn execute(
     status_code: u16,
-    student_response: Option<StudentUpsert>,
+    student_response: Option<StudentView>,
     student_collection: Option<StudentViewCollection>,
 ) -> Response<Body> {
     let mut is_get_students = false;
@@ -55,7 +55,6 @@ pub fn execute(
         "final user response{:?}",
         serde_json::to_string(&student_response)
     );
-
     response
 }
 

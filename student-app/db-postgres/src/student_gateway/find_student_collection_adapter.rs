@@ -22,7 +22,7 @@ impl FindStudentCollectionPort for StudentRepository {
 
         let mut students = vec![
             StudentDbResponse {
-                id: Option::from(Uuid::from_str("53f549b9-99bf-4e12-88e3-c2f868953283").unwrap()),
+                id: Uuid::from_str("53f549b9-99bf-4e12-88e3-c2f868953283").unwrap(),
                 // polity: Option::from(PolityDbResponse {
                 //     id: Default::default(),
                 //     name: Some("Empty".to_string()),
@@ -47,7 +47,7 @@ impl FindStudentCollectionPort for StudentRepository {
                 last_name: None,
             },
             StudentDbResponse {
-                id: Option::from(Uuid::from_str("53f549b9-99bf-4e12-88e3-c2f868953283").unwrap()),
+                id: Uuid::from_str("53f549b9-99bf-4e12-88e3-c2f868953283").unwrap(),
                 polity_id: None,
                 title: Option::from("PRIEST".to_string()),
                 first_name: None,

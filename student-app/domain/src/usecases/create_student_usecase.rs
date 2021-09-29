@@ -1,6 +1,8 @@
 use crate::entities::student::{Student as StudentEntity, StudentTitle};
 use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
-use crate::usecases::student_usecase_shared_models::StudentUsecaseSharedTitle;
+use crate::usecases::student_usecase_shared_models::{
+    StudentUsecaseSharedTitle, WithChristianName, WithPolity,
+};
 use crate::usecases::{ToEntity, ToUsecaseOutput, UsecaseError};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
@@ -89,10 +91,16 @@ pub struct CreateStudentUsecaseInput {
     pub undergraduate_school: Option<String>,
 }
 
+#[derive(Clone)]
 pub struct CreateStudentUsecaseOutput {
-    pub id: Option<Uuid>,
+    pub id: Uuid,
     pub polity_id: Option<Uuid>,
+    pub polity_name: Option<String>,
+    pub polity_location_name: Option<String>,
+    pub polity_location_address: Option<String>,
+    pub polity_location_email: Option<String>,
     pub saint_ids: Option<Vec<Uuid>>,
+    pub christian_name: Option<String>,
     pub title: Option<StudentUsecaseSharedTitle>,
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
@@ -143,7 +151,12 @@ impl ToUsecaseOutput<CreateStudentUsecaseOutput> for StudentDbResponse {
         CreateStudentUsecaseOutput {
             id: self.id,
             polity_id: self.polity_id,
+            polity_name: None,
+            polity_location_name: None,
+            polity_location_address: None,
+            polity_location_email: None,
             saint_ids: self.saint_ids.clone(),
+            christian_name: None,
             title: self.title.map(|t| t.parse().unwrap()),
             first_name: self.first_name.clone(),
             middle_name: self.middle_name.clone(),
@@ -154,5 +167,28 @@ impl ToUsecaseOutput<CreateStudentUsecaseOutput> for StudentDbResponse {
             phone: self.phone.clone(),
             undergraduate_school: self.undergraduate_school,
         }
+    }
+}
+
+impl WithPolity<CreateStudentUsecaseOutput> for CreateStudentUsecaseOutput {
+    fn with_polity(
+        mut self,
+        name: Option<String>,
+        location_name: Option<String>,
+        location_address: Option<String>,
+        location_email: Option<String>,
+    ) -> CreateStudentUsecaseOutput {
+        self.polity_name = name;
+        self.polity_location_name = location_name;
+        self.polity_location_address = location_address;
+        self.polity_location_email = location_email;
+        self
+    }
+}
+
+impl WithChristianName<CreateStudentUsecaseOutput> for CreateStudentUsecaseOutput {
+    fn with_christian_name(mut self, name: Option<String>) -> CreateStudentUsecaseOutput {
+        self.christian_name = name;
+        self
     }
 }

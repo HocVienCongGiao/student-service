@@ -13,7 +13,7 @@ impl InsertStudentPort for StudentRepository {
     ) -> Result<StudentDbResponse, DbError> {
         println!("Inserting to DB");
         Ok(StudentDbResponse {
-            id: None,
+            id: Uuid::new_v4(),
             polity_id: None,
             saint_ids: None,
             title: None,
