@@ -28,14 +28,6 @@ pub trait CreateStudentUsecase {
         &mut self,
         request: CreateStudentUsecaseInput,
     ) -> Result<CreateStudentUsecaseOutput, UsecaseError>;
-    // async fn update_student(
-    //     &mut self,
-    //     request: StudentMutationUsecaseInput,
-    // ) -> Result<StudentUsecaseOutput, UsecaseError>;
-    // async fn delete_student(
-    //     &mut self,
-    //     request: StudentMutationUsecaseInput,
-    // ) -> Result<(), UsecaseError>;
 }
 
 #[async_trait]

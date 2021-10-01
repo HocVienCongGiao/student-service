@@ -13,10 +13,6 @@ pub struct QueryStudentCollectionUsecaseInteractor<A: StudentDbGateway> {
 #[async_trait]
 pub trait QueryStudentCollectionUsecase {
     // InputBoundary
-    // async fn get_student(
-    //     &self,
-    //     request: QueryStudentCollectionUsecaseInput,
-    // ) -> Option<QueryStudentCollectionUsecaseOutput>;
     async fn execute(
         &self,
         request: QueryStudentCollectionUsecaseInput,

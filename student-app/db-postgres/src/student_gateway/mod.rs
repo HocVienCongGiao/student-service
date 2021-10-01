@@ -4,3 +4,4 @@ mod find_student_collection_adapter;
 mod insert_student_adapter;
 pub mod repository;
 mod update_student_adapter;
+mod db_column;

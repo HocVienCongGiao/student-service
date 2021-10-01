@@ -6,7 +6,8 @@ use hvcg_academics_openapi_student::models::{
 };
 use uuid::Uuid;
 mod create_student;
-mod get_students;
+mod get_one_student_by_id;
+mod get_student_collection;
 
 pub mod openapi;
 
@@ -14,8 +15,8 @@ pub(crate) trait ToUsecaseInput<T> {
     fn to_usecase_input(self) -> T;
 }
 
-pub async fn get_student_by_id(id: Uuid) -> Option<StudentViewOpenApi> {
-    todo!()
+pub async fn get_one_student_by_id(id: Uuid) -> Option<StudentViewOpenApi> {
+    get_one_student_by_id::from_uuid(id).await
 }
 
 pub async fn update_student(
@@ -31,7 +32,7 @@ pub async fn create_student(
 }
 
 pub async fn get_students(query: StudentCollectionQuery) -> StudentViewCollection {
-    get_students::from_usecase_input(query.to_usecase_input()).await
+    get_student_collection::from_usecase_input(query.to_usecase_input()).await
 }
 
 pub struct StudentCollectionQuery {

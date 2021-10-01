@@ -1,4 +1,5 @@
 pub mod create_student_usecase;
+pub mod query_one_student_by_id_usecase;
 pub mod query_student_collection_usecase;
 pub mod student_usecase_shared_models;
 

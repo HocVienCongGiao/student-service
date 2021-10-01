@@ -31,7 +31,7 @@ pub async fn execute(request: Request) -> Response<Body> {
 }
 
 async fn get_student_by_id(id: Uuid) -> Response<Body> {
-    let student_response = controller::get_student_by_id(id).await;
+    let student_response = controller::get_one_student_by_id(id).await;
     build_response::execute(200, student_response, None)
 }
 

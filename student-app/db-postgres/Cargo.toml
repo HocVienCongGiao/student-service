@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio-postgres = {version = "0.7.2", features = ["with-uuid-0_8"]}
+tokio-postgres = { version = "0.7.2", features = ["with-uuid-0_8", "with-chrono-0_4", "with-time-0_2"] }
 tokio = { version = "1.6.0", features = ["full"] }
 domain = { path = "../domain", version = "0.1.5" }
 #refinery = { version = "0.5", features = ["tokio-postgres"] }

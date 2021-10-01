@@ -28,7 +28,7 @@ fn initialise() {
 #[tokio::test]
 async fn crud_should_work() {
     initialise();
-    // given_a_student_when_get_one_by_id_then_return_correct_student_view_openapi().await;
+    given_a_student_when_get_one_by_id_then_return_correct_student_view_openapi().await;
     // when_post_a_student_upsert_then_student_is_correctly_saved_and_student_view_returned().await;
     // given_3_students_when_find_without_filtering_then_return_collection_with_the_right_size().await;
 }
