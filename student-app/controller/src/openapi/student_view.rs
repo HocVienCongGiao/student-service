@@ -33,15 +33,12 @@ impl ToOpenApi<StudentViewCollection> for QueryStudentCollectionUsecaseOutput {
 
 impl ToOpenApi<StudentView> for QueryStudentUsecaseOutput {
     fn to_openapi(self) -> StudentView {
-        // TODO Optimise
-        let polity_name: Option<String> = Some("".to_string());
-
         StudentView {
             id: self.id,
-            polity_name,
-            polity_location_name: None,
-            polity_location_address: None,
-            polity_location_email: None,
+            polity_name: self.polity_name,
+            polity_location_name: self.polity_location_name,
+            polity_location_address: self.polity_location_address,
+            polity_location_email: self.polity_location_email,
             title: self.title.map(|t| t.parse().unwrap()),
             date_of_birth: self.date_of_birth,
             place_of_birth: self.place_of_birth,

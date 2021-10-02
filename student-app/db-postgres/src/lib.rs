@@ -1,6 +1,8 @@
 use tokio_postgres::{Client, NoTls};
 
 pub mod config;
+mod db_column;
+pub mod polity_gateway;
 pub mod student_gateway;
 
 pub async fn connect() -> Client {

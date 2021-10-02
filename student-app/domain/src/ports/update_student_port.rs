@@ -1,4 +1,5 @@
-use crate::ports::student_db_gateway::{DbError, StudentDbResponse, StudentMutationDbRequest};
+use crate::ports::student_db_gateway::{StudentDbResponse, StudentMutationDbRequest};
+use crate::ports::DbError;
 use async_trait::async_trait;
 
 #[async_trait]

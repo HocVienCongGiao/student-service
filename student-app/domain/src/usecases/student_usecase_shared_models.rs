@@ -40,6 +40,10 @@ impl std::str::FromStr for StudentUsecaseSharedTitle {
 pub struct QueryStudentUsecaseOutput {
     pub id: Uuid,
     pub polity_id: Option<Uuid>,
+    pub polity_name: Option<String>,
+    pub polity_location_name: Option<String>,
+    pub polity_location_address: Option<String>,
+    pub polity_location_email: Option<String>,
     pub saint_ids: Option<Vec<Uuid>>,
     pub title: Option<String>,
     pub first_name: Option<String>,

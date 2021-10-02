@@ -2,7 +2,8 @@ use crate::student_gateway::repository::StudentRepository;
 use async_trait::async_trait;
 use chrono::DateTime;
 use domain::ports::insert_student_port::InsertStudentPort;
-use domain::ports::student_db_gateway::{DbError, StudentDbResponse, StudentMutationDbRequest};
+use domain::ports::student_db_gateway::{StudentDbResponse, StudentMutationDbRequest};
+use domain::ports::DbError;
 use uuid::Uuid;
 
 #[async_trait]

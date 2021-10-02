@@ -1,14 +1,13 @@
 use crate::entities::student::Student;
 use crate::ports::delete_student_port::DeleteStudentPort;
-use crate::ports::find_one_student_by_id::FindOneStudentById;
 use crate::ports::find_student_collection_port::FindStudentCollectionPort;
 use crate::ports::insert_student_port::InsertStudentPort;
 use crate::ports::update_student_port::UpdateStudentPort;
-use crate::usecases::UsecaseError;
 use crate::SortDirection;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
+use crate::ports::find_one_student_by_id_port::FindOneStudentByIdPort;
 
 #[async_trait]
 pub trait StudentDbGateway:
@@ -16,7 +15,7 @@ pub trait StudentDbGateway:
     + UpdateStudentPort
     + DeleteStudentPort
     + FindStudentCollectionPort
-    + FindOneStudentById
+    + FindOneStudentByIdPort
 {
 }
 
@@ -84,31 +83,6 @@ pub struct StudentCollectionDbResponse {
     pub collection: Vec<StudentDbResponse>,
     pub has_more: bool,
     pub total: i64,
-}
-
-pub struct PolityDbResponse {
-    pub id: Uuid,
-    pub name: Option<String>,
-    pub location_name: Option<String>,
-    pub location_address: Option<String>,
-    pub location_email: Option<String>,
-}
-
-#[derive(Debug)]
-pub enum DbError {
-    UniqueConstraintViolationError(String),
-    UnknownError(String),
-}
-
-impl DbError {
-    pub(crate) fn to_usecase_error(&self) -> UsecaseError {
-        match self {
-            DbError::UniqueConstraintViolationError(field) => {
-                UsecaseError::UniqueConstraintViolationError(field.to_string())
-            }
-            DbError::UnknownError(msg) => UsecaseError::UnknownError(msg.to_string()),
-        }
-    }
 }
 
 impl Student {
