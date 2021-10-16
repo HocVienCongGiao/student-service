@@ -1,12 +1,9 @@
-use uuid::Uuid;
 use crate::ports::find_one_polity_by_id_port::FindOnePolityByIdPort;
 use async_trait::async_trait;
+use uuid::Uuid;
 
 #[async_trait]
-pub trait PolityDbGateway:
- FindOnePolityByIdPort
-{
-}
+pub trait PolityDbGateway: FindOnePolityByIdPort {}
 
 pub struct PolityDbResponse {
     pub id: Uuid,

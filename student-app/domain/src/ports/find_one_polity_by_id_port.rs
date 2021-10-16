@@ -1,6 +1,6 @@
+use crate::ports::polity_db_gateway::PolityDbResponse;
 use async_trait::async_trait;
 use uuid::Uuid;
-use crate::ports::polity_db_gateway::PolityDbResponse;
 
 #[async_trait]
 pub trait FindOnePolityByIdPort {

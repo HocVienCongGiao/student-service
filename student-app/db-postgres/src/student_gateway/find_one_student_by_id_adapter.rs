@@ -27,7 +27,7 @@ fn from_pg_row_to_student_db_response(row: Row) -> StudentDbResponse {
     StudentDbResponse {
         id: db_column::get_uuid(&row, "id"),
         polity_id: Some(db_column::get_uuid(&row, "polity_id")),
-        saint_ids: None,
+        saint_ids: Some(db_column::get_uuid_collection(&row, "saint_ids")),
         title: Some(db_column::get_string(&row, "title")),
         first_name: Some(db_column::get_string(&row, "first_name")),
         middle_name: Some(db_column::get_string(&row, "middle_name")),
