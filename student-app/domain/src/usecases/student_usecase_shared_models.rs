@@ -45,6 +45,7 @@ pub struct QueryStudentUsecaseOutput {
     pub polity_location_address: Option<String>,
     pub polity_location_email: Option<String>,
     pub saint_ids: Option<Vec<Uuid>>,
+    pub christian_name: Option<Vec<String>>,
     pub title: Option<String>,
     pub first_name: Option<String>,
     pub middle_name: Option<String>,

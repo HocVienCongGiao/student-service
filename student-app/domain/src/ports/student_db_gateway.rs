@@ -1,5 +1,6 @@
 use crate::entities::student::Student;
 use crate::ports::delete_student_port::DeleteStudentPort;
+use crate::ports::find_one_student_by_id_port::FindOneStudentByIdPort;
 use crate::ports::find_student_collection_port::FindStudentCollectionPort;
 use crate::ports::insert_student_port::InsertStudentPort;
 use crate::ports::update_student_port::UpdateStudentPort;
@@ -7,7 +8,6 @@ use crate::SortDirection;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
-use crate::ports::find_one_student_by_id_port::FindOneStudentByIdPort;
 
 #[async_trait]
 pub trait StudentDbGateway:

@@ -14,7 +14,7 @@ pub fn prepare_student_view_openapi(uuid: Option<Uuid>) -> StudentView {
         title: Some(StudentTitle::PRIEST),
         name: Some("Nguyễn Hữu Chiến".to_string()),
         date_of_birth: Some(DateTime::from_str("1983-05-16 00:00:00+00:00").unwrap()),
-        place_of_birth: Some("Tra Vinh".to_string()),
+        place_of_birth: Some("Trà Vinh".to_string()),
         email: Some("binh@sunrise.vn".to_string()),
         phone: Some("+84 1228019700".to_string()),
         undergraduate_school: Some("Đại Chủng Viện Thánh Quý - Cần Thơ".to_string()),
