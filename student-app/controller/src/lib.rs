@@ -43,8 +43,8 @@ pub struct StudentCollectionQuery {
     pub date_of_birth: Option<DateTime<Utc>>,
     pub place_of_birth: Option<String>,
     pub polity_name: Option<String>,
-    pub specialism: Option<String>,
+    //pub specialism: Option<String>,
     pub sorts: Option<Vec<StudentSortCriteria>>,
-    pub offset: Option<i32>,
-    pub count: Option<i32>,
+    pub offset: Option<i64>,
+    pub count: Option<i64>,
 }

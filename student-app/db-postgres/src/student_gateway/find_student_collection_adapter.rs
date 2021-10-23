@@ -1,12 +1,17 @@
+use crate::student_gateway::find_one_student_by_id_adapter::from_pg_row_to_student_db_response;
 use crate::student_gateway::repository::StudentRepository;
 use async_trait::async_trait;
-use chrono::DateTime;
+use chrono::{DateTime, NaiveDate, Utc};
 use domain::ports::find_student_collection_port::FindStudentCollectionPort;
 use domain::ports::student_db_gateway::{
     StudentCollectionDbResponse, StudentDbResponse, StudentQueryDbRequest,
+    StudentSortCriteriaDbRequest, StudentSortFieldDbRequest,
 };
-use std::str::FromStr;
-use uuid::Uuid;
+use domain::SortDirection;
+use tokio_postgres::types::ToSql;
+use tokio_postgres::{Client, Error, Row};
+
+use heck::SnakeCase;
 
 #[async_trait]
 impl FindStudentCollectionPort for StudentRepository {
@@ -14,58 +19,247 @@ impl FindStudentCollectionPort for StudentRepository {
         &self,
         db_request: StudentQueryDbRequest,
     ) -> StudentCollectionDbResponse {
-        let mut result = StudentCollectionDbResponse {
-            collection: vec![],
-            has_more: false,
-            total: 3,
-        };
+        let name = db_request.name.unwrap_or("".to_string());
+        let email = db_request.email.unwrap_or("".to_string());
+        let phone = db_request.phone.unwrap_or("".to_string());
+        let undergraduate_school = db_request.undergraduate_school.unwrap_or("".to_string());
+        let date_of_birth = db_request
+            .date_of_birth
+            .map(|date_time| date_time.date().naive_utc());
+        let place_of_birth = db_request.place_of_birth.unwrap_or("".to_string());
+        let polity_name = db_request.polity_name.unwrap_or("".to_string());
+        let offset = db_request.offset.unwrap_or(0);
+        let count = db_request.count.unwrap_or(20);
 
-        let mut students = vec![
-            StudentDbResponse {
-                id: Uuid::from_str("53f549b9-99bf-4e12-88e3-c2f868953283").unwrap(),
-                // polity: Option::from(PolityDbResponse {
-                //     id: Default::default(),
-                //     name: Some("Empty".to_string()),
-                //     location_name: None,
-                //     location_address: None,
-                //     location_email: None,
-                // }),
-                polity_id: None,
-                title: Some("PRIEST".to_string()),
-                first_name: None,
-                middle_name: None,
-                date_of_birth: Option::from(
-                    DateTime::from_str("1990-10-29 00:00:00+00:00").unwrap(),
-                ),
-                place_of_birth: Option::from("Tra Vinh".to_string()),
-                email: Option::from("binh@sunrise.vn".to_string()),
-                phone: Option::from("84 1228019700".to_string()),
-                undergraduate_school: Option::from(
-                    "Dai Chung Vien Thanh Quy - Can Tho".to_string(),
-                ),
-                saint_ids: None,
-                last_name: None,
-            },
-            StudentDbResponse {
-                id: Uuid::from_str("53f549b9-99bf-4e12-88e3-c2f868953283").unwrap(),
-                polity_id: None,
-                title: Option::from("PRIEST".to_string()),
-                first_name: None,
-                middle_name: None,
-                date_of_birth: Option::from(
-                    DateTime::from_str("1990-10-29 00:00:00+00:00").unwrap(),
-                ),
-                place_of_birth: Option::from("Tra Vinh".to_string()),
-                email: Option::from("binh@sunrise.vn".to_string()),
-                phone: Option::from("84 1228019700".to_string()),
-                undergraduate_school: Option::from(
-                    "Dai Chung Vien Thanh Quy - Can Tho".to_string(),
-                ),
-                saint_ids: None,
-                last_name: None,
-            },
-        ];
-        result.collection.append(&mut students);
-        result
+        let order_by_string: String;
+        if let Some(sort_db_request) = db_request.sort_request {
+            order_by_string = build_order_string(sort_db_request.sort_criteria);
+        } else {
+            order_by_string = default_order_string();
+        }
+
+        let filtering_string = build_filtering_query_statement_string();
+
+        let result = find_by(
+            &(*self).client,
+            name.clone(),
+            email.clone(),
+            phone.clone(),
+            undergraduate_school.clone(),
+            date_of_birth,
+            place_of_birth.clone(),
+            polity_name.clone(),
+            count,
+            offset,
+            filtering_string.clone(),
+            order_by_string.clone(),
+        )
+        .await;
+        let collection: Vec<StudentDbResponse>;
+        if result.is_err() {
+            collection = vec![];
+        } else {
+            collection = result
+                .unwrap()
+                .into_iter()
+                .map(|row| from_pg_row_to_student_db_response(row)) //fn in find one by id
+                .collect();
+        }
+
+        let has_more: Option<bool>;
+        let total_from_offset = count_without_limit(
+            &(*self).client,
+            name.clone(),
+            email.clone(),
+            phone.clone(),
+            undergraduate_school.clone(),
+            date_of_birth,
+            place_of_birth.clone(),
+            polity_name.clone(),
+            offset,
+            filtering_string.clone(),
+            order_by_string,
+        )
+        .await
+        .unwrap();
+        if total_from_offset > count {
+            has_more = Some(true);
+        } else {
+            has_more = Some(false);
+        }
+        let total = count_total(
+            &(*self).client,
+            name,
+            email,
+            phone,
+            undergraduate_school,
+            date_of_birth,
+            place_of_birth,
+            polity_name,
+            filtering_string,
+        )
+        .await
+        .unwrap();
+        StudentCollectionDbResponse {
+            collection,
+            has_more,
+            total,
+        }
     }
+}
+
+fn to_query_string(sort_criteria: &StudentSortCriteriaDbRequest) -> String {
+    let field_str = &*sort_criteria.field.to_string();
+    let field_str_sc = field_str.to_snake_case();
+    format!(
+        "{} {}",
+        field_str_sc.to_lowercase(),
+        sort_criteria.direction.to_string()
+    )
+}
+
+fn build_order_string(vec_sort_criteria: Vec<StudentSortCriteriaDbRequest>) -> String {
+    let mut order_by_strings: Vec<String> = Vec::new();
+    for (_i, e) in vec_sort_criteria.iter().enumerate() {
+        order_by_strings.push(to_query_string(e));
+    }
+    order_by_strings.join(", ")
+}
+
+fn default_order_string() -> String {
+    let vec_sort_criteria = vec![
+        StudentSortCriteriaDbRequest {
+            field: StudentSortFieldDbRequest::LastName,
+            direction: SortDirection::Asc,
+        },
+        StudentSortCriteriaDbRequest {
+            field: StudentSortFieldDbRequest::MiddleName,
+            direction: SortDirection::Asc,
+        },
+        StudentSortCriteriaDbRequest {
+            field: StudentSortFieldDbRequest::FirstName,
+            direction: SortDirection::Asc,
+        },
+    ];
+    build_order_string(vec_sort_criteria)
+}
+
+fn build_filtering_query_statement_string() -> String {
+    "(unaccent(last_name) LIKE ('%' || unaccent($1) || '%') \
+        OR unaccent(middle_name) LIKE ('%' || unaccent($1) || '%')  \
+        OR unaccent(first_name) LIKE ('%' || unaccent($1) || '%')) \
+        AND (unaccent(email) LIKE ('%' || unaccent($2) || '%') OR email is NULL) \
+        AND (unaccent(phone) LIKE ('%' || unaccent($3) || '%') OR phone is NULL) \
+        AND (unaccent(undergraduate_school_name) LIKE ('%' || unaccent($4) || '%') OR undergraduate_school_name is NULL) \
+        AND ($5::DATE is null OR date_of_birth = $5::DATE) \
+        AND (unaccent(place_of_birth) LIKE ('%' || unaccent($6) || '%') OR place_of_birth is NULL) \
+        AND (unaccent(polity_name) LIKE ('%' || unaccent($7) || '%') OR polity_name is NULL) \
+        "
+    .to_string()
+}
+
+async fn find_by(
+    client: &Client,
+    name: String,
+    email: String,
+    phone: String,
+    undergraduate_school: String,
+    date_of_birth: Option<NaiveDate>,
+    place_of_birth: String,
+    polity_name: String,
+    count: i64,
+    offset: i64,
+    filtering_string: String,
+    order_by_string: String,
+) -> Result<Vec<Row>, Error> {
+    let statement = format!(
+        "SELECT * FROM student__student_view \
+        WHERE {} \
+        ORDER BY {} \
+        LIMIT $8 OFFSET $9",
+        filtering_string, order_by_string
+    );
+
+    println!("statement = {}", statement);
+    let stmt = (*client).prepare(&statement).await.unwrap();
+    let name_param: &[&(dyn ToSql + Sync)] = &[
+        &name,
+        &email,
+        &phone,
+        &undergraduate_school,
+        &date_of_birth,
+        &place_of_birth,
+        &polity_name,
+        &count,
+        &offset,
+    ];
+    client.query(&stmt, name_param).await
+}
+
+pub async fn count_without_limit(
+    client: &Client,
+    name: String,
+    email: String,
+    phone: String,
+    undergraduate_school: String,
+    date_of_birth: Option<NaiveDate>,
+    place_of_birth: String,
+    polity_name: String,
+    offset: i64,
+    filtering_string: String,
+    order_by_string: String,
+) -> Result<i64, Error> {
+    let statement = format!(
+        "SELECT COUNT(*) FROM
+        (SELECT * FROM student__student_view \
+        WHERE {} \
+        ORDER BY {} \
+        LIMIT ALL OFFSET $8) AS students",
+        filtering_string, order_by_string
+    );
+
+    println!("statement = {}", statement);
+    let stmt = (*client).prepare(&statement).await.unwrap();
+    let name_param: &[&(dyn ToSql + Sync)] = &[
+        &name,
+        &email,
+        &phone,
+        &undergraduate_school,
+        &date_of_birth,
+        &place_of_birth,
+        &polity_name,
+        &offset,
+    ];
+    Ok(client.query_one(&stmt, name_param).await?.get("count"))
+}
+
+pub async fn count_total(
+    client: &Client,
+    name: String,
+    email: String,
+    phone: String,
+    undergraduate_school: String,
+    date_of_birth: Option<NaiveDate>,
+    place_of_birth: String,
+    polity_name: String,
+    filtering_string: String,
+) -> Result<i64, Error> {
+    let statement = format!(
+        "SELECT COUNT(*) FROM student__student_view \
+        WHERE {}",
+        filtering_string
+    );
+
+    println!("statement = {}", statement);
+    let stmt = (*client).prepare(&statement).await.unwrap();
+    let name_param: &[&(dyn ToSql + Sync)] = &[
+        &name,
+        &email,
+        &phone,
+        &undergraduate_school,
+        &date_of_birth,
+        &place_of_birth,
+        &polity_name,
+    ];
+    Ok(client.query_one(&stmt, name_param).await?.get("count"))
 }
