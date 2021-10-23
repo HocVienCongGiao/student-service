@@ -1,5 +1,5 @@
 use chrono::DateTime;
-use hvcg_academics_openapi_student::models::{StudentUpsert, StudentView};
+use hvcg_academics_openapi_student::models::{StudentSortCriteria, StudentUpsert, StudentView};
 use lambda_http::http::{HeaderValue, Request};
 use lambda_http::{http, Body, Context, IntoResponse, RequestExt, Response};
 use std::collections::HashMap;
@@ -38,7 +38,11 @@ pub fn build_http_request_to_get_student_collection(offset: String, count: i32) 
     let mut query_param = HashMap::new();
     query_param.insert("count".to_string(), vec![count.to_string()]);
     query_param.insert("offset".to_string(), vec![offset]);
-    query_param.insert("firstName".to_string(), vec!["test".to_string()]);
+    //query_param.insert("firstName".to_string(), vec!["test".to_string()]);
+    query_param.insert(
+        "sorts".to_string(),
+        vec![StudentSortCriteria::NAME_DESC.to_string()],
+    );
 
     let mut path_param = HashMap::new();
 
