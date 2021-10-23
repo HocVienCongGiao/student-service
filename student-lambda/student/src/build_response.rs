@@ -24,6 +24,9 @@ pub fn execute(
     student_collection: Option<StudentViewCollection>,
 ) -> Response<Body> {
     let mut is_get_students = false;
+    if student_collection.is_some() {
+        is_get_students = true;
+    }
     // let mut content_type = "application/json";
     let mut content_type: String = "application/json".to_string();
     if status_code == 204 {
@@ -53,7 +56,7 @@ pub fn execute(
         .expect("unable to build http::Response");
     println!(
         "final user response{:?}",
-        serde_json::to_string(&student_response)
+        serde_json::to_string(&student_collection)
     );
     response
 }
