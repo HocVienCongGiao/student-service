@@ -19,15 +19,15 @@ impl FindStudentCollectionPort for StudentRepository {
         &self,
         db_request: StudentQueryDbRequest,
     ) -> StudentCollectionDbResponse {
-        let name = db_request.name.unwrap_or("".to_string());
-        let email = db_request.email.unwrap_or("".to_string());
-        let phone = db_request.phone.unwrap_or("".to_string());
-        let undergraduate_school = db_request.undergraduate_school.unwrap_or("".to_string());
+        let name = db_request.name.unwrap_or_else(|| "".to_string());
+        let email = db_request.email.unwrap_or_else(|| "".to_string());
+        let phone = db_request.phone.unwrap_or_else(|| "".to_string());
+        let undergraduate_school = db_request.undergraduate_school.unwrap_or_else(|| "".to_string());
         let date_of_birth = db_request
             .date_of_birth
             .map(|date_time| date_time.date().naive_utc());
-        let place_of_birth = db_request.place_of_birth.unwrap_or("".to_string());
-        let polity_name = db_request.polity_name.unwrap_or("".to_string());
+        let place_of_birth = db_request.place_of_birth.unwrap_or_else(|| "".to_string());
+        let polity_name = db_request.polity_name.unwrap_or_else(|| "".to_string());
         let offset = db_request.offset.unwrap_or(0);
         let count = db_request.count.unwrap_or(20);
 
@@ -56,14 +56,13 @@ impl FindStudentCollectionPort for StudentRepository {
         )
         .await;
         let collection: Vec<StudentDbResponse>;
-        if result.is_err() {
-            collection = vec![];
-        } else {
+        if let Ok(result) = result{
             collection = result
-                .unwrap()
                 .into_iter()
                 .map(|row| from_pg_row_to_student_db_response(row)) //fn in find one by id
                 .collect();
+        } else {
+            collection = vec![];
         }
 
         let has_more: Option<bool>;
