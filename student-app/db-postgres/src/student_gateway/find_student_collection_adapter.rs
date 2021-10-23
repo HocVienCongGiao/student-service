@@ -1,4 +1,3 @@
-#![allow(clippy::too_many_arguments)]
 use crate::student_gateway::find_one_student_by_id_adapter::from_pg_row_to_student_db_response;
 use crate::student_gateway::repository::StudentRepository;
 use async_trait::async_trait;
@@ -13,6 +12,16 @@ use tokio_postgres::types::ToSql;
 use tokio_postgres::{Client, Error, Row};
 
 use heck::SnakeCase;
+
+pub struct StudentFilter {
+    name: String,
+    email: String,
+    phone: String,
+    undergraduate_school: String,
+    date_of_birth: Option<NaiveDate>,
+    place_of_birth: String,
+    polity_name: String,
+}
 
 #[async_trait]
 impl FindStudentCollectionPort for StudentRepository {
@@ -43,15 +52,19 @@ impl FindStudentCollectionPort for StudentRepository {
 
         let filtering_string = build_filtering_query_statement_string();
 
+        let student_filter = StudentFilter {
+            name,
+            email,
+            phone,
+            undergraduate_school,
+            date_of_birth,
+            place_of_birth,
+            polity_name,
+        };
+
         let result = find_by(
             &(*self).client,
-            name.clone(),
-            email.clone(),
-            phone.clone(),
-            undergraduate_school.clone(),
-            date_of_birth,
-            place_of_birth.clone(),
-            polity_name.clone(),
+            &student_filter,
             count,
             offset,
             filtering_string.clone(),
@@ -71,13 +84,7 @@ impl FindStudentCollectionPort for StudentRepository {
         let has_more: Option<bool>;
         let total_from_offset = count_without_limit(
             &(*self).client,
-            name.clone(),
-            email.clone(),
-            phone.clone(),
-            undergraduate_school.clone(),
-            date_of_birth,
-            place_of_birth.clone(),
-            polity_name.clone(),
+            &student_filter,
             offset,
             filtering_string.clone(),
             order_by_string,
@@ -89,19 +96,9 @@ impl FindStudentCollectionPort for StudentRepository {
         } else {
             has_more = Some(false);
         }
-        let total = count_total(
-            &(*self).client,
-            name,
-            email,
-            phone,
-            undergraduate_school,
-            date_of_birth,
-            place_of_birth,
-            polity_name,
-            filtering_string,
-        )
-        .await
-        .unwrap();
+        let total = count_total(&(*self).client, &student_filter, filtering_string)
+            .await
+            .unwrap();
         StudentCollectionDbResponse {
             collection,
             has_more,
@@ -162,13 +159,7 @@ fn build_filtering_query_statement_string() -> String {
 
 async fn find_by(
     client: &Client,
-    name: String,
-    email: String,
-    phone: String,
-    undergraduate_school: String,
-    date_of_birth: Option<NaiveDate>,
-    place_of_birth: String,
-    polity_name: String,
+    filter: &StudentFilter,
     count: i64,
     offset: i64,
     filtering_string: String,
@@ -185,13 +176,13 @@ async fn find_by(
     println!("statement = {}", statement);
     let stmt = (*client).prepare(&statement).await.unwrap();
     let name_param: &[&(dyn ToSql + Sync)] = &[
-        &name,
-        &email,
-        &phone,
-        &undergraduate_school,
-        &date_of_birth,
-        &place_of_birth,
-        &polity_name,
+        &filter.name,
+        &filter.email,
+        &filter.phone,
+        &filter.undergraduate_school,
+        &filter.date_of_birth,
+        &filter.place_of_birth,
+        &filter.polity_name,
         &count,
         &offset,
     ];
@@ -200,13 +191,7 @@ async fn find_by(
 
 pub async fn count_without_limit(
     client: &Client,
-    name: String,
-    email: String,
-    phone: String,
-    undergraduate_school: String,
-    date_of_birth: Option<NaiveDate>,
-    place_of_birth: String,
-    polity_name: String,
+    filter: &StudentFilter,
     offset: i64,
     filtering_string: String,
     order_by_string: String,
@@ -223,13 +208,13 @@ pub async fn count_without_limit(
     println!("statement = {}", statement);
     let stmt = (*client).prepare(&statement).await.unwrap();
     let name_param: &[&(dyn ToSql + Sync)] = &[
-        &name,
-        &email,
-        &phone,
-        &undergraduate_school,
-        &date_of_birth,
-        &place_of_birth,
-        &polity_name,
+        &filter.name,
+        &filter.email,
+        &filter.phone,
+        &filter.undergraduate_school,
+        &filter.date_of_birth,
+        &filter.place_of_birth,
+        &filter.polity_name,
         &offset,
     ];
     Ok(client.query_one(&stmt, name_param).await?.get("count"))
@@ -237,13 +222,7 @@ pub async fn count_without_limit(
 
 pub async fn count_total(
     client: &Client,
-    name: String,
-    email: String,
-    phone: String,
-    undergraduate_school: String,
-    date_of_birth: Option<NaiveDate>,
-    place_of_birth: String,
-    polity_name: String,
+    filter: &StudentFilter,
     filtering_string: String,
 ) -> Result<i64, Error> {
     let statement = format!(
@@ -255,13 +234,13 @@ pub async fn count_total(
     println!("statement = {}", statement);
     let stmt = (*client).prepare(&statement).await.unwrap();
     let name_param: &[&(dyn ToSql + Sync)] = &[
-        &name,
-        &email,
-        &phone,
-        &undergraduate_school,
-        &date_of_birth,
-        &place_of_birth,
-        &polity_name,
+        &filter.name,
+        &filter.email,
+        &filter.phone,
+        &filter.undergraduate_school,
+        &filter.date_of_birth,
+        &filter.place_of_birth,
+        &filter.polity_name,
     ];
     Ok(client.query_one(&stmt, name_param).await?.get("count"))
 }
