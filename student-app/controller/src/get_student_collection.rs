@@ -19,20 +19,7 @@ pub(crate) async fn from_usecase_input(
     // Inject dependencies to Interactor and invoke func
     let query_students_usecase_output =
         QueryStudentCollectionUsecaseInteractor::new(student_repository)
-            .execute(QueryStudentCollectionUsecaseInput {
-                id: None,
-                name: None,
-                email: None,
-                phone: None,
-                undergraduate_school: None,
-                date_of_birth: None,
-                place_of_birth: None,
-                polity_name: None,
-                specialism: None,
-                sort_request: None,
-                offset: None,
-                count: None,
-            })
+            .execute(request)
             .await;
 
     query_students_usecase_output.to_openapi()
@@ -49,7 +36,7 @@ impl StudentCollectionQuery {
             date_of_birth: self.date_of_birth,
             place_of_birth: self.place_of_birth.clone(),
             polity_name: self.polity_name.clone(),
-            specialism: self.specialism.clone(),
+            //specialism: self.specialism.clone(),
             sort_request: from_openapi_to_usecase_input(self.sorts.clone()),
             offset: self.offset,
             count: self.count,
@@ -68,11 +55,11 @@ pub fn from_openapi_to_usecase_input(
         sort_criteria_dto.iter().for_each(|criterion| {
             let sort_criteria_request = match criterion {
                 StudentSortCriteria::NAME_ASC => build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::Name,
+                    QueryStudentCollectionUsecaseInputSortField::LastName,
                     SortDirection::Asc,
                 ),
                 StudentSortCriteria::NAME_DESC => build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::Name,
+                    QueryStudentCollectionUsecaseInputSortField::LastName,
                     SortDirection::Desc,
                 ),
                 StudentSortCriteria::CHRISTIAN_NAME_ASC => build_sort_criteria_request(
@@ -108,7 +95,22 @@ pub fn from_openapi_to_usecase_input(
                     SortDirection::Desc,
                 ),
             };
+
+            let sort_field = sort_criteria_request.field.clone();
+            let sort_direction = sort_criteria_request.direction.clone();
+
             sort_criteria.push(sort_criteria_request);
+
+            if QueryStudentCollectionUsecaseInputSortField::LastName == sort_field {
+                sort_criteria.push(build_sort_criteria_request(
+                    QueryStudentCollectionUsecaseInputSortField::MiddleName,
+                    sort_direction.clone(),
+                ));
+                sort_criteria.push(build_sort_criteria_request(
+                    QueryStudentCollectionUsecaseInputSortField::FirstName,
+                    sort_direction,
+                ));
+            }
         });
 
         sort_request = Option::from(QueryStudentCollectionUsecaseInputSort { sort_criteria });

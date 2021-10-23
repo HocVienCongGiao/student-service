@@ -25,8 +25,8 @@ impl ToOpenApi<StudentViewCollection> for QueryStudentCollectionUsecaseOutput {
 
         StudentViewCollection {
             students: student_views,
-            has_more: None,
-            total: None,
+            has_more: self.has_more,
+            total: Some(self.total),
         }
     }
 }

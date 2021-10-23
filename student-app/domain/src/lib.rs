@@ -2,7 +2,7 @@ mod entities;
 pub mod ports;
 pub mod usecases;
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, strum_macros::Display)]
 pub enum SortDirection {
     Asc,
     Desc,

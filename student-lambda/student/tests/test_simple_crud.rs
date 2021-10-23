@@ -1,5 +1,5 @@
 use chrono::DateTime;
-use hvcg_academics_openapi_student::models::{StudentUpsert, StudentView};
+use hvcg_academics_openapi_student::models::{StudentUpsert, StudentView, StudentViewCollection};
 use lambda_http::http::{HeaderValue, Request};
 use lambda_http::{http, Body, Context, IntoResponse, RequestExt, Response};
 use std::collections::HashMap;
@@ -31,6 +31,7 @@ async fn crud_should_work() {
     given_a_student_when_get_one_by_id_then_return_correct_student_view_openapi().await;
     // when_post_a_student_upsert_then_student_is_correctly_saved_and_student_view_returned().await;
     // given_3_students_when_find_without_filtering_then_return_collection_with_the_right_size().await;
+    test_get_collection().await;
 }
 
 async fn given_a_student_when_get_one_by_id_then_return_correct_student_view_openapi() {
@@ -68,4 +69,23 @@ async fn when_post_a_student_upsert_then_student_is_correctly_saved_and_student_
 
 async fn given_3_students_when_find_without_filtering_then_return_collection_with_the_right_size() {
     todo!()
+}
+
+async fn test_get_collection() {
+    let expected_student_view_collection_openapi: StudentViewCollection =
+        test_data::prepare_student_view_collection_openapi();
+
+    let actual_student_view_collection_openapi = getter::get_student_collection().await;
+
+    // missing polity & saint info
+    // can't test assert_eq
+
+    /*assert_eq!(
+        expected_student_view_collection_openapi,
+        actual_student_view_collection_openapi.unwrap()
+    );*/
+    assert!(!actual_student_view_collection_openapi
+        .unwrap()
+        .students
+        .is_empty());
 }

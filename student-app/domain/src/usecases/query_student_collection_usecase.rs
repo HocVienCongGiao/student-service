@@ -1,8 +1,9 @@
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
-use crate::ports::student_db_gateway::StudentDbGateway;
+use crate::ports::student_db_gateway::{StudentCollectionDbResponse, StudentDbGateway};
 use crate::usecases::student_usecase_shared_models::QueryStudentUsecaseOutput;
+use crate::usecases::ToUsecaseOutput;
 use crate::SortDirection;
 use async_trait::async_trait;
 
@@ -35,7 +36,11 @@ where
         &self,
         request: QueryStudentCollectionUsecaseInput,
     ) -> QueryStudentCollectionUsecaseOutput {
-        todo!()
+        (*self)
+            .db_gateway
+            .find_collection_by(request.to_query_db_request())
+            .await
+            .to_usecase_output()
     }
 }
 
@@ -57,10 +62,10 @@ pub struct QueryStudentCollectionUsecaseInput {
     pub date_of_birth: Option<DateTime<Utc>>,
     pub place_of_birth: Option<String>,
     pub polity_name: Option<String>,
-    pub specialism: Option<String>,
+    //pub specialism: Option<String>,
     pub sort_request: Option<QueryStudentCollectionUsecaseInputSort>,
-    pub offset: Option<i32>,
-    pub count: Option<i32>,
+    pub offset: Option<i64>,
+    pub count: Option<i64>,
 }
 
 pub struct QueryStudentCollectionUsecaseInputSort {
@@ -75,7 +80,9 @@ pub struct QueryStudentCollectionUsecaseInputSortCriteria {
 
 #[derive(PartialEq, Clone)]
 pub enum QueryStudentCollectionUsecaseInputSortField {
-    Name,
+    FirstName,
+    MiddleName,
+    LastName,
     ChristianName,
     PolityName,
     LocationName,
@@ -86,4 +93,19 @@ pub struct QueryStudentCollectionUsecaseOutput {
     pub collection: Vec<QueryStudentUsecaseOutput>, // I am cheating here
     pub has_more: Option<bool>,
     pub total: i64,
+}
+
+impl ToUsecaseOutput<QueryStudentCollectionUsecaseOutput> for StudentCollectionDbResponse {
+    fn to_usecase_output(self) -> QueryStudentCollectionUsecaseOutput {
+        let collection = self
+            .collection
+            .into_iter()
+            .map(|student_db_response| student_db_response.to_usecase_output()) // fn in query_one_student_by_id_usecase
+            .collect();
+        QueryStudentCollectionUsecaseOutput {
+            collection,
+            has_more: self.has_more,
+            total: self.total,
+        }
+    }
 }

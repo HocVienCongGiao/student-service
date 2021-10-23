@@ -23,7 +23,7 @@ impl FindOneStudentByIdPort for StudentRepository {
     }
 }
 
-fn from_pg_row_to_student_db_response(row: Row) -> StudentDbResponse {
+pub(crate) fn from_pg_row_to_student_db_response(row: Row) -> StudentDbResponse {
     StudentDbResponse {
         id: db_column::get_uuid(&row, "id"),
         polity_id: Some(db_column::get_uuid(&row, "polity_id")),
