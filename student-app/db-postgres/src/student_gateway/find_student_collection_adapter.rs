@@ -1,3 +1,4 @@
+#![allow(clippy::too_many_arguments)]
 use crate::student_gateway::find_one_student_by_id_adapter::from_pg_row_to_student_db_response;
 use crate::student_gateway::repository::StudentRepository;
 use async_trait::async_trait;
@@ -22,7 +23,9 @@ impl FindStudentCollectionPort for StudentRepository {
         let name = db_request.name.unwrap_or_else(|| "".to_string());
         let email = db_request.email.unwrap_or_else(|| "".to_string());
         let phone = db_request.phone.unwrap_or_else(|| "".to_string());
-        let undergraduate_school = db_request.undergraduate_school.unwrap_or_else(|| "".to_string());
+        let undergraduate_school = db_request
+            .undergraduate_school
+            .unwrap_or_else(|| "".to_string());
         let date_of_birth = db_request
             .date_of_birth
             .map(|date_time| date_time.date().naive_utc());
@@ -56,10 +59,10 @@ impl FindStudentCollectionPort for StudentRepository {
         )
         .await;
         let collection: Vec<StudentDbResponse>;
-        if let Ok(result) = result{
+        if let Ok(result) = result {
             collection = result
                 .into_iter()
-                .map(|row| from_pg_row_to_student_db_response(row)) //fn in find one by id
+                .map(from_pg_row_to_student_db_response) //fn in find one by id
                 .collect();
         } else {
             collection = vec![];
