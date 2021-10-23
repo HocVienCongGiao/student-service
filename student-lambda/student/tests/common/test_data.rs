@@ -1,5 +1,7 @@
 use chrono::DateTime;
-use hvcg_academics_openapi_student::models::{StudentTitle, StudentUpsert, StudentView};
+use hvcg_academics_openapi_student::models::{
+    StudentTitle, StudentUpsert, StudentView, StudentViewCollection,
+};
 use std::str::FromStr;
 use uuid::Uuid;
 
@@ -36,5 +38,13 @@ pub fn prepare_student_upsert_openapi() -> StudentUpsert {
         email: Some("binh@sunrise.vn".to_string()),
         phone: Some("+84 1228019700".to_string()),
         undergraduate_school: Some("Đại Chủng Viện Thánh Quý - Cần Thơ".to_string()),
+    }
+}
+
+pub fn prepare_student_view_collection_openapi() -> StudentViewCollection {
+    StudentViewCollection {
+        students: vec![prepare_student_view_openapi(None)],
+        has_more: Some(false),
+        total: Some(1),
     }
 }

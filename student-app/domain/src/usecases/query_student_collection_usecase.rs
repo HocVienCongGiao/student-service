@@ -103,7 +103,7 @@ impl ToUsecaseOutput<QueryStudentCollectionUsecaseOutput> for StudentCollectionD
             .map(|student_db_response| student_db_response.to_usecase_output()) // fn in query_one_student_by_id_usecase
             .collect();
         QueryStudentCollectionUsecaseOutput {
-            collection: collection,
+            collection,
             has_more: self.has_more,
             total: self.total,
         }

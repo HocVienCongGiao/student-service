@@ -78,7 +78,7 @@ pub fn from_request_to_collection_query(req: &Request) -> StudentCollectionQuery
         date_of_birth: param_date_of_birth,
         place_of_birth: from_query_param_to_string(req, "place_of_birth"),
         polity_name: from_query_param_to_string(req, "polity_name"),
-        specialism: from_query_param_to_string(req, "specialism"),
+        //specialism: from_query_param_to_string(req, "specialism"),
         sorts: param_sorts,
         offset: query.get("offset").map(|str| str.parse().unwrap()),
         count: query.get("count").map(|str| str.parse().unwrap()),
