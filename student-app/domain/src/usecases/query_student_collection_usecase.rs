@@ -1,14 +1,23 @@
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
+use crate::ports::polity_db_gateway::PolityDbGateway;
+use crate::ports::saint_db_gateway::SaintDbGateway;
 use crate::ports::student_db_gateway::{StudentCollectionDbResponse, StudentDbGateway};
 use crate::usecases::student_usecase_shared_models::QueryStudentUsecaseOutput;
+use crate::usecases::student_usecase_shared_models::{WithChristianName, WithPolity};
 use crate::usecases::ToUsecaseOutput;
 use crate::SortDirection;
 use async_trait::async_trait;
 
-pub struct QueryStudentCollectionUsecaseInteractor<A: StudentDbGateway> {
-    db_gateway: A,
+pub struct QueryStudentCollectionUsecaseInteractor<
+    A: StudentDbGateway,
+    B: PolityDbGateway,
+    C: SaintDbGateway,
+> {
+    student_db_gateway: A,
+    polity_db_gateway: B,
+    saint_db_gateway: C,
 }
 
 #[async_trait]
@@ -21,9 +30,11 @@ pub trait QueryStudentCollectionUsecase {
 }
 
 #[async_trait]
-impl<A> QueryStudentCollectionUsecase for QueryStudentCollectionUsecaseInteractor<A>
+impl<A, B, C> QueryStudentCollectionUsecase for QueryStudentCollectionUsecaseInteractor<A, B, C>
 where
     A: StudentDbGateway + Sync + Send,
+    B: PolityDbGateway + Sync + Send,
+    C: SaintDbGateway + Sync + Send,
 {
     // async fn get_student(
     //     &self,
@@ -36,20 +47,66 @@ where
         &self,
         request: QueryStudentCollectionUsecaseInput,
     ) -> QueryStudentCollectionUsecaseOutput {
-        (*self)
-            .db_gateway
+        let collection_usecase_output = (*self)
+            .student_db_gateway
             .find_collection_by(request.to_query_db_request())
             .await
-            .to_usecase_output()
+            .to_usecase_output();
+
+        let collection = collection_usecase_output.collection;
+        let mut students: Vec<QueryStudentUsecaseOutput> = Vec::new();
+        for e in collection {
+            let mut student: QueryStudentUsecaseOutput = e;
+            student = student.with_polity(
+                Some("1".to_string()),
+                Some("1".to_string()),
+                Some("1".to_string()),
+                Some("1".to_string()),
+            );
+            if let Some(polity_id) = student.polity_id {
+                if let Some(polity_db_response) =
+                    (*self).polity_db_gateway.find_one_by_id(polity_id).await
+                {
+                    student = student.with_polity(
+                        polity_db_response.name,
+                        polity_db_response.location_name,
+                        polity_db_response.location_address,
+                        polity_db_response.location_email,
+                    )
+                }
+            }
+            let saint_ids = student.saint_ids.clone();
+            if let Some(saint_ids) = saint_ids {
+                for (_i, e) in saint_ids.iter().enumerate() {
+                    if let Some(saint_db_response) =
+                        (*self).saint_db_gateway.find_one_by_id(*e).await
+                    {
+                        student = student.with_christian_name(saint_db_response.display_name)
+                    }
+                }
+            }
+            students.push(student);
+        }
+        QueryStudentCollectionUsecaseOutput {
+            collection: students,
+            has_more: collection_usecase_output.has_more,
+            total: collection_usecase_output.total,
+        }
     }
 }
 
-impl<A> QueryStudentCollectionUsecaseInteractor<A>
+impl<A, B, C> QueryStudentCollectionUsecaseInteractor<A, B, C>
 where
     A: StudentDbGateway + Sync + Send,
+    B: PolityDbGateway + Sync + Send,
+    C: SaintDbGateway + Sync + Send,
 {
-    pub fn new(db_gateway: A) -> Self {
-        QueryStudentCollectionUsecaseInteractor { db_gateway }
+    pub fn new(student_db_gateway: A, polity_db_gateway: B, saint_db_gateway: C) -> Self {
+        QueryStudentCollectionUsecaseInteractor {
+            student_db_gateway,
+            polity_db_gateway,
+            saint_db_gateway,
+        }
     }
 }
 
