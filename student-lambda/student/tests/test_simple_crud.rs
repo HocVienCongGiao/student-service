@@ -77,15 +77,8 @@ async fn test_get_collection() {
 
     let actual_student_view_collection_openapi = getter::get_student_collection().await;
 
-    // missing polity & saint info
-    // can't test assert_eq
-
-    /*assert_eq!(
+    assert_eq!(
         expected_student_view_collection_openapi,
         actual_student_view_collection_openapi.unwrap()
-    );*/
-    assert!(!actual_student_view_collection_openapi
-        .unwrap()
-        .students
-        .is_empty());
+    );
 }
