@@ -1,5 +1,7 @@
 use crate::openapi::ToOpenApi;
 use crate::StudentCollectionQuery;
+use db_postgres::polity_gateway::repository::PolityRepository;
+use db_postgres::saint_gateway::repository::SaintRepository;
 use db_postgres::student_gateway::repository::StudentRepository;
 use domain::usecases::query_student_collection_usecase::{
     QueryStudentCollectionUsecase, QueryStudentCollectionUsecaseInput,
@@ -16,11 +18,24 @@ pub(crate) async fn from_usecase_input(
     let client = db_postgres::connect().await;
     let student_repository = StudentRepository { client };
 
+    let polity_client = db_postgres::connect().await;
+    let polity_repository = PolityRepository {
+        client: polity_client,
+    };
+
+    let saint_client = db_postgres::connect().await;
+    let saint_repository = SaintRepository {
+        client: saint_client,
+    };
+
     // Inject dependencies to Interactor and invoke func
-    let query_students_usecase_output =
-        QueryStudentCollectionUsecaseInteractor::new(student_repository)
-            .execute(request)
-            .await;
+    let query_students_usecase_output = QueryStudentCollectionUsecaseInteractor::new(
+        student_repository,
+        polity_repository,
+        saint_repository,
+    )
+    .execute(request)
+    .await;
 
     query_students_usecase_output.to_openapi()
 }
