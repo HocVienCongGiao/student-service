@@ -1,12 +1,14 @@
 use std::ops::Add;
+
 use async_trait::async_trait;
 use chrono::{Date, DateTime, NaiveDate, Utc};
-use domain::ports::DbError;
-use domain::ports::insert_student_port::InsertStudentPort;
-use domain::ports::student_db_gateway::{StudentDbResponse, StudentMutationDbRequest};
 use tokio_postgres::{Error, Transaction};
 use tokio_postgres::types::ToSql;
 use uuid::Uuid;
+
+use domain::ports::DbError;
+use domain::ports::insert_student_port::InsertStudentPort;
+use domain::ports::student_db_gateway::{StudentDbResponse, StudentMutationDbRequest};
 
 use crate::student_gateway::repository::StudentRepository;
 
@@ -205,12 +207,7 @@ impl InsertStudentPort for StudentRepository {
 
         // insert date of birth
         let date_of_birth = db_request.date_of_birth.unwrap();
-        result = save_date_of_birth(
-            &transaction,
-            id.clone(),
-            date_of_birth.clone(),
-        )
-            .await;
+        result = save_date_of_birth(&transaction, id.clone(), date_of_birth.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -219,13 +216,8 @@ impl InsertStudentPort for StudentRepository {
 
         // insert email
         let email = db_request.email.unwrap();
-        result = save_student_info(
-            &transaction,
-            id.clone(),
-            "email".to_string(),
-            email.clone(),
-        )
-            .await;
+        result =
+             save_student_info(&transaction, id.clone(), "email".to_string(), email.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -234,13 +226,8 @@ impl InsertStudentPort for StudentRepository {
 
         // insert phone
         let phone = db_request.phone.unwrap();
-        result = save_student_info(
-            &transaction,
-            id.clone(),
-            "phone".to_string(),
-            phone.clone(),
-        )
-            .await;
+        result =
+             save_student_info(&transaction, id.clone(), "phone".to_string(), phone.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -255,7 +242,7 @@ impl InsertStudentPort for StudentRepository {
             "place_of_birth".to_string(),
             place_of_birth.clone(),
         )
-            .await;
+        .await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -264,12 +251,7 @@ impl InsertStudentPort for StudentRepository {
 
         // insert polity
         let polity_id = db_request.polity_id.unwrap();
-        result = save_polity(
-            &transaction,
-            id.clone(),
-            polity_id.clone(),
-        )
-            .await;
+        result = save_polity(&transaction, id.clone(), polity_id.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -278,12 +260,8 @@ impl InsertStudentPort for StudentRepository {
 
         // insert undergraduate school name
         let undergraduate_school = db_request.undergraduate_school.unwrap();
-        result = save_undergraduate_school(
-            &transaction,
-            id.clone(),
-            undergraduate_school.clone(),
-        )
-            .await;
+        result =
+            save_undergraduate_school(&transaction, id.clone(), undergraduate_school.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -295,18 +273,18 @@ impl InsertStudentPort for StudentRepository {
             .await
             .map_err(|error| DbError::UnknownError(error.into_source().unwrap().to_string()));
         Ok(StudentDbResponse {
-                id: id.clone(),
-                polity_id: Some(polity_id.clone()),
-                saint_ids: Some(christian_names.clone()),
-                title: Some(title.to_string()),
-                first_name: Some(first_name.clone()),
-                middle_name: Some(middle_name.clone()),
-                last_name: Some(last_name.clone()),
-                date_of_birth: Some(date_of_birth.clone()),
-                place_of_birth: Some(place_of_birth.clone()),
-                email: Some(email.clone()),
-                phone: Some(phone.clone()),
-                undergraduate_school: Some(undergraduate_school.clone()),
-            })
+            id: id,
+            polity_id: Some(polity_id),
+            saint_ids: Some(christian_names.clone()),
+            title: Some(title.to_string()),
+            first_name: Some(first_name.clone()),
+            middle_name: Some(middle_name.clone()),
+            last_name: Some(last_name.clone()),
+            date_of_birth: Some(date_of_birth),
+            place_of_birth: Some(place_of_birth.clone()),
+            email: Some(email.clone()),
+            phone: Some(phone.clone()),
+            undergraduate_school: Some(undergraduate_school.clone()),
+        })
     }
 }
