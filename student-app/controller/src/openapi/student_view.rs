@@ -78,12 +78,12 @@ impl ToOpenApi<StudentView> for CreateStudentUsecaseOutput {
             email: self.email,
             phone: self.phone,
             undergraduate_school: self.undergraduate_school,
-            christian_name: None,
+            christian_name: self.christian_name.map(|saint_names| saint_names.join(" ")),
             name: Some(format!(
                 "{} {} {}",
                 self.last_name.clone().unwrap_or_default(),
                 self.middle_name.clone().unwrap_or_default(),
-                self.last_name.unwrap_or_default(),
+                self.first_name.clone().unwrap_or_default(),
             )),
         }
     }
