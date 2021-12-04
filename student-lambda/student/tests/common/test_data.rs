@@ -34,7 +34,7 @@ pub fn prepare_student_upsert_openapi() -> StudentUpsert {
         middle_name: Some("Hữu".to_string()),
         last_name: Some("Nguyễn".to_string()),
         date_of_birth: Some(DateTime::from_str("1983-05-16 00:00:00+00:00").unwrap()),
-        place_of_birth: Some("Tra Vinh".to_string()),
+        place_of_birth: Some("Trà Vinh".to_string()),
         email: Some("binh@sunrise.vn".to_string()),
         phone: Some("+84 1228019700".to_string()),
         undergraduate_school: Some("Đại Chủng Viện Thánh Quý - Cần Thơ".to_string()),
