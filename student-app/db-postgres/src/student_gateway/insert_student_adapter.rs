@@ -1,14 +1,12 @@
-use std::ops::Add;
-
 use async_trait::async_trait;
 use chrono::{Date, DateTime, NaiveDate, Utc};
-use tokio_postgres::{Error, Transaction};
-use tokio_postgres::types::ToSql;
-use uuid::Uuid;
-
 use domain::ports::DbError;
 use domain::ports::insert_student_port::InsertStudentPort;
 use domain::ports::student_db_gateway::{StudentDbResponse, StudentMutationDbRequest};
+use std::ops::Add;
+use tokio_postgres::{Error, Transaction};
+use tokio_postgres::types::ToSql;
+use uuid::Uuid;
 
 use crate::student_gateway::repository::StudentRepository;
 

@@ -1,7 +1,10 @@
 use chrono::DateTime;
+use common::getter;
+use common::poster;
+use common::test_data;
 use hvcg_academics_openapi_student::models::{StudentUpsert, StudentView, StudentViewCollection};
+use lambda_http::{Body, Context, http, IntoResponse, RequestExt, Response};
 use lambda_http::http::{HeaderValue, Request};
-use lambda_http::{http, Body, Context, IntoResponse, RequestExt, Response};
 use std::collections::HashMap;
 use std::ops::Add;
 use std::path::PathBuf;
@@ -9,11 +12,9 @@ use std::str::FromStr;
 use std::sync::Once;
 use uuid::Uuid;
 
-mod common;
 use crate::common::poster::post_student_upsert;
-use common::getter;
-use common::poster;
-use common::test_data;
+
+mod common;
 
 static INIT: Once = Once::new();
 
@@ -77,10 +78,10 @@ async fn test_get_collection() {
 
     let actual_student_view_collection_openapi = getter::get_student_collection().await;
 
-     assert!(!actual_student_view_collection_openapi
-         .unwrap()
-         .students
-         .is_empty());
+    assert!(!actual_student_view_collection_openapi
+        .unwrap()
+        .students
+        .is_empty());
     // assert_eq!(
     //     expected_student_view_collection_openapi,
     //     actual_student_view_collection_openapi.unwrap()

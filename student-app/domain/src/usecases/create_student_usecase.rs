@@ -247,9 +247,7 @@ impl WithChristianName<CreateStudentUsecaseOutput> for CreateStudentUsecaseOutpu
                 saint_names = self.christian_name.unwrap();
             }
             saint_names.push(name);
-            println!("{:?}", saint_names);
             self.christian_name = Some(saint_names);
-            println!("{:?}", self.christian_name);
         }
         self
     }

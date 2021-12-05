@@ -1,7 +1,5 @@
-use crate::openapi::ToOpenApi;
-use crate::ToUsecaseInput;
-use db_postgres::saint_gateway::repository::SaintRepository;
 use db_postgres::polity_gateway::repository::PolityRepository;
+use db_postgres::saint_gateway::repository::SaintRepository;
 use db_postgres::student_gateway::repository::StudentRepository;
 use domain::usecases::create_student_usecase::{
     CreateStudentUsecase, CreateStudentUsecaseInput, CreateStudentUsecaseInteractor,
@@ -11,6 +9,9 @@ use domain::usecases::UsecaseError;
 use hvcg_academics_openapi_student::models::{
     StudentTitle, StudentUpsert as StudentUpsertOpenApi, StudentView as StudentViewOpenApi,
 };
+
+use crate::openapi::ToOpenApi;
+use crate::ToUsecaseInput;
 
 pub(crate) async fn from_openapi(
     student: StudentUpsertOpenApi,
