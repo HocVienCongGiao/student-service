@@ -33,10 +33,9 @@ pub(crate) async fn from_openapi(
         student_repository,
         polity_repository,
         saint_repository,
-
     )
-        .execute(student.to_usecase_input())
-        .await;
+    .execute(student.to_usecase_input())
+    .await;
     result.map(|res| res.to_openapi())
 }
 

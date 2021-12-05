@@ -12,10 +12,7 @@ use domain::ports::student_db_gateway::{StudentDbResponse, StudentMutationDbRequ
 
 use crate::student_gateway::repository::StudentRepository;
 
-pub(crate) async fn save_id(
-    transaction: &Transaction<'_>,
-    id: Uuid
-) -> Result<u64, Error> {
+pub(crate) async fn save_id(transaction: &Transaction<'_>, id: Uuid) -> Result<u64, Error> {
     let stmt = (*transaction)
         .prepare("INSERT into public.student__student (id) VAlUES ($1)")
         .await
@@ -30,9 +27,11 @@ pub(crate) async fn save_date_of_birth(
     id: Uuid,
     date_of_birth: DateTime<Utc>,
 ) -> Result<u64, Error> {
-    let date : NaiveDate = date_of_birth.naive_utc().date();
+    let date: NaiveDate = date_of_birth.naive_utc().date();
     let stmt = (*transaction)
-        .prepare("INSERT into public.student__student_date_of_birth (id, date_of_birth) VAlUES ($1, $2)")
+        .prepare(
+            "INSERT into public.student__student_date_of_birth (id, date_of_birth) VAlUES ($1, $2)"
+        )
         .await
         .unwrap();
 
@@ -50,10 +49,7 @@ pub(crate) async fn save_student_info(
         "INSERT into public.student__student_{} (id, {}) VAlUES ($1, $2)",
         field_name, field_name
     );
-    let stmt = (*transaction)
-        .prepare(&statement)
-        .await
-        .unwrap();
+    let stmt = (*transaction).prepare(&statement).await.unwrap();
 
     let params: &[&(dyn ToSql + Sync)] = &[&id, &value];
     transaction.execute(&stmt, params).await
@@ -93,10 +89,10 @@ pub(crate) async fn save_christian_names(
     christian_names: Vec<Uuid>,
 ) -> Result<u64, Error> {
     // TODO: refactor this into 1 query
-    let mut result : Result<u64, Error> = Ok(1 as u64);
-    let ordering : i16 = 1;
+    let mut result: Result<u64, Error> = Ok(1 as u64);
+    let ordering: i16 = 1;
     for christian_name in christian_names {
-        let params : &[&(dyn ToSql + Sync)] = &[&id, &christian_name, &ordering];
+        let params: &[&(dyn ToSql + Sync)] = &[&id, &christian_name, &ordering];
         let stmt = (*transaction)
             .prepare("INSERT into public.student__student_christian_names (student_id, saint_id, ordering) VAlUES ($1, $2, $3)")
             .await
@@ -133,13 +129,8 @@ impl InsertStudentPort for StudentRepository {
         // insert title
         let title = db_request.title.unwrap();
 
-        result = save_student_info(
-            &transaction,
-            id.clone(),
-            "title".to_string(),
-            title.clone(),
-        )
-            .await;
+        result =
+            save_student_info(&transaction, id.clone(), "title".to_string(), title.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -217,7 +208,7 @@ impl InsertStudentPort for StudentRepository {
         // insert email
         let email = db_request.email.unwrap();
         result =
-             save_student_info(&transaction, id.clone(), "email".to_string(), email.clone()).await;
+            save_student_info(&transaction, id.clone(), "email".to_string(), email.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -227,7 +218,7 @@ impl InsertStudentPort for StudentRepository {
         // insert phone
         let phone = db_request.phone.unwrap();
         result =
-             save_student_info(&transaction, id.clone(), "phone".to_string(), phone.clone()).await;
+            save_student_info(&transaction, id.clone(), "phone".to_string(), phone.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -242,7 +233,7 @@ impl InsertStudentPort for StudentRepository {
             "place_of_birth".to_string(),
             place_of_birth.clone(),
         )
-        .await;
+            .await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -273,7 +264,7 @@ impl InsertStudentPort for StudentRepository {
             .await
             .map_err(|error| DbError::UnknownError(error.into_source().unwrap().to_string()));
         Ok(StudentDbResponse {
-            id: id,
+            id,
             polity_id: Some(polity_id),
             saint_ids: Some(christian_names.clone()),
             title: Some(title.to_string()),
