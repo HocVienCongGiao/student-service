@@ -114,7 +114,7 @@ impl InsertStudentPort for StudentRepository {
             Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
             ))
-        })?;
+        });
 
         // insert id
         let id = db_request.id.unwrap();
