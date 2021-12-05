@@ -3,14 +3,14 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 use crate::entities::student::{Student as StudentEntity, StudentTitle};
-use crate::ports::DbError;
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
 use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
-use crate::usecases::{ToEntity, ToUsecaseOutput, UsecaseError};
+use crate::ports::DbError;
 use crate::usecases::student_usecase_shared_models::{
     StudentUsecaseSharedTitle, WithChristianName, WithPolity,
 };
+use crate::usecases::{ToEntity, ToUsecaseOutput, UsecaseError};
 
 pub struct CreateStudentUsecaseInteractor<
     A: StudentDbGateway,
@@ -23,10 +23,10 @@ pub struct CreateStudentUsecaseInteractor<
 }
 
 impl<A, B, C> CreateStudentUsecaseInteractor<A, B, C>
-    where
-        A: StudentDbGateway + Sync + Send,
-        B: PolityDbGateway + Sync + Send,
-        C: SaintDbGateway + Sync + Send,
+where
+    A: StudentDbGateway + Sync + Send,
+    B: PolityDbGateway + Sync + Send,
+    C: SaintDbGateway + Sync + Send,
 {
     pub fn new(student_db_gateway: A, polity_db_gateway: B, saint_db_gateway: C) -> Self {
         CreateStudentUsecaseInteractor {
@@ -48,10 +48,10 @@ pub trait CreateStudentUsecase {
 
 #[async_trait]
 impl<A, B, C> CreateStudentUsecase for CreateStudentUsecaseInteractor<A, B, C>
-    where
-        A: StudentDbGateway + Sync + Send,
-        B: PolityDbGateway + Sync + Send,
-        C: SaintDbGateway + Sync + Send,
+where
+    A: StudentDbGateway + Sync + Send,
+    B: PolityDbGateway + Sync + Send,
+    C: SaintDbGateway + Sync + Send,
 {
     async fn execute(
         &mut self,
@@ -78,7 +78,7 @@ impl<A, B, C> CreateStudentUsecase for CreateStudentUsecaseInteractor<A, B, C>
 
                     if let Some(polity_id) = output.polity_id {
                         if let Some(polity_db_response) =
-                        (*self).polity_db_gateway.find_one_by_id(polity_id).await
+                            (*self).polity_db_gateway.find_one_by_id(polity_id).await
                         {
                             output = output.with_polity(
                                 polity_db_response.name,

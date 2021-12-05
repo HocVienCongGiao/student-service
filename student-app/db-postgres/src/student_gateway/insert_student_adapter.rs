@@ -28,7 +28,7 @@ pub(crate) async fn save_date_of_birth(
     let date: NaiveDate = date_of_birth.naive_utc().date();
     let stmt = (*transaction)
         .prepare(
-            "INSERT into public.student__student_date_of_birth (id, date_of_birth) VAlUES ($1, $2)"
+            "INSERT into public.student__student_date_of_birth (id, date_of_birth) VAlUES ($1, $2)",
         )
         .await
         .unwrap();
@@ -87,7 +87,7 @@ pub(crate) async fn save_christian_names(
     christian_names: Vec<Uuid>,
 ) -> Result<u64, Error> {
     // TODO: refactor this into 1 query
-    let mut result: Result<u64, Error> = Ok(1 as u64);
+    let mut result: Result<u64, Error> = Ok(1_u64);
     let ordering: i16 = 1;
     for christian_name in christian_names {
         let params: &[&(dyn ToSql + Sync)] = &[&id, &christian_name, &ordering];
@@ -95,7 +95,7 @@ pub(crate) async fn save_christian_names(
             .prepare("INSERT into public.student__student_christian_names (student_id, saint_id, ordering) VAlUES ($1, $2, $3)")
             .await
             .unwrap();
-        result = transaction.execute(&stmt, &params).await;
+        result = transaction.execute(&stmt, params).await;
         ordering.add(1);
     }
     result
@@ -110,7 +110,7 @@ impl InsertStudentPort for StudentRepository {
     ) -> Result<StudentDbResponse, DbError> {
         let mut result: Result<u64, Error>;
 
-        let transaction = (*self).client.transaction().await.or_else(|error| {
+        let transaction = (*self).client.transaction().await.map_err(|error| {
             Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
             ))
@@ -118,7 +118,7 @@ impl InsertStudentPort for StudentRepository {
 
         // insert id
         let id = db_request.id.unwrap();
-        result = save_id(&transaction, id.clone()).await;
+        result = save_id(&transaction, id).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -128,7 +128,7 @@ impl InsertStudentPort for StudentRepository {
         let title = db_request.title.unwrap();
 
         result =
-            save_student_info(&transaction, id.clone(), "title".to_string(), title.clone()).await;
+            save_student_info(&transaction, id, "title".to_string(), title.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -154,7 +154,7 @@ impl InsertStudentPort for StudentRepository {
         let last_name = db_request.last_name.unwrap();
         result = save_student_info(
             &transaction,
-            id.clone(),
+            id,
             "last_name".to_string(),
             last_name.clone(),
         )
@@ -169,7 +169,7 @@ impl InsertStudentPort for StudentRepository {
         let middle_name = db_request.middle_name.unwrap();
         result = save_student_info(
             &transaction,
-            id.clone(),
+            id,
             "middle_name".to_string(),
             last_name.clone(),
         )
@@ -182,12 +182,7 @@ impl InsertStudentPort for StudentRepository {
 
         // insert christian names
         let christian_names = db_request.saint_ids.unwrap();
-        result = save_christian_names(
-            &transaction,
-            id.clone(),
-            christian_names.clone(),
-        )
-        .await;
+        result = save_christian_names(&transaction, id.clone(), christian_names.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -196,7 +191,7 @@ impl InsertStudentPort for StudentRepository {
 
         // insert date of birth
         let date_of_birth = db_request.date_of_birth.unwrap();
-        result = save_date_of_birth(&transaction, id.clone(), date_of_birth.clone()).await;
+        result = save_date_of_birth(&transaction, id, date_of_birth).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -206,7 +201,7 @@ impl InsertStudentPort for StudentRepository {
         // insert email
         let email = db_request.email.unwrap();
         result =
-            save_student_info(&transaction, id.clone(), "email".to_string(), email.clone()).await;
+            save_student_info(&transaction, id, "email".to_string(), email.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -216,7 +211,7 @@ impl InsertStudentPort for StudentRepository {
         // insert phone
         let phone = db_request.phone.unwrap();
         result =
-            save_student_info(&transaction, id.clone(), "phone".to_string(), phone.clone()).await;
+            save_student_info(&transaction, id, "phone".to_string(), phone.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -227,7 +222,7 @@ impl InsertStudentPort for StudentRepository {
         let place_of_birth = db_request.place_of_birth.unwrap();
         result = save_student_info(
             &transaction,
-            id.clone(),
+            id,
             "place_of_birth".to_string(),
             place_of_birth.clone(),
         )
@@ -240,7 +235,7 @@ impl InsertStudentPort for StudentRepository {
 
         // insert polity
         let polity_id = db_request.polity_id.unwrap();
-        result = save_polity(&transaction, id.clone(), polity_id.clone()).await;
+        result = save_polity(&transaction, id, polity_id).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -250,7 +245,7 @@ impl InsertStudentPort for StudentRepository {
         // insert undergraduate school name
         let undergraduate_school = db_request.undergraduate_school.unwrap();
         result =
-            save_undergraduate_school(&transaction, id.clone(), undergraduate_school.clone()).await;
+            save_undergraduate_school(&transaction, id, undergraduate_school.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
