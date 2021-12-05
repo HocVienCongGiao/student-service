@@ -77,7 +77,6 @@ async fn test_get_collection() {
 
     let actual_student_view_collection_openapi = getter::get_student_collection().await;
 
-     assert!(!actual_student_view_collection_openapi.unwrap().students.is_empty());
      assert!(!actual_student_view_collection_openapi
          .unwrap()
          .students
