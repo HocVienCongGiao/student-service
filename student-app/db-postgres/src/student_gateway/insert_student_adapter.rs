@@ -1,11 +1,11 @@
 use async_trait::async_trait;
 use chrono::{Date, DateTime, NaiveDate, Utc};
-use domain::ports::DbError;
 use domain::ports::insert_student_port::InsertStudentPort;
 use domain::ports::student_db_gateway::{StudentDbResponse, StudentMutationDbRequest};
+use domain::ports::DbError;
 use std::ops::Add;
-use tokio_postgres::{Error, Transaction};
 use tokio_postgres::types::ToSql;
+use tokio_postgres::{Error, Transaction};
 use uuid::Uuid;
 
 use crate::student_gateway::repository::StudentRepository;
@@ -143,7 +143,7 @@ impl InsertStudentPort for StudentRepository {
             "first_name".to_string(),
             first_name.clone(),
         )
-            .await;
+        .await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -158,7 +158,7 @@ impl InsertStudentPort for StudentRepository {
             "last_name".to_string(),
             last_name.clone(),
         )
-            .await;
+        .await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -173,7 +173,7 @@ impl InsertStudentPort for StudentRepository {
             "middle_name".to_string(),
             last_name.clone(),
         )
-            .await;
+        .await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -187,7 +187,7 @@ impl InsertStudentPort for StudentRepository {
             id.clone(),
             christian_names.clone(),
         )
-            .await;
+        .await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -231,7 +231,7 @@ impl InsertStudentPort for StudentRepository {
             "place_of_birth".to_string(),
             place_of_birth.clone(),
         )
-            .await;
+        .await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
