@@ -1,5 +1,5 @@
-use crate::openapi::ToOpenApi;
-use crate::ToUsecaseInput;
+use db_postgres::polity_gateway::repository::PolityRepository;
+use db_postgres::saint_gateway::repository::SaintRepository;
 use db_postgres::student_gateway::repository::StudentRepository;
 use domain::usecases::create_student_usecase::{
     CreateStudentUsecase, CreateStudentUsecaseInput, CreateStudentUsecaseInteractor,
@@ -10,6 +10,9 @@ use hvcg_academics_openapi_student::models::{
     StudentTitle, StudentUpsert as StudentUpsertOpenApi, StudentView as StudentViewOpenApi,
 };
 
+use crate::openapi::ToOpenApi;
+use crate::ToUsecaseInput;
+
 pub(crate) async fn from_openapi(
     student: StudentUpsertOpenApi,
 ) -> Result<StudentViewOpenApi, UsecaseError> {
@@ -17,10 +20,23 @@ pub(crate) async fn from_openapi(
     let client = db_postgres::connect().await;
     let student_repository = StudentRepository { client };
 
+    let polity_client = db_postgres::connect().await;
+    let polity_repository = PolityRepository {
+        client: polity_client,
+    };
+
+    let saint_client = db_postgres::connect().await;
+    let saint_repository = SaintRepository {
+        client: saint_client,
+    };
     // Inject dependencies to Interactor and invoke func
-    let result = CreateStudentUsecaseInteractor::new(student_repository)
-        .execute(student.to_usecase_input())
-        .await;
+    let result = CreateStudentUsecaseInteractor::new(
+        student_repository,
+        polity_repository,
+        saint_repository,
+    )
+    .execute(student.to_usecase_input())
+    .await;
     result.map(|res| res.to_openapi())
 }
 
