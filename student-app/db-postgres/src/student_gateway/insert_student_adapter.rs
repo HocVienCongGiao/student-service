@@ -112,11 +112,9 @@ impl InsertStudentPort for StudentRepository {
     ) -> Result<StudentDbResponse, DbError> {
         let mut result: Result<u64, Error>;
 
-        let transaction = (*self).client.transaction().await.or_else(|error| {
-            Err(DbError::UnknownError(
-                error.into_source().unwrap().to_string(),
-            ))
-        })?;
+        let transaction = (*self).client.transaction().await.map_err(|error| DbError::UnknownError(
+            error.into_source().unwrap().to_string(),
+        )?;
 
         // insert id
         let id = db_request.id.unwrap();
@@ -140,7 +138,7 @@ impl InsertStudentPort for StudentRepository {
         let first_name = db_request.first_name.unwrap();
         result = save_student_info(
             &transaction,
-            id.clone(),
+            id,
             "first_name".to_string(),
             first_name.clone(),
         )
@@ -178,7 +176,7 @@ impl InsertStudentPort for StudentRepository {
 
         // insert christian names
         let christian_names = db_request.saint_ids.unwrap();
-        result = save_christian_names(&transaction, id.clone(), christian_names.clone()).await;
+        result = save_christian_names(&transaction, id, christian_names.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
