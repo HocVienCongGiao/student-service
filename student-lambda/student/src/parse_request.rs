@@ -36,7 +36,7 @@ pub fn from_request_to_id(req: &Request) -> Option<uuid::Uuid> {
 
 pub fn from_request_to_collection_query(req: &Request) -> StudentCollectionQuery {
     let query = req.query_string_parameters();
-    let param_date_of_birth = query.get("date_of_birth");
+    let param_date_of_birth = query.get("dateOfBirth");
     let param_date_of_birth = match param_date_of_birth {
         Some(param_date_of_birth) => {
             let param_date_of_birth =
@@ -74,10 +74,10 @@ pub fn from_request_to_collection_query(req: &Request) -> StudentCollectionQuery
         name: from_query_param_to_string(req, "name"),
         email: from_query_param_to_string(req, "email"),
         phone: from_query_param_to_string(req, "phone"),
-        undergraduate_school: from_query_param_to_string(req, "undergraduate_school"),
+        undergraduate_school: from_query_param_to_string(req, "undergraduateSchool"),
         date_of_birth: param_date_of_birth,
-        place_of_birth: from_query_param_to_string(req, "place_of_birth"),
-        polity_name: from_query_param_to_string(req, "polity_name"),
+        place_of_birth: from_query_param_to_string(req, "placeOfBirth"),
+        polity_name: from_query_param_to_string(req, "polityName"),
         //specialism: from_query_param_to_string(req, "specialism"),
         sorts: param_sorts,
         offset: query.get("offset").map(|str| str.parse().unwrap()),
