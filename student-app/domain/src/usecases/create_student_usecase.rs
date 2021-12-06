@@ -1,23 +1,39 @@
-use crate::entities::student::{Student as StudentEntity, StudentTitle};
-use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
-use crate::usecases::student_usecase_shared_models::{
-    StudentUsecaseSharedTitle, WithChristianName, WithPolity,
-};
-use crate::usecases::{ToEntity, ToUsecaseOutput, UsecaseError};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
-pub struct CreateStudentUsecaseInteractor<A: StudentDbGateway> {
-    db_gateway: A,
+use crate::entities::student::{Student as StudentEntity, StudentTitle};
+use crate::ports::polity_db_gateway::PolityDbGateway;
+use crate::ports::saint_db_gateway::SaintDbGateway;
+use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
+use crate::ports::DbError;
+use crate::usecases::student_usecase_shared_models::{
+    StudentUsecaseSharedTitle, WithChristianName, WithPolity,
+};
+use crate::usecases::{ToEntity, ToUsecaseOutput, UsecaseError};
+
+pub struct CreateStudentUsecaseInteractor<
+    A: StudentDbGateway,
+    B: PolityDbGateway,
+    C: SaintDbGateway,
+> {
+    student_db_gateway: A,
+    polity_db_gateway: B,
+    saint_db_gateway: C,
 }
 
-impl<A> CreateStudentUsecaseInteractor<A>
+impl<A, B, C> CreateStudentUsecaseInteractor<A, B, C>
 where
     A: StudentDbGateway + Sync + Send,
+    B: PolityDbGateway + Sync + Send,
+    C: SaintDbGateway + Sync + Send,
 {
-    pub fn new(db_gateway: A) -> Self {
-        CreateStudentUsecaseInteractor { db_gateway }
+    pub fn new(student_db_gateway: A, polity_db_gateway: B, saint_db_gateway: C) -> Self {
+        CreateStudentUsecaseInteractor {
+            student_db_gateway,
+            polity_db_gateway,
+            saint_db_gateway,
+        }
     }
 }
 
@@ -31,9 +47,11 @@ pub trait CreateStudentUsecase {
 }
 
 #[async_trait]
-impl<A> CreateStudentUsecase for CreateStudentUsecaseInteractor<A>
+impl<A, B, C> CreateStudentUsecase for CreateStudentUsecaseInteractor<A, B, C>
 where
     A: StudentDbGateway + Sync + Send,
+    B: PolityDbGateway + Sync + Send,
+    C: SaintDbGateway + Sync + Send,
 {
     async fn execute(
         &mut self,
@@ -42,12 +60,51 @@ where
         let student = request.to_entity();
         if student.is_valid() {
             println!("This student is valid");
-            (*self)
-                .db_gateway
+            let usecase_output: Result<CreateStudentUsecaseOutput, UsecaseError> = (*self)
+                .student_db_gateway
                 .insert(student.to_mutation_db_request())
                 .await
                 .map(|response| response.to_usecase_output())
-                .map_err(|err| err.to_usecase_error())
+                .map_err(|err| err.to_usecase_error());
+
+            return match usecase_output {
+                Ok(output) => {
+                    let mut output = output.with_polity(
+                        Some("1".to_string()),
+                        Some("1".to_string()),
+                        Some("1".to_string()),
+                        Some("1".to_string()),
+                    );
+
+                    if let Some(polity_id) = output.polity_id {
+                        if let Some(polity_db_response) =
+                            (*self).polity_db_gateway.find_one_by_id(polity_id).await
+                        {
+                            output = output.with_polity(
+                                polity_db_response.name,
+                                polity_db_response.location_name,
+                                polity_db_response.location_address,
+                                polity_db_response.location_email,
+                            )
+                        }
+                    }
+                    let saint_ids = output.saint_ids.clone();
+                    if let Some(saint_ids) = saint_ids {
+                        for (_i, e) in saint_ids.iter().enumerate() {
+                            if let Some(saint_db_response) =
+                                (*self).saint_db_gateway.find_one_by_id(*e).await
+                            {
+                                output = output.with_christian_name(saint_db_response.display_name)
+                            }
+                        }
+                    }
+                    Ok(output)
+                }
+                Err(error) => {
+                    println!("Create fail");
+                    Err(error)
+                }
+            };
         } else {
             println!("This student is not valid");
             Err(UsecaseError::InvalidInput)
@@ -92,7 +149,7 @@ pub struct CreateStudentUsecaseOutput {
     pub polity_location_address: Option<String>,
     pub polity_location_email: Option<String>,
     pub saint_ids: Option<Vec<Uuid>>,
-    pub christian_name: Option<String>,
+    pub christian_name: Option<Vec<String>>,
     pub title: Option<StudentUsecaseSharedTitle>,
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
@@ -111,6 +168,8 @@ impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
         if let Some(title_usecase_input) = title_usecase_input {
             title = Some(title_usecase_input.to_entity());
         }
+        let title_test = title.clone().unwrap();
+        println!("Test {:?}", title_test.to_string());
         StudentEntity {
             id: Some(Uuid::new_v4()),
             polity_id: self.polity_id,
@@ -180,7 +239,16 @@ impl WithPolity<CreateStudentUsecaseOutput> for CreateStudentUsecaseOutput {
 
 impl WithChristianName<CreateStudentUsecaseOutput> for CreateStudentUsecaseOutput {
     fn with_christian_name(mut self, name: Option<String>) -> CreateStudentUsecaseOutput {
-        self.christian_name = name;
+        if let Some(name) = name {
+            let mut saint_names: Vec<String>;
+            if self.christian_name.is_none() {
+                saint_names = vec![];
+            } else {
+                saint_names = self.christian_name.unwrap();
+            }
+            saint_names.push(name);
+            self.christian_name = Some(saint_names);
+        }
         self
     }
 }
