@@ -48,8 +48,8 @@ impl ToOpenApi<StudentView> for QueryStudentUsecaseOutput {
             christian_name: self.christian_name.map(|saint_names| saint_names.join(" ")),
             name: Some(format!(
                 "{} {} {}",
-                self.first_name.clone().unwrap(),
-                self.middle_name.clone().unwrap(),
+                self.first_name.unwrap(),
+                self.middle_name.unwrap(),
                 self.last_name.unwrap(),
             )),
         }
