@@ -1,12 +1,14 @@
+use std::ops::Add;
+
 use async_trait::async_trait;
-use chrono::{Date, DateTime, NaiveDate, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
+use tokio_postgres::{Error, Transaction};
+use tokio_postgres::types::ToSql;
+use uuid::Uuid;
+
+use domain::ports::DbError;
 use domain::ports::insert_student_port::InsertStudentPort;
 use domain::ports::student_db_gateway::{StudentDbResponse, StudentMutationDbRequest};
-use domain::ports::DbError;
-use std::ops::Add;
-use tokio_postgres::types::ToSql;
-use tokio_postgres::{Error, Transaction};
-use uuid::Uuid;
 
 use crate::student_gateway::repository::StudentRepository;
 
@@ -127,8 +129,7 @@ impl InsertStudentPort for StudentRepository {
         // insert title
         let title = db_request.title.unwrap();
 
-        result =
-            save_student_info(&transaction, id, "title".to_string(), title.clone()).await;
+        result = save_student_info(&transaction, id, "title".to_string(), title.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -143,6 +144,7 @@ impl InsertStudentPort for StudentRepository {
             "first_name".to_string(),
             first_name.clone(),
         )
+
         .await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
@@ -152,13 +154,8 @@ impl InsertStudentPort for StudentRepository {
 
         // insert last name
         let last_name = db_request.last_name.unwrap();
-        result = save_student_info(
-            &transaction,
-            id,
-            "last_name".to_string(),
-            last_name.clone(),
-        )
-        .await;
+        result =
+            save_student_info(&transaction, id, "last_name".to_string(), last_name.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -200,8 +197,7 @@ impl InsertStudentPort for StudentRepository {
 
         // insert email
         let email = db_request.email.unwrap();
-        result =
-            save_student_info(&transaction, id, "email".to_string(), email.clone()).await;
+        result = save_student_info(&transaction, id, "email".to_string(), email.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -210,8 +206,7 @@ impl InsertStudentPort for StudentRepository {
 
         // insert phone
         let phone = db_request.phone.unwrap();
-        result =
-            save_student_info(&transaction, id, "phone".to_string(), phone.clone()).await;
+        result = save_student_info(&transaction, id, "phone".to_string(), phone.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -244,8 +239,7 @@ impl InsertStudentPort for StudentRepository {
 
         // insert undergraduate school name
         let undergraduate_school = db_request.undergraduate_school.unwrap();
-        result =
-            save_undergraduate_school(&transaction, id, undergraduate_school.clone()).await;
+        result = save_undergraduate_school(&transaction, id, undergraduate_school.clone()).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),

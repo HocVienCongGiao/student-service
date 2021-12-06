@@ -92,7 +92,7 @@ where
                     if let Some(saint_ids) = saint_ids {
                         for (_i, e) in saint_ids.iter().enumerate() {
                             if let Some(saint_db_response) =
-                            (*self).saint_db_gateway.find_one_by_id(*e).await
+                                (*self).saint_db_gateway.find_one_by_id(*e).await
                             {
                                 output = output.with_christian_name(saint_db_response.display_name)
                             }

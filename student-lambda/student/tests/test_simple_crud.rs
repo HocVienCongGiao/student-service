@@ -4,7 +4,7 @@ use common::poster;
 use common::test_data;
 use hvcg_academics_openapi_student::models::{StudentUpsert, StudentView, StudentViewCollection};
 use lambda_http::http::{HeaderValue, Request};
-use lambda_http::{Body, Context, http, IntoResponse, RequestExt, Response};
+use lambda_http::{http, Body, Context, IntoResponse, RequestExt, Response};
 use std::collections::HashMap;
 use std::ops::Add;
 use std::path::PathBuf;
