@@ -2,13 +2,13 @@ use std::ops::Add;
 
 use async_trait::async_trait;
 use chrono::{DateTime, NaiveDate, Utc};
-use tokio_postgres::{Error, Transaction};
 use tokio_postgres::types::ToSql;
+use tokio_postgres::{Error, Transaction};
 use uuid::Uuid;
 
-use domain::ports::DbError;
 use domain::ports::insert_student_port::InsertStudentPort;
 use domain::ports::student_db_gateway::{StudentDbResponse, StudentMutationDbRequest};
+use domain::ports::DbError;
 
 use crate::student_gateway::repository::StudentRepository;
 
@@ -144,7 +144,6 @@ impl InsertStudentPort for StudentRepository {
             "first_name".to_string(),
             first_name.clone(),
         )
-
         .await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
