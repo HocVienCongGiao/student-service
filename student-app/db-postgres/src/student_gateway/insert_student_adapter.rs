@@ -112,7 +112,7 @@ impl InsertStudentPort for StudentRepository {
     ) -> Result<StudentDbResponse, DbError> {
         let mut result: Result<u64, Error>;
 
-        let transaction = (*self).client.transaction().await.map_or_else(|error| {
+        let transaction = (*self).client.transaction().await.or_else(|error| {
             Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
             ))
