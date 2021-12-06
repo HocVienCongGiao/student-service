@@ -112,9 +112,11 @@ impl InsertStudentPort for StudentRepository {
     ) -> Result<StudentDbResponse, DbError> {
         let mut result: Result<u64, Error>;
 
-        let transaction = (*self).client.transaction().await.map_err(|error| DbError::UnknownError(
-            error.into_source().unwrap().to_string(),
-        )?;
+        let transaction = (*self)
+            .client
+            .transaction()
+            .await
+            .map_err(|error| DbError::UnknownError(error.into_source().unwrap().to_string()))?;
 
         // insert id
         let id = db_request.id.unwrap();
