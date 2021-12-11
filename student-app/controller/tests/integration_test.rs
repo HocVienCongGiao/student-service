@@ -8,6 +8,7 @@ fn initialise() {
         let my_path = PathBuf::new().join(".env.test");
         dotenv::from_path(my_path.as_path()).ok();
         // println!("testing env {}", std::env::var("HELLO").unwrap());
+        // ok
     });
 }
 
