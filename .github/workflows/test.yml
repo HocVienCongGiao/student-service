@@ -1,4 +1,4 @@
-name: Rust Lint and Tests
+name: Lint and Tests
 
 on:
   push:
