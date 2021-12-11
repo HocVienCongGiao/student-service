@@ -1,11 +1,11 @@
 name: Build and Push
 
 on:
-  push:
-    branches:
-      - development
-      - prod
-
+  workflow_run:
+    workflows: ["Lint and Tests"]
+    branches: [development]
+    types: 
+      - completed
 jobs:
   check_lambda_files:
     name: Check Lambda source code
