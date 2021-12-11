@@ -43,10 +43,10 @@ jobs:
     needs: [ check_lambda_files ]
     if: needs.check_lambda_files.outputs.run_job == 'true'
     steps:
-      - name: Set up Rust
-        uses: hecrj/setup-rust-action@v1
-        with:
-          components: rustfmt
+#       - name: Set up Rust
+#         uses: hecrj/setup-rust-action@v1
+#         with:
+#           components: rustfmt
       - uses: actions/checkout@v2
       - 
         working-directory: student-lambda
