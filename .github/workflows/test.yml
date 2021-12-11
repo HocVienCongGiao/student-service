@@ -48,6 +48,8 @@ jobs:
 #         with:
 #           components: rustfmt
       - uses: actions/checkout@v2
+      -
+        run: source $HOME/.cargo/env
       - 
         working-directory: student-lambda
         run: cargo fmt --all -- --check
