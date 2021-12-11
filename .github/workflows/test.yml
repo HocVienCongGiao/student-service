@@ -32,10 +32,6 @@ jobs:
   lint:
     runs-on: peterbean
     steps:
-#       - name: Set up Rust
-#         uses: hecrj/setup-rust-action@v1
-#         with:
-#           components: clippy
       - uses: actions/checkout@v2
       - name: Lambda Cargo lint
         working-directory: student-lambda
@@ -50,8 +46,6 @@ jobs:
   compile:
     runs-on: peterbean
     steps:
-#       - name: Set up Rust
-#         uses: hecrj/setup-rust-action@v1
       - uses: actions/checkout@v2
       - name: Lambda Cargo check
         working-directory: student-lambda
@@ -84,8 +78,6 @@ jobs:
           --health-retries 5
 
     steps:
-#     - name: Setup Rust
-#       uses: hecrj/setup-rust-action@v1
     - name: Checkout
       uses: actions/checkout@v2
       with:
@@ -111,7 +103,7 @@ jobs:
         sudo apt-get update -y &&
         sudo apt-get install -y postgresql-server-dev-all gcc python3-dev musl-dev
         echo "install python"
-        pip install -r ./requirements.txt --target ./lambda/terraform/module/python
+        pip3 install -r ./requirements.txt --target ./lambda/terraform/module/python
         echo "copy python files in lamda folder"
         cp -R ./lambda/*.py ./lambda/terraform/module/python/
         echo "copy python files in shared_db_app folder"
