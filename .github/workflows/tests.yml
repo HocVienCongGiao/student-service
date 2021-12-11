@@ -1,4 +1,4 @@
-name: Lint and Tests
+name: Run Tests
 
 on:
   push:
@@ -6,53 +6,7 @@ on:
       - master
       
 jobs:
-  codestyle-lint-compile:
-    runs-on: peterbean
-    steps:
-#       - name: Set up Rust
-#         uses: hecrj/setup-rust-action@v1
-#         with:
-#           components: rustfmt
-      - uses: actions/checkout@v2
-      - name: Cargo version
-        working-directory: student-lambda      
-        run: |
-          source $HOME/.cargo/env
-          cargo version
-      - name: Lambda Cargo fmt
-        working-directory: student-lambda
-        run: |
-          source $HOME/.cargo/env
-          cargo fmt --all -- --check
-      - name: Check App Cargo fmt
-        working-directory: student-app
-        run: |
-          source $HOME/.cargo/env
-          cargo fmt --all -- --check
-          
-      - name: Lambda Cargo lint
-        working-directory: student-lambda
-        run: |
-          source $HOME/.cargo/env
-          cargo clippy --all-targets -- -D clippy::all
-      - name: App Cargo lint
-        working-directory: student-app
-        run: |
-          source $HOME/.cargo/env
-          cargo clippy --all-targets -- -D clippy::all
-
-      - name: Lambda Cargo check for compile
-        working-directory: student-lambda
-        run: |
-          source $HOME/.cargo/env
-          cargo check --all
-      - name: App Cargo check for compile
-        working-directory: student-app
-        run: |
-          source $HOME/.cargo/env
-          cargo check --all
-  test:
-    needs: [codestyle-lint-compile]
+  run_tests:
     runs-on: peterbean
     services:
       postgres:
