@@ -6,42 +6,8 @@ on:
       - master
       
 jobs:
-  check_lambda_files:
-    name: Check Lambda source code
-    outputs:
-      run_job: ${{ steps.check_lambda_files.outputs.run_job }}
-    runs-on: peterbean
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-
-      - name: Check modified AWS Lambda Source Code
-        id: check_lambda_files
-        working-directory: student-lambda
-        run: |
-          echo "=============== list modified files ==============="
-          git diff --name-only HEAD^ HEAD
-
-          echo "========== check paths of modified files =========="
-          git diff --name-only HEAD^ HEAD > files.txt
-          while IFS= read -r file
-          do
-            echo $file
-            if [[ $file == student-lambda/terraform/* || $file == .github/*  ]]; then
-              echo "This modified file is not Lambda source code"
-              echo "::set-output name=run_job::false"
-              break
-            else
-              echo "::set-output name=run_job::true"
-            fi
-          done < files.txt
-
   codestyle:
     runs-on: peterbean
-    needs: [ check_lambda_files ]
-    if: needs.check_lambda_files.outputs.run_job == 'true'
     steps:
 #       - name: Set up Rust
 #         uses: hecrj/setup-rust-action@v1
@@ -49,7 +15,10 @@ jobs:
 #           components: rustfmt
       - uses: actions/checkout@v2
       -
-        run: source $HOME/.cargo/env
+        working-directory: student-lambda      
+        run: |
+          source $HOME/.cargo/env
+          cargo version
       - 
         working-directory: student-lambda
         run: cargo fmt --all -- --check
@@ -58,8 +27,6 @@ jobs:
         run: cargo fmt --all -- --check
   lint:
     runs-on: peterbean
-    needs: [ check_lambda_files ]
-    if: needs.check_lambda_files.outputs.run_job == 'true'
     steps:
 #       - name: Set up Rust
 #         uses: hecrj/setup-rust-action@v1
@@ -74,8 +41,6 @@ jobs:
         run: cargo clippy --all-targets -- -D clippy::all
   compile:
     runs-on: peterbean
-    needs: [ check_lambda_files ]
-    if: needs.check_lambda_files.outputs.run_job == 'true'
     steps:
 #       - name: Set up Rust
 #         uses: hecrj/setup-rust-action@v1
