@@ -2,7 +2,7 @@ name: Build and Push
 
 on:
   workflow_run:
-    workflows: ["Run Tests"]
+    workflows: ["Run Lint", "Run Tests"]
     branches: [development]
     types: 
       - completed
