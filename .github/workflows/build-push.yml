@@ -7,40 +7,10 @@ on:
     types: 
       - completed
 jobs:
-  check_lambda_files:
-    name: Check Lambda source code
-    outputs:
-      run_job: ${{ steps.check_lambda_files.outputs.run_job }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-
-      - name: Check modified AWS Lambda Source Code
-        id: check_lambda_files
-        working-directory: student-lambda
-        run: |
-          echo "=============== list modified files ==============="
-          git diff --name-only HEAD^ HEAD
-
-          echo "========== check paths of modified files =========="
-          git diff --name-only HEAD^ HEAD > files.txt
-          while IFS= read -r file
-          do
-            echo $file
-            if [[ $file == student-lambda/terraform/* || $file == .github/*  ]]; then
-              echo "This modified file is not Lambda source code"
-              echo "::set-output name=run_job::false"
-              break
-            else
-              echo "::set-output name=run_job::true"
-            fi
-          done < files.txt
   # deploy on pushes to master branch
   # assumes aws credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) are set in github secrets
   push:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}  
     runs-on: ubuntu-latest
     env:
       TFE_TOKEN: ${{ secrets.TFE_TOKEN }}
