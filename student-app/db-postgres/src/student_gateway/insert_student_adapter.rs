@@ -13,12 +13,19 @@ use domain::ports::DbError;
 use crate::student_gateway::repository::StudentRepository;
 
 pub(crate) async fn save_id(transaction: &Transaction<'_>, id: Uuid) -> Result<u64, Error> {
+    let insert_person_stmt = (*transaction)
+        .prepare("INSERT into public.person__person (id, type) VAlUES ($1, $2)")
+        .await
+        .unwrap();
+    let params: &[&(dyn ToSql + Sync)] = &[&id, &"student".to_string()];
+    transaction.execute(&insert_person_stmt, params).await;
     let stmt = (*transaction)
-        .prepare("INSERT into public.student__student (id) VAlUES ($1)")
+        .prepare("INSERT into public.student__person (id) VAlUES ($1)")
         .await
         .unwrap();
 
     let params: &[&(dyn ToSql + Sync)] = &[&id];
+    // TODO: result and then
     transaction.execute(&stmt, params).await
 }
 
@@ -42,12 +49,13 @@ pub(crate) async fn save_date_of_birth(
 pub(crate) async fn save_student_info(
     transaction: &Transaction<'_>,
     id: Uuid,
+    entity_name: String,
     field_name: String,
     value: String,
 ) -> Result<u64, Error> {
     let statement = format!(
-        "INSERT into public.student__student_{} (id, {}) VAlUES ($1, $2)",
-        field_name, field_name
+        "INSERT into public.{}__{}_{} (id, {}) VAlUES ($1, $2)",
+        entity_name, entity_name, field_name, field_name
     );
     let stmt = (*transaction).prepare(&statement).await.unwrap();
 
@@ -75,7 +83,7 @@ pub(crate) async fn save_polity(
     polity_id: Uuid,
 ) -> Result<u64, Error> {
     let stmt = (*transaction)
-        .prepare("INSERT into public.student__student_polity (id, polity_id) VAlUES ($1, $2)")
+        .prepare("INSERT into public.person__person_polity (id, polity_id) VAlUES ($1, $2)")
         .await
         .unwrap();
 
@@ -89,12 +97,13 @@ pub(crate) async fn save_christian_names(
     christian_names: Vec<Uuid>,
 ) -> Result<u64, Error> {
     // TODO: refactor this into 1 query
+    // TODO: result and then
     let mut result: Result<u64, Error> = Ok(1_u64);
     let ordering: i16 = 1;
     for christian_name in christian_names {
         let params: &[&(dyn ToSql + Sync)] = &[&id, &christian_name, &ordering];
         let stmt = (*transaction)
-            .prepare("INSERT into public.student__student_christian_names (student_id, saint_id, ordering) VAlUES ($1, $2, $3)")
+            .prepare("INSERT into public.person__person_christian_names (person_id, saint_id, ordering) VAlUES ($1, $2, $3)")
             .await
             .unwrap();
         result = transaction.execute(&stmt, params).await;
@@ -129,7 +138,14 @@ impl InsertStudentPort for StudentRepository {
         // insert title
         let title = db_request.title.unwrap();
 
-        result = save_student_info(&transaction, id, "title".to_string(), title.clone()).await;
+        result = save_student_info(
+            &transaction,
+            id,
+            "person".to_string(),
+            "title".to_string(),
+            title.clone(),
+        )
+        .await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -141,6 +157,7 @@ impl InsertStudentPort for StudentRepository {
         result = save_student_info(
             &transaction,
             id,
+            "person".to_string(),
             "first_name".to_string(),
             first_name.clone(),
         )
@@ -153,8 +170,14 @@ impl InsertStudentPort for StudentRepository {
 
         // insert last name
         let last_name = db_request.last_name.unwrap();
-        result =
-            save_student_info(&transaction, id, "last_name".to_string(), last_name.clone()).await;
+        result = save_student_info(
+            &transaction,
+            id,
+            "person".to_string(),
+            "last_name".to_string(),
+            last_name.clone(),
+        )
+        .await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -166,6 +189,7 @@ impl InsertStudentPort for StudentRepository {
         result = save_student_info(
             &transaction,
             id,
+            "person".to_string(),
             "middle_name".to_string(),
             last_name.clone(),
         )
@@ -196,7 +220,14 @@ impl InsertStudentPort for StudentRepository {
 
         // insert email
         let email = db_request.email.unwrap();
-        result = save_student_info(&transaction, id, "email".to_string(), email.clone()).await;
+        result = save_student_info(
+            &transaction,
+            id,
+            "student".to_string(),
+            "email".to_string(),
+            email.clone(),
+        )
+        .await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -205,7 +236,14 @@ impl InsertStudentPort for StudentRepository {
 
         // insert phone
         let phone = db_request.phone.unwrap();
-        result = save_student_info(&transaction, id, "phone".to_string(), phone.clone()).await;
+        result = save_student_info(
+            &transaction,
+            id,
+            "student".to_string(),
+            "phone".to_string(),
+            phone.clone(),
+        )
+        .await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -217,6 +255,7 @@ impl InsertStudentPort for StudentRepository {
         result = save_student_info(
             &transaction,
             id,
+            "student".to_string(),
             "place_of_birth".to_string(),
             place_of_birth.clone(),
         )
