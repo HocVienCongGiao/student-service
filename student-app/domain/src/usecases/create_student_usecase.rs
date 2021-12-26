@@ -169,7 +169,6 @@ impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
             title = Some(title_usecase_input.to_entity());
         }
         let title_test = title.clone().unwrap();
-        println!("Test {:?}", title_test.to_string());
         StudentEntity {
             id: Some(Uuid::new_v4()),
             polity_id: self.polity_id,
