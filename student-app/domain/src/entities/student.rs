@@ -1,6 +1,7 @@
 use uuid::Uuid;
 
 pub(crate) struct Student {
+    pub id: Option<Uuid>,
     pub person_id: Option<Uuid>,
 }
 
