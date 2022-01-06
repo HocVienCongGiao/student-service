@@ -18,6 +18,10 @@ pub fn get_datetime(row: &Row, col: &str) -> DateTime<Utc> {
     row.get::<&str, DateTime<Utc>>(col)
 }
 
+pub fn get_date(row: &Row, col: &str) -> NaiveDate {
+    row.get::<&str, NaiveDate>(col)
+}
+
 pub fn get_datetime_from_db_date(row: &Row, col: &str) -> DateTime<Utc> {
     let date = row.get::<&str, NaiveDate>(col);
     let datetime = NaiveDateTime::new(date, NaiveTime::from_hms(0, 0, 0));
