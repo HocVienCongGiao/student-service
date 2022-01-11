@@ -1,0 +1,444 @@
+openapi: 3.0.0
+servers:
+  - url: 'https://{env}-sg.portal.hocvienconggiao.com'
+    variables:
+      env:
+        enum:
+          - dev
+          - prod
+        default: dev
+
+info:
+  description: >-
+    This is a sample server Student info server. For this sample, you can use the api key
+    `special-key` to test the authorization filters.
+  version: 0.8.1
+  title: OpenAPI student info
+  license:
+    name: Apache-2.0
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: student
+    description: Everything about your students
+paths:
+  /mutation-api/student-service/students:
+    post:
+      tags:
+        - student-mutation
+      summary: Add new student
+      description: ''
+      operationId: addStudent
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentUpsert'
+        '405':
+          description: Invalid input
+      requestBody:
+        $ref: '#/components/requestBodies/StudentRequest'
+      security:
+        - student_auth: [ ]
+  /mutation-api/student-service/students/{id}:
+    put:
+      tags:
+        - student-mutation
+      summary: Update an existing student
+      description: ''
+      operationId: updateStudent
+      parameters:
+        - name: id
+          in: path
+          description: ID of student to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentUpsert'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Student not found
+        '405':
+          description: Validation exception
+      requestBody:
+        $ref: '#/components/requestBodies/StudentRequest'
+      security:
+        - student_auth: [ ]
+    delete:
+      tags:
+        - student-mutation
+      summary: Deletes a student
+      description: ''
+      operationId: deleteStudent
+      parameters:
+        - name: id
+          in: path
+          description: ID of student to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: student not found
+      security:
+        - student_auth: [ ]
+  /query-api/student-service/students:
+    get:
+      tags:
+        - student-query
+      summary: Get all students
+      description: Returns all students
+      operationId: getStudents
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+        - in: query
+          name: email
+          schema:
+            type: string
+        - in: query
+          name: phone
+          schema:
+            type: string
+        - in: query
+          name: undergraduateSchool
+          schema:
+            type: string
+        - in: query
+          name: dateOfBirth
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: placeOfBirth
+          schema:
+            type: string
+        - in: query
+          name: polityName
+          schema:
+            type: string
+        - in: query
+          name: specialism
+          schema:
+            type: string
+        - in: query
+          name: sorts
+          description: to sort +displayName for ASC and -displayName for DESC
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/StudentSortCriteria'
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          required: false
+          description: The number of students to skip before starting to collect the result set.
+        - in: query
+          name: count
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          required: false
+          description: The number of students to return.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentViewCollection'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Student not found
+  /query-api/student-service/students/{id}:
+    get:
+      tags:
+        - student-query
+      summary: Find student by ID
+      description: Returns a single student
+      operationId: getStudentById
+      parameters:
+        - name: id
+          in: path
+          description: ID of student to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentUpsert'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Student not found
+
+externalDocs:
+  description: Find out more about Swagger
+  url: 'http://swagger.io'
+components:
+  requestBodies:
+    StudentArray:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/StudentUpsert'
+      description: List of student object
+      required: true
+    StudentRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StudentUpsert'
+      description: student object that needs to be added to the database
+      required: true
+  securitySchemes:
+    student_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    StudentSortCriteria:
+      type: string
+      enum:
+        - NAME_ASC
+        - NAME_DESC
+        - CHRISTIAN_NAME_ASC
+        - CHRISTIAN_NAME_DESC
+        - POLITY_NAME_ASC
+        - POLITY_NAME_DESC
+        - LOCATION_NAME_ASC
+        - LOCATION_NAME_DESC
+        - PLACE_OF_BIRTH_ASC
+        - PLACE_OF_BIRTH_DESC
+    StudentTitle:
+      type: string
+      enum:
+        - PRIEST
+        - MONK
+        - NUN
+    VowProgress:
+      type: string
+      enum:
+        - SOLEMN_VOW # khấn trọn
+        - SIMPLE_VOW # khấn tạm
+        - NOVICE # dự tu
+        - PREPARATION # nhà tập
+    EducationalLevel:
+      type: string
+      enum:
+        - ELEMENTARY_SCHOOL
+        - MIDDLE_SCHOOL
+        - HIGH_SCHOOL
+        - BACHELOR
+        - MASTER
+        - DOCTOR
+        - OTHER
+    EducationalStage:
+      type: object
+      properties:
+        educationalLevel:
+          $ref: '#/components/schemas/EducationalLevel'
+        schoolName:
+          type: string
+          example: Dai Chung Vien Thanh Quy - Can Tho
+        major:
+          type: string
+          example: Than hoc
+        graduateYear:
+          type: number
+          format: integer
+          example: 2010
+      required:
+        - educationalLevel
+        - schoolName
+    ForeignLanguage:
+      type: object
+      properties:
+        language:
+          type: string
+          example: English
+        level:
+          $ref: '#/components/schemas/ForeignLanguageLevel'
+      required:
+        - language
+        - level
+    IdNumberProvider:
+      type: string
+      enum:
+        - NATIONAL_ID
+        - PASSPORT
+    ForeignLanguageLevel:
+      type: string
+      enum:
+        - BEGINNER
+        - INTERMEDIATE
+        - ADVANCED
+    StudentUpsert:
+      title: StudentUpsert
+      description: Student info
+      type: object
+      properties:
+        polityId:
+          type: string
+          format: uuid
+          example: 4d084b56-54e1-4bd2-878e-c52675497c2b
+        saintIdArray:
+          type: array
+          items:
+            type: string
+            format: uuid
+            example: 40e6215d-b5c6-4896-987c-f30f3678f608
+        title:
+          $ref: '#/components/schemas/StudentTitle'
+        progress:
+          $ref: '#/components/schemas/VowProgress'
+        firstName:
+          type: string
+          example: Chien
+        middleName:
+          type: string
+          example: Huu
+        lastName:
+          type: string
+          example: Nguyen
+        dateOfBirth:
+          type: string
+          format: date
+          example: 1983-05-16
+          description: date of birth in format YYYY-MM-DD
+        placeOfBirth:
+          type: string
+          example: Tra Vinh
+        email:
+          type: string
+          example: binh@sunrise.vn
+        phone:
+          type: string
+          example: +84 1228019700
+        address:
+          type: string
+          example: 1000 CMT8 p5 q.Tân Bình, TP.HCM
+        nationality:
+          type: string
+          default: Vietnamese
+          example: British
+        educationalStage:
+          type: array
+          items:
+            $ref: '#/components/schemas/EducationalStage'
+        foreignLanguage:
+          type: array
+          items:
+            $ref: '#/components/schemas/ForeignLanguage'
+        race:
+          type: string
+          example: Kinh
+        idNumber:
+          type: string
+          example: 099005014079
+        idNumberProvider:
+          $ref: '#/components/schemas/IdNumberProvider'
+        dateOfIssue:
+          type: string
+          format: date
+        placeOfIssue:
+          type: string
+      xml:
+        name: student
+    StudentView:
+      title: Student View
+      description: Student View
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 53f549b9-99bf-4e12-88e3-c2f868953283
+        polityName:
+          type: string
+          example: Dong Thanh The
+        polityLocationName:
+          type: string
+          example: Dong Thanh The Viet Nam
+        polityLocationAddress:
+          type: string
+          example: 123 Cach Mang
+        polityLocationEmail:
+          type: string
+          example: info@gmail.com
+        christianName:
+          type: string
+          example: Phero
+        title:
+          $ref: '#/components/schemas/StudentTitle'
+        name:
+          type: string
+          example: Nguyen Huu Chien
+        dateOfBirth:
+          type: string
+          format: date
+          example: 1983-05-16
+          description: date of birth in format YYYY-MM-DD
+        placeOfBirth:
+          type: string
+          example: Tra Vinh
+        email:
+          type: string
+          example: binh@sunrise.vn
+        phone:
+          type: string
+          example: +84 1228019700
+        undergraduateSchool:
+          type: string
+          example: Dai Chung Vien Thanh Quy - Can Tho
+        # specialism:
+        #   type: string
+        #   example: Thac si Than hoc Thanh Kinh K2
+      xml:
+        name: student-view
+    StudentViewCollection:
+      required:
+        - students
+      properties:
+        students:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudentView'
+        hasMore:
+          type: boolean
+        total:
+          type: integer
+          format: int64
+
+security:
+  - student_auth: [ ]
