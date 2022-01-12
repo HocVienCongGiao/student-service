@@ -1,9 +1,11 @@
-use crate::entities::person::Person;
-use crate::entities::person_educational_stage::EducationalStage;
-use crate::ports::insert_person_port::InsertPersonPort;
 use async_trait::async_trait;
 use chrono::NaiveDate;
 use uuid::Uuid;
+
+use crate::entities::person::Person;
+use crate::entities::person_educational_stage::{EducationalLevel, EducationalStage};
+use crate::entities::person_language::PersonLanguage;
+use crate::ports::insert_person_port::InsertPersonPort;
 
 #[async_trait]
 pub trait PersonDbGateway: InsertPersonPort {}
@@ -26,6 +28,8 @@ pub struct PersonMutationDbRequest {
     pub date_of_issue: Option<NaiveDate>,
     pub place_of_issue: Option<String>,
     pub address: Option<String>,
+    // pub languages: Option<Vec<PersonLanguage>>,
+    pub languages: Option<Vec<String>>,
 }
 
 pub struct PersonDbResponse {
@@ -48,21 +52,32 @@ pub struct PersonDbResponse {
     pub address: Option<String>,
 }
 
-pub struct EducationalStageMutationDbRequest {
-    pub educational_stage_list: Option<Vec<EducationalStage>>,
-}
+// pub struct EducationalStageMutationDbRequest {
+//     pub educational_stage_list: Option<Vec<EducationalStage>>,
+// }
 
-pub struct EducationalStageDbResponse {
-    pub id: Option<Uuid>,
-    pub educational_level: Option<EducationalLevel>,
-    pub school_name: Option<String>,
-    pub major: Option<String>,
-    pub graduate_year: Option<i8>,
-    pub person_id: Option<Uuid>,
-}
+pub struct EducationalStageMutationDbRequest {}
+
+// pub struct EducationalStageDbResponse {
+//     pub id: Option<Uuid>,
+//     pub educational_level: Option<EducationalLevel>,
+//     pub school_name: Option<String>,
+//     pub major: Option<String>,
+//     pub graduate_year: Option<i8>,
+//     pub person_id: Option<Uuid>,
+// }
+
+pub struct EducationalStageDbResponse {}
 
 impl Person {
     pub fn to_mutation_db_request(&self) -> PersonMutationDbRequest {
+        // let mut language_list: Vec<PersonLanguage> = Vec::new();
+        // for language in self.languages.unwrap() {
+        //     language_list.push((
+        //         language.language.unwrap(),
+        //         language.level.unwrap().to_string(),
+        //     ))
+        // }
         PersonMutationDbRequest {
             id: self.id,
             polity_id: self.polity_id,
@@ -79,11 +94,12 @@ impl Person {
             place_of_birth: self.place_of_birth.clone(),
             email: self.email.clone(),
             phone: self.phone.clone(),
-            nationality: self.nationality,
-            race: self.race,
+            nationality: self.nationality.clone(),
+            race: self.race.clone(),
             date_of_issue: self.date_of_issue,
-            place_of_issue: self.place_of_issue,
-            address: self.address,
+            place_of_issue: self.place_of_issue.clone(),
+            address: self.address.clone(),
+            languages: None,
         }
     }
 }

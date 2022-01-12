@@ -10,7 +10,7 @@ use crate::usecases::query_student_collection_usecase::{
 };
 use crate::SortDirection;
 use async_trait::async_trait;
-use chrono::{DateTime, Utc};
+use chrono::NaiveDate;
 use uuid::Uuid;
 
 #[async_trait]
@@ -28,8 +28,7 @@ pub struct StudentQueryDbRequest {
     pub name: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub polity_name: Option<String>,
     //pub specialism: Option<String>,
@@ -59,17 +58,7 @@ pub enum StudentSortFieldDbRequest {
 
 pub struct StudentMutationDbRequest {
     pub id: Option<Uuid>,
-    pub polity_id: Option<Uuid>,
-    pub saint_ids: Option<Vec<uuid::Uuid>>,
-    pub title: Option<String>,
-    pub first_name: Option<String>,
-    pub middle_name: Option<String>,
-    pub last_name: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
-    pub place_of_birth: Option<String>,
-    pub email: Option<String>,
-    pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
+    pub person_id: Option<Uuid>,
 }
 
 pub struct StudentDbResponse {
@@ -80,7 +69,7 @@ pub struct StudentDbResponse {
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
@@ -97,17 +86,7 @@ impl Student {
     pub fn to_mutation_db_request(&self) -> StudentMutationDbRequest {
         StudentMutationDbRequest {
             id: self.id,
-            polity_id: self.polity_id,
-            saint_ids: self.saint_ids.clone(),
-            title: self.title.clone().map(|title| title.to_string()),
-            first_name: self.first_name.clone(),
-            middle_name: self.middle_name.clone(),
-            last_name: self.last_name.clone(),
-            date_of_birth: self.date_of_birth,
-            place_of_birth: self.place_of_birth.clone(),
-            email: self.email.clone(),
-            phone: self.phone.clone(),
-            undergraduate_school: self.undergraduate_school.clone(),
+            person_id: self.person_id,
         }
     }
 }
@@ -119,7 +98,6 @@ impl QueryStudentCollectionUsecaseInput {
             name: self.name.clone(),
             email: self.email.clone(),
             phone: self.phone.clone(),
-            undergraduate_school: self.undergraduate_school.clone(),
             date_of_birth: self.date_of_birth,
             place_of_birth: self.place_of_birth.clone(),
             polity_name: self.polity_name.clone(),

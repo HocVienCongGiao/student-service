@@ -1,3 +1,8 @@
+use async_trait::async_trait;
+use chrono::Utc;
+use uuid::Uuid;
+
+use crate::ports::person_db_gateway::PersonDbResponse;
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
 use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
@@ -5,9 +10,6 @@ use crate::usecases::student_usecase_shared_models::{
     QueryStudentUsecaseOutput, WithChristianName, WithPolity,
 };
 use crate::usecases::ToUsecaseOutput;
-use async_trait::async_trait;
-use chrono::Utc;
-use uuid::Uuid;
 
 pub struct QueryOneStudentByIdUsecaseInteractor<
     A: StudentDbGateway,
@@ -93,24 +95,61 @@ where
 
 impl ToUsecaseOutput<QueryStudentUsecaseOutput> for StudentDbResponse {
     fn to_usecase_output(self) -> QueryStudentUsecaseOutput {
+        // QueryStudentUsecaseOutput {
+        //     person_id: self.id,
+        //     polity_id: self.polity_id,
+        //     polity_name: None,
+        //     polity_location_name: None,
+        //     polity_location_address: None,
+        //     polity_location_email: None,
+        //     saint_ids: self.saint_ids,
+        //     christian_name: None,
+        //     title: self.title,
+        //     first_name: self.first_name,
+        //     middle_name: self.middle_name,
+        //     last_name: self.last_name,
+        //     date_of_birth: self.date_of_birth,
+        //     place_of_birth: self.place_of_birth,
+        //     email: self.email,
+        //     phone: self.phone,
+        //     educational_stages: None,
+        //     nationality: self.nationality,
+        //     race: self.race,
+        //     id_number: None,
+        //     id_number_provider: None,
+        //     date_of_issue: None,
+        //     place_of_issue: None,
+        //     address: self.address,
+        //     foreign_language: None,
+        //     student_id: None,
+        // }
         QueryStudentUsecaseOutput {
-            id: self.id,
-            polity_id: self.polity_id,
+            person_id: Default::default(),
+            student_id: None,
+            polity_id: None,
             polity_name: None,
             polity_location_name: None,
             polity_location_address: None,
             polity_location_email: None,
-            saint_ids: self.saint_ids,
+            saint_ids: None,
             christian_name: None,
-            title: self.title,
-            first_name: self.first_name,
-            middle_name: self.middle_name,
-            last_name: self.last_name,
-            date_of_birth: self.date_of_birth,
-            place_of_birth: self.place_of_birth,
-            email: self.email,
-            phone: self.phone,
-            undergraduate_school: self.undergraduate_school,
+            title: None,
+            first_name: None,
+            middle_name: None,
+            last_name: None,
+            date_of_birth: None,
+            place_of_birth: None,
+            email: None,
+            phone: None,
+            educational_stages: None,
+            nationality: None,
+            race: None,
+            id_number: None,
+            id_number_provider: None,
+            date_of_issue: None,
+            place_of_issue: None,
+            address: None,
+            foreign_language: None,
         }
     }
 }

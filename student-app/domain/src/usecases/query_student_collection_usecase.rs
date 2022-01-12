@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use uuid::Uuid;
 
 use crate::ports::polity_db_gateway::PolityDbGateway;
@@ -116,7 +116,7 @@ pub struct QueryStudentCollectionUsecaseInput {
     pub email: Option<String>,
     pub phone: Option<String>,
     pub undergraduate_school: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub polity_name: Option<String>,
     //pub specialism: Option<String>,
@@ -154,11 +154,12 @@ pub struct QueryStudentCollectionUsecaseOutput {
 
 impl ToUsecaseOutput<QueryStudentCollectionUsecaseOutput> for StudentCollectionDbResponse {
     fn to_usecase_output(self) -> QueryStudentCollectionUsecaseOutput {
-        let collection = self
-            .collection
-            .into_iter()
-            .map(|student_db_response| student_db_response.to_usecase_output()) // fn in query_one_student_by_id_usecase
-            .collect();
+        // let collection = self
+        //     .collection
+        //     .into_iter()
+        //     .map(|student_db_response| student_db_response.to_usecase_output()) // fn in query_one_student_by_id_usecase
+        //     .collect();
+        let collection = vec![]; // todo()!
         QueryStudentCollectionUsecaseOutput {
             collection,
             has_more: self.has_more,

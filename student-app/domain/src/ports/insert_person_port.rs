@@ -1,5 +1,6 @@
 use crate::ports::person_db_gateway::{
-    EducationalStageMutationDbRequest, PersonDbResponse, PersonMutationDbRequest,
+    EducationalStageDbResponse, EducationalStageMutationDbRequest, PersonDbResponse,
+    PersonMutationDbRequest,
 };
 use crate::ports::DbError;
 use async_trait::async_trait;

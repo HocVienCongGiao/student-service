@@ -1,23 +1,23 @@
-use crate::student_gateway::find_one_student_by_id_adapter::from_pg_row_to_student_db_response;
-use crate::student_gateway::repository::StudentRepository;
 use async_trait::async_trait;
 use chrono::{DateTime, NaiveDate, Utc};
+use heck::SnakeCase;
+use tokio_postgres::types::ToSql;
+use tokio_postgres::{Client, Error, Row};
+
 use domain::ports::find_student_collection_port::FindStudentCollectionPort;
 use domain::ports::student_db_gateway::{
     StudentCollectionDbResponse, StudentDbResponse, StudentQueryDbRequest,
     StudentSortCriteriaDbRequest, StudentSortFieldDbRequest,
 };
 use domain::SortDirection;
-use tokio_postgres::types::ToSql;
-use tokio_postgres::{Client, Error, Row};
 
-use heck::SnakeCase;
+use crate::student_gateway::find_one_student_by_id_adapter::from_pg_row_to_student_db_response;
+use crate::student_gateway::repository::StudentRepository;
 
 pub struct StudentFilter {
     name: String,
     email: String,
     phone: String,
-    undergraduate_school: String,
     date_of_birth: Option<NaiveDate>,
     place_of_birth: String,
     polity_name: String,
@@ -32,12 +32,7 @@ impl FindStudentCollectionPort for StudentRepository {
         let name = db_request.name.unwrap_or_else(|| "".to_string());
         let email = db_request.email.unwrap_or_else(|| "".to_string());
         let phone = db_request.phone.unwrap_or_else(|| "".to_string());
-        let undergraduate_school = db_request
-            .undergraduate_school
-            .unwrap_or_else(|| "".to_string());
-        let date_of_birth = db_request
-            .date_of_birth
-            .map(|date_time| date_time.date().naive_utc());
+        let date_of_birth = db_request.date_of_birth.map(|date_time| date_time);
         let place_of_birth = db_request.place_of_birth.unwrap_or_else(|| "".to_string());
         let polity_name = db_request.polity_name.unwrap_or_else(|| "".to_string());
         let offset = db_request.offset.unwrap_or(0);
@@ -56,7 +51,6 @@ impl FindStudentCollectionPort for StudentRepository {
             name,
             email,
             phone,
-            undergraduate_school,
             date_of_birth,
             place_of_birth,
             polity_name,
@@ -154,7 +148,7 @@ fn build_filtering_query_statement_string() -> String {
         AND (unaccent(place_of_birth) LIKE ('%' || unaccent($6) || '%') OR place_of_birth is NULL) \
         AND (unaccent(polity_name) LIKE ('%' || unaccent($7) || '%') OR polity_name is NULL) \
         "
-    .to_string()
+        .to_string()
 }
 
 async fn find_by(
@@ -179,7 +173,6 @@ async fn find_by(
         &filter.name,
         &filter.email,
         &filter.phone,
-        &filter.undergraduate_school,
         &filter.date_of_birth,
         &filter.place_of_birth,
         &filter.polity_name,
@@ -211,7 +204,6 @@ pub async fn count_without_limit(
         &filter.name,
         &filter.email,
         &filter.phone,
-        &filter.undergraduate_school,
         &filter.date_of_birth,
         &filter.place_of_birth,
         &filter.polity_name,
@@ -237,7 +229,6 @@ pub async fn count_total(
         &filter.name,
         &filter.email,
         &filter.phone,
-        &filter.undergraduate_school,
         &filter.date_of_birth,
         &filter.place_of_birth,
         &filter.polity_name,

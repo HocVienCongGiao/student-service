@@ -1,38 +1,58 @@
 use async_trait::async_trait;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use uuid::Uuid;
 
-use crate::entities::student::{Student as StudentEntity, StudentTitle};
+use crate::entities::person::{Person as PersonEntity, PersonTitle};
+use crate::entities::person::{Person, VowProgress};
+use crate::entities::person_educational_stage::{
+    EducationalLevel, EducationalStage as EducationalStageEntity, EducationalStage,
+};
+use crate::entities::person_id_number::{
+    PersonIdNumberProvider as PersonIdNumberProviderEntity, PersonIdNumberProvider,
+};
+use crate::entities::student::Student as StudentEntity;
+use crate::ports::person_db_gateway::{PersonDbGateway, PersonDbResponse};
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
 use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
 use crate::ports::DbError;
-use crate::usecases::student_usecase_shared_models::{
-    StudentUsecaseSharedTitle, WithChristianName, WithPolity,
+use crate::usecases::person_usecase_shared_models::{
+    PersonUsecaseSharedEducationalStage, PersonUsecaseSharedIdNumberProvider,
+    PersonUsecaseSharedLanguage, PersonUsecaseSharedTitle, PersonUsecaseSharedVowProgress,
 };
+use crate::usecases::student_usecase_shared_models::{WithChristianName, WithPolity};
 use crate::usecases::{ToEntity, ToUsecaseOutput, UsecaseError};
 
 pub struct CreateStudentUsecaseInteractor<
     A: StudentDbGateway,
     B: PolityDbGateway,
     C: SaintDbGateway,
+    D: PersonDbGateway,
 > {
     student_db_gateway: A,
     polity_db_gateway: B,
     saint_db_gateway: C,
+    person_db_gateway: D,
 }
 
-impl<A, B, C> CreateStudentUsecaseInteractor<A, B, C>
+impl<A, B, C, D> CreateStudentUsecaseInteractor<A, B, C, D>
 where
     A: StudentDbGateway + Sync + Send,
     B: PolityDbGateway + Sync + Send,
     C: SaintDbGateway + Sync + Send,
+    D: PersonDbGateway + Sync + Send,
 {
-    pub fn new(student_db_gateway: A, polity_db_gateway: B, saint_db_gateway: C) -> Self {
+    pub fn new(
+        student_db_gateway: A,
+        polity_db_gateway: B,
+        saint_db_gateway: C,
+        person_db_gateway: D,
+    ) -> Self {
         CreateStudentUsecaseInteractor {
             student_db_gateway,
             polity_db_gateway,
             saint_db_gateway,
+            person_db_gateway,
         }
     }
 }
@@ -47,22 +67,24 @@ pub trait CreateStudentUsecase {
 }
 
 #[async_trait]
-impl<A, B, C> CreateStudentUsecase for CreateStudentUsecaseInteractor<A, B, C>
+impl<A, B, C, D> CreateStudentUsecase for CreateStudentUsecaseInteractor<A, B, C, D>
 where
     A: StudentDbGateway + Sync + Send,
     B: PolityDbGateway + Sync + Send,
     C: SaintDbGateway + Sync + Send,
+    D: PersonDbGateway + Sync + Send,
 {
     async fn execute(
         &mut self,
         request: CreateStudentUsecaseInput,
     ) -> Result<CreateStudentUsecaseOutput, UsecaseError> {
-        let student = request.to_entity();
-        if student.is_valid() {
+        let person = request.to_entity();
+        // let educational_stages = request.to_educational_stage_entity();
+        if person.is_valid() {
             println!("This student is valid");
             let usecase_output: Result<CreateStudentUsecaseOutput, UsecaseError> = (*self)
-                .student_db_gateway
-                .insert(student.to_mutation_db_request())
+                .person_db_gateway
+                .insert(person.to_mutation_db_request())
                 .await
                 .map(|response| response.to_usecase_output())
                 .map_err(|err| err.to_usecase_error());
@@ -88,6 +110,7 @@ where
                             )
                         }
                     }
+                    // TODO: refactor, get from view
                     let saint_ids = output.saint_ids.clone();
                     if let Some(saint_ids) = saint_ids {
                         for (_i, e) in saint_ids.iter().enumerate() {
@@ -106,9 +129,21 @@ where
                 }
             };
         } else {
-            println!("This student is not valid");
+            println!("This person is not valid");
             Err(UsecaseError::InvalidInput)
         }
+
+        // if !educational_stages.is_empty() {
+        //     println!("Education list is not empty");
+        //     let insert_educational_stage: Result<EducationalStageDbResponse, UsecaseError> =
+        //         (*self)
+        //             .person_db_gateway
+        //             .insert_educational_stage(educational_stages)
+        //             .await
+        //             .map_err(|err| err.to_usecase_error());
+        // }
+
+        // TODO: if insert education_stage, student not error
     }
 
     // async fn update_student(
@@ -128,21 +163,31 @@ where
 
 pub struct CreateStudentUsecaseInput {
     pub polity_id: Option<Uuid>,
-    pub saint_ids: Option<Vec<uuid::Uuid>>,
-    pub title: Option<StudentUsecaseSharedTitle>,
+    pub saint_ids: Option<Vec<Uuid>>,
+    pub title: Option<PersonUsecaseSharedTitle>,
+    pub vow_progress: Option<PersonUsecaseSharedVowProgress>,
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
+    pub educational_stages: Option<Vec<PersonUsecaseSharedEducationalStage>>,
+    pub nationality: Option<String>,
+    pub race: Option<String>,
+    pub id_number: Option<String>,
+    pub id_number_provider: Option<PersonUsecaseSharedIdNumberProvider>,
+    pub date_of_issue: Option<NaiveDate>,
+    pub place_of_issue: Option<String>,
+    pub address: Option<String>,
+    pub languages: Option<Vec<PersonUsecaseSharedLanguage>>,
 }
 
 #[derive(Clone)]
 pub struct CreateStudentUsecaseOutput {
-    pub id: Uuid,
+    pub person_id: Uuid,
+    pub student_id: Option<Uuid>,
     pub polity_id: Option<Uuid>,
     pub polity_name: Option<String>,
     pub polity_location_name: Option<String>,
@@ -150,56 +195,142 @@ pub struct CreateStudentUsecaseOutput {
     pub polity_location_email: Option<String>,
     pub saint_ids: Option<Vec<Uuid>>,
     pub christian_name: Option<Vec<String>>,
-    pub title: Option<StudentUsecaseSharedTitle>,
+    pub title: Option<String>,
+    pub vow_progress: Option<String>,
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
+    pub nationality: Option<String>,
+    pub race: Option<String>,
+    pub id_number: Option<String>,
+    pub id_number_provider: Option<String>,
+    pub date_of_issue: Option<NaiveDate>,
+    pub place_of_issue: Option<String>,
+    pub address: Option<String>,
+    // pub languages: Option<Vec<Language>>, // todo()!
+    // pub educational_stages: Option<Vec<EducationalStage>>, // todo()!
 }
 
-impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
-    fn to_entity(self) -> StudentEntity {
+impl ToEntity<PersonEntity> for CreateStudentUsecaseInput {
+    fn to_entity(self) -> PersonEntity {
         let title_usecase_input = self.title;
-        let mut title: Option<StudentTitle> = None;
+        let mut title: Option<PersonTitle> = None;
         if let Some(title_usecase_input) = title_usecase_input {
             title = Some(title_usecase_input.to_entity());
         }
-        let title_test = title.clone().unwrap();
-        StudentEntity {
+
+        let vow_progress_usecase_input = self.vow_progress;
+        let mut vow_progress: Option<VowProgress> = None;
+        if let Some(vow_progress_usecase_input) = vow_progress_usecase_input {
+            vow_progress = Some(vow_progress_usecase_input.to_entity());
+        }
+
+        // let mut language_list: Vec<Language> = Vec::new();
+        // for language in self.language.unwrap() {
+        //     language_list.push(LanguageEntity {
+        //         person_id,
+        //         language: language.language,
+        //         level: language.level,
+        //     })
+        // }
+
+        PersonEntity {
             id: Some(Uuid::new_v4()),
+            student_id: Some(Uuid::new_v4()),
             polity_id: self.polity_id,
             saint_ids: self.saint_ids,
             title,
+            vow_progress,
             first_name: self.first_name,
             middle_name: self.middle_name,
             last_name: self.last_name,
             date_of_birth: self.date_of_birth,
             place_of_birth: self.place_of_birth,
+            date_of_issue: self.date_of_issue,
+            place_of_issue: self.place_of_issue,
             email: self.email,
             phone: self.phone,
-            undergraduate_school: self.undergraduate_school,
+            nationality: self.nationality,
+            race: self.race,
+            address: self.address,
+            // languages: language_list, // todo()!
         }
     }
+
+    // fn to_educational_stage_entity(self, person_id: Uuid) -> Vec<EducationalStageEntity> {
+    //     let mut educational_stage_list: Vec<EducationalStage> = Vec::new();
+    //     for stage in self.educational_stages.unwrap() {
+    //         let education_level_usecase_input = stage.educational_level;
+    //         let mut educational_level: Option<EducationalLevel> = None;
+    //         if let Some(education_level_usecase_input) = education_level_usecase_input {
+    //             educational_level = Some(educational_level.to_entity());
+    //         }
+    //         educational_stage_list.push(EducationalStageEntity {
+    //             id: Some(Uuid::new_v4()),
+    //             educational_level: educational_level,
+    //             school_name: stage.school_name,
+    //             major: stage.major,
+    //             graduate_year: stage.graduate_year,
+    //             person_id: person_id,
+    //         });
+    //     }
+    //     educational_stage_list
+    // }
 }
 
-impl ToEntity<StudentTitle> for StudentUsecaseSharedTitle {
-    fn to_entity(self) -> StudentTitle {
+impl ToEntity<PersonTitle> for PersonUsecaseSharedTitle {
+    fn to_entity(self) -> PersonTitle {
         match self {
-            StudentUsecaseSharedTitle::Monk => StudentTitle::Monk,
-            StudentUsecaseSharedTitle::Nun => StudentTitle::Nun,
-            StudentUsecaseSharedTitle::Priest => StudentTitle::Priest,
+            PersonUsecaseSharedTitle::Monk => PersonTitle::Monk,
+            PersonUsecaseSharedTitle::Nun => PersonTitle::Nun,
+            PersonUsecaseSharedTitle::Priest => PersonTitle::Priest,
         }
     }
 }
 
-impl ToUsecaseOutput<CreateStudentUsecaseOutput> for StudentDbResponse {
+impl ToEntity<VowProgress> for PersonUsecaseSharedVowProgress {
+    fn to_entity(self) -> VowProgress {
+        match self {
+            PersonUsecaseSharedVowProgress::SolemnVow => VowProgress::SolemnVow,
+            PersonUsecaseSharedVowProgress::SimpleVow => VowProgress::SimpleVow,
+            PersonUsecaseSharedVowProgress::Novice => VowProgress::Novice,
+            PersonUsecaseSharedVowProgress::Preparation => VowProgress::Preparation,
+        }
+    }
+}
+
+impl ToEntity<EducationalLevel> for EducationalLevel {
+    fn to_entity(self) -> EducationalLevel {
+        match self {
+            EducationalLevel::ElementarySchool => EducationalLevel::ElementarySchool,
+            EducationalLevel::MiddleSchool => EducationalLevel::MiddleSchool,
+            EducationalLevel::HighSchool => EducationalLevel::HighSchool,
+            EducationalLevel::Bachelor => EducationalLevel::Bachelor,
+            EducationalLevel::Master => EducationalLevel::Master,
+            EducationalLevel::Doctor => EducationalLevel::Doctor,
+            EducationalLevel::Other => EducationalLevel::Other,
+        }
+    }
+}
+
+impl ToEntity<PersonIdNumberProvider> for PersonUsecaseSharedIdNumberProvider {
+    fn to_entity(self) -> PersonIdNumberProvider {
+        match self {
+            PersonUsecaseSharedIdNumberProvider::NationalId => PersonIdNumberProvider::NationalId,
+            PersonUsecaseSharedIdNumberProvider::Passport => PersonIdNumberProvider::Passport,
+        }
+    }
+}
+
+impl ToUsecaseOutput<CreateStudentUsecaseOutput> for PersonDbResponse {
     fn to_usecase_output(self) -> CreateStudentUsecaseOutput {
         CreateStudentUsecaseOutput {
-            id: self.id,
+            person_id: self.id.unwrap(), // todo()!
+            student_id: None,            // todo()!
             polity_id: self.polity_id,
             polity_name: None,
             polity_location_name: None,
@@ -208,6 +339,7 @@ impl ToUsecaseOutput<CreateStudentUsecaseOutput> for StudentDbResponse {
             saint_ids: self.saint_ids.clone(),
             christian_name: None,
             title: self.title.map(|t| t.parse().unwrap()),
+            vow_progress: self.vow_progress.map(|t| t.parse().unwrap()),
             first_name: self.first_name.clone(),
             middle_name: self.middle_name.clone(),
             last_name: self.last_name.clone(),
@@ -215,7 +347,15 @@ impl ToUsecaseOutput<CreateStudentUsecaseOutput> for StudentDbResponse {
             place_of_birth: self.place_of_birth.clone(),
             email: self.email.clone(),
             phone: self.phone.clone(),
-            undergraduate_school: self.undergraduate_school,
+            nationality: self.nationality.clone(),
+            race: self.race.clone(),
+            id_number: None,
+            id_number_provider: None,
+            date_of_issue: None,
+            place_of_issue: None,
+            address: self.address.clone(),
+            // languages: None,  // todo()!
+            // educational_stages: None, // todo()!
         }
     }
 }

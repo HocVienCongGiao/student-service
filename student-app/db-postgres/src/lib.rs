@@ -2,6 +2,7 @@ use tokio_postgres::{Client, NoTls};
 
 pub mod config;
 mod db_column;
+pub mod person_gateway;
 pub mod polity_gateway;
 pub mod saint_gateway;
 pub mod student_gateway;

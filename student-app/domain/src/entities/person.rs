@@ -12,11 +12,15 @@ pub(crate) struct Person {
     pub last_name: Option<String>,
     pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
+    pub date_of_issue: Option<NaiveDate>,
+    pub place_of_issue: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
     pub nationality: Option<String>,
     pub race: Option<String>,
     pub address: Option<String>,
+    // pub languages: Option<Vec<Language>>,
+    pub student_id: Option<Uuid>,
 }
 
 impl Person {
@@ -61,7 +65,7 @@ impl std::str::FromStr for PersonTitle {
 pub(crate) enum VowProgress {
     SolemnVow,
     SimpleVow,
-    Novoice,
+    Novice,
     Preparation,
 }
 
@@ -70,7 +74,7 @@ impl std::fmt::Display for VowProgress {
         match *self {
             VowProgress::SolemnVow => write!(f, "SOLEMNVOW"),
             VowProgress::SimpleVow => write!(f, "SIMPLEVOW"),
-            VowProgress::Novoice => write!(f, "NOVOICE"),
+            VowProgress::Novice => write!(f, "NOVOICE"),
             VowProgress::Preparation => write!(f, "PREPARATION"),
         }
     }
@@ -83,7 +87,7 @@ impl std::str::FromStr for VowProgress {
         match s.to_uppercase().as_str() {
             "SOLEMNVOW" => std::result::Result::Ok(VowProgress::SolemnVow),
             "SIMPLEVOW" => std::result::Result::Ok(VowProgress::SimpleVow),
-            "NOVOICE" => std::result::Result::Ok(VowProgress::Novoice),
+            "NOVOICE" => std::result::Result::Ok(VowProgress::Novice),
             "PREPARATION" => std::result::Result::Ok(VowProgress::Preparation),
             _ => std::result::Result::Err(format!("Value not valid: {}", s)),
         }

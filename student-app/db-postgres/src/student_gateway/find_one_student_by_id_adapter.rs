@@ -32,7 +32,7 @@ pub(crate) fn from_pg_row_to_student_db_response(row: Row) -> StudentDbResponse 
         first_name: Some(db_column::get_string(&row, "first_name")),
         middle_name: Some(db_column::get_string(&row, "middle_name")),
         last_name: Some(db_column::get_string(&row, "last_name")),
-        date_of_birth: Some(db_column::get_datetime_from_db_date(&row, "date_of_birth")),
+        date_of_birth: Some(db_column::get_date(&row, "date_of_birth")),
         place_of_birth: Some(db_column::get_string(&row, "place_of_birth")),
         email: Some(db_column::get_string(&row, "email")),
         phone: Some(db_column::get_string(&row, "phone")),

@@ -44,7 +44,6 @@ impl ToOpenApi<StudentView> for QueryStudentUsecaseOutput {
             place_of_birth: self.place_of_birth,
             email: self.email,
             phone: self.phone,
-            undergraduate_school: self.undergraduate_school,
             christian_name: self.christian_name.map(|saint_names| saint_names.join(" ")),
             name: Some(format!(
                 "{} {} {}",
@@ -52,6 +51,7 @@ impl ToOpenApi<StudentView> for QueryStudentUsecaseOutput {
                 self.middle_name.unwrap(),
                 self.last_name.unwrap(),
             )),
+            undergraduate_school: None,
         }
     }
 }
@@ -77,7 +77,7 @@ impl ToOpenApi<StudentView> for CreateStudentUsecaseOutput {
             place_of_birth: self.place_of_birth,
             email: self.email,
             phone: self.phone,
-            undergraduate_school: self.undergraduate_school,
+            undergraduate_school: None,
             christian_name: self.christian_name.map(|saint_names| saint_names.join(" ")),
             name: Some(format!(
                 "{} {} {}",

@@ -17,6 +17,7 @@ pub fn build_http_request_to_post_student_upsert(student_upsert: StudentUpsert) 
         .to_string();
 
     let serialized = serde_json::to_string(&student_upsert).unwrap();
+    println!("student_obj: {}", serialized);
 
     build_http_post_request(uri, query_param, path_param, Some(serialized))
 }
