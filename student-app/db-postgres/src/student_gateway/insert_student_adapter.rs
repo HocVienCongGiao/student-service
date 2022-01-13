@@ -1,7 +1,7 @@
 use std::ops::Add;
 
 use async_trait::async_trait;
-use chrono::{DateTime, NaiveDate, Utc};
+use chrono::NaiveDate;
 use tokio_postgres::types::ToSql;
 use tokio_postgres::{Error, Transaction};
 use uuid::Uuid;
@@ -32,9 +32,8 @@ pub(crate) async fn save_id(transaction: &Transaction<'_>, id: Uuid) -> Result<u
 pub(crate) async fn save_date_of_birth(
     transaction: &Transaction<'_>,
     id: Uuid,
-    date_of_birth: DateTime<Utc>,
+    date_of_birth: NaiveDate,
 ) -> Result<u64, Error> {
-    let date: NaiveDate = date_of_birth.naive_utc().date();
     let stmt = (*transaction)
         .prepare(
             "INSERT into public.student__student_date_of_birth (id, date_of_birth) VAlUES ($1, $2)",
@@ -42,7 +41,7 @@ pub(crate) async fn save_date_of_birth(
         .await
         .unwrap();
 
-    let params: &[&(dyn ToSql + Sync)] = &[&id, &date];
+    let params: &[&(dyn ToSql + Sync)] = &[&id, &date_of_birth];
     transaction.execute(&stmt, params).await
 }
 

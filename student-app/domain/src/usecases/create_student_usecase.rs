@@ -1,12 +1,11 @@
 use async_trait::async_trait;
-use chrono::{DateTime, Utc};
+use chrono::NaiveDate;
 use uuid::Uuid;
 
 use crate::entities::student::{Student as StudentEntity, StudentTitle};
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
 use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
-use crate::ports::DbError;
 use crate::usecases::student_usecase_shared_models::{
     StudentUsecaseSharedTitle, WithChristianName, WithPolity,
 };
@@ -133,11 +132,10 @@ pub struct CreateStudentUsecaseInput {
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
 }
 
 #[derive(Clone)]
@@ -154,7 +152,7 @@ pub struct CreateStudentUsecaseOutput {
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
@@ -168,7 +166,6 @@ impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
         if let Some(title_usecase_input) = title_usecase_input {
             title = Some(title_usecase_input.to_entity());
         }
-        let title_test = title.clone().unwrap();
         StudentEntity {
             id: Some(Uuid::new_v4()),
             polity_id: self.polity_id,
@@ -181,7 +178,7 @@ impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
             place_of_birth: self.place_of_birth,
             email: self.email,
             phone: self.phone,
-            undergraduate_school: self.undergraduate_school,
+            undergraduate_school: None,
         }
     }
 }

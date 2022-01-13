@@ -1,4 +1,5 @@
-use chrono::{DateTime, Utc};
+use async_trait::async_trait;
+use chrono::NaiveDate;
 use uuid::Uuid;
 
 use crate::ports::polity_db_gateway::PolityDbGateway;
@@ -8,7 +9,6 @@ use crate::usecases::student_usecase_shared_models::QueryStudentUsecaseOutput;
 use crate::usecases::student_usecase_shared_models::{WithChristianName, WithPolity};
 use crate::usecases::ToUsecaseOutput;
 use crate::SortDirection;
-use async_trait::async_trait;
 
 pub struct QueryStudentCollectionUsecaseInteractor<
     A: StudentDbGateway,
@@ -116,7 +116,7 @@ pub struct QueryStudentCollectionUsecaseInput {
     pub email: Option<String>,
     pub phone: Option<String>,
     pub undergraduate_school: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub polity_name: Option<String>,
     //pub specialism: Option<String>,
@@ -147,7 +147,8 @@ pub enum QueryStudentCollectionUsecaseInputSortField {
 }
 
 pub struct QueryStudentCollectionUsecaseOutput {
-    pub collection: Vec<QueryStudentUsecaseOutput>, // I am cheating here
+    pub collection: Vec<QueryStudentUsecaseOutput>,
+    // I am cheating here
     pub has_more: Option<bool>,
     pub total: i64,
 }

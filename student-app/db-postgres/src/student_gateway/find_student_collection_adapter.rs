@@ -1,7 +1,7 @@
 use crate::student_gateway::find_one_student_by_id_adapter::from_pg_row_to_student_db_response;
 use crate::student_gateway::repository::StudentRepository;
 use async_trait::async_trait;
-use chrono::{DateTime, NaiveDate, Utc};
+use chrono::NaiveDate;
 use domain::ports::find_student_collection_port::FindStudentCollectionPort;
 use domain::ports::student_db_gateway::{
     StudentCollectionDbResponse, StudentDbResponse, StudentQueryDbRequest,
@@ -35,9 +35,7 @@ impl FindStudentCollectionPort for StudentRepository {
         let undergraduate_school = db_request
             .undergraduate_school
             .unwrap_or_else(|| "".to_string());
-        let date_of_birth = db_request
-            .date_of_birth
-            .map(|date_time| date_time.date().naive_utc());
+        let date_of_birth = db_request.date_of_birth;
         let place_of_birth = db_request.place_of_birth.unwrap_or_else(|| "".to_string());
         let polity_name = db_request.polity_name.unwrap_or_else(|| "".to_string());
         let offset = db_request.offset.unwrap_or(0);
@@ -144,12 +142,13 @@ fn default_order_string() -> String {
 }
 
 fn build_filtering_query_statement_string() -> String {
+    // TODO: fix undergraduate school $4
     "(unaccent(last_name) LIKE ('%' || unaccent($1) || '%') \
         OR unaccent(middle_name) LIKE ('%' || unaccent($1) || '%')  \
         OR unaccent(first_name) LIKE ('%' || unaccent($1) || '%')) \
         AND (unaccent(email) LIKE ('%' || unaccent($2) || '%') OR email is NULL) \
         AND (unaccent(phone) LIKE ('%' || unaccent($3) || '%') OR phone is NULL) \
-        AND (unaccent(undergraduate_school_name) LIKE ('%' || unaccent($4) || '%') OR undergraduate_school_name is NULL) \
+        AND (unaccent(phone) LIKE ('%' || unaccent($4) || '%') OR phone is NULL) \
         AND ($5::DATE is null OR date_of_birth = $5::DATE) \
         AND (unaccent(place_of_birth) LIKE ('%' || unaccent($6) || '%') OR place_of_birth is NULL) \
         AND (unaccent(polity_name) LIKE ('%' || unaccent($7) || '%') OR polity_name is NULL) \

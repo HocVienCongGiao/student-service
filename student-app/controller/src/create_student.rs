@@ -62,8 +62,7 @@ impl ToUsecaseInput<CreateStudentUsecaseInput> for StudentUpsertOpenApi {
             date_of_birth: self.date_of_birth,
             place_of_birth: self.place_of_birth.clone(),
             email: self.email.clone(),
-            phone: self.phone.clone(),
-            undergraduate_school: self.undergraduate_school,
+            phone: self.phone,
         }
     }
 }

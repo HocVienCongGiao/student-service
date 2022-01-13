@@ -10,7 +10,7 @@ use crate::usecases::query_student_collection_usecase::{
 };
 use crate::SortDirection;
 use async_trait::async_trait;
-use chrono::{DateTime, Utc};
+use chrono::NaiveDate;
 use uuid::Uuid;
 
 #[async_trait]
@@ -29,7 +29,7 @@ pub struct StudentQueryDbRequest {
     pub email: Option<String>,
     pub phone: Option<String>,
     pub undergraduate_school: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub polity_name: Option<String>,
     //pub specialism: Option<String>,
@@ -65,7 +65,7 @@ pub struct StudentMutationDbRequest {
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
@@ -80,7 +80,7 @@ pub struct StudentDbResponse {
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
