@@ -144,12 +144,13 @@ fn default_order_string() -> String {
 }
 
 fn build_filtering_query_statement_string() -> String {
+    // TODO: fix undergraduate school $4
     "(unaccent(last_name) LIKE ('%' || unaccent($1) || '%') \
         OR unaccent(middle_name) LIKE ('%' || unaccent($1) || '%')  \
         OR unaccent(first_name) LIKE ('%' || unaccent($1) || '%')) \
         AND (unaccent(email) LIKE ('%' || unaccent($2) || '%') OR email is NULL) \
         AND (unaccent(phone) LIKE ('%' || unaccent($3) || '%') OR phone is NULL) \
-        AND (unaccent(undergraduate_school_name) LIKE ('%' || unaccent($4) || '%') OR undergraduate_school_name is NULL) \
+        AND (unaccent(phone) LIKE ('%' || unaccent($4) || '%') OR phone is NULL) \
         AND ($5::DATE is null OR date_of_birth = $5::DATE) \
         AND (unaccent(place_of_birth) LIKE ('%' || unaccent($6) || '%') OR place_of_birth is NULL) \
         AND (unaccent(polity_name) LIKE ('%' || unaccent($7) || '%') OR polity_name is NULL) \
