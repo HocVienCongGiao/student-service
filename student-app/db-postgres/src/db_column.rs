@@ -24,3 +24,7 @@ pub fn get_datetime_from_db_date(row: &Row, col: &str) -> DateTime<Utc> {
 
     DateTime::from_utc(datetime, Utc)
 }
+
+pub fn get_date(row: &Row, col: &str) -> NaiveDate {
+    row.get::<&str, NaiveDate>(col)
+}

@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use chrono::{DateTime, Utc};
+use chrono::NaiveDate;
 use uuid::Uuid;
 
 use crate::entities::student::{Student as StudentEntity, StudentTitle};
@@ -133,11 +133,10 @@ pub struct CreateStudentUsecaseInput {
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
 }
 
 #[derive(Clone)]
@@ -154,7 +153,7 @@ pub struct CreateStudentUsecaseOutput {
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
@@ -181,7 +180,7 @@ impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
             place_of_birth: self.place_of_birth,
             email: self.email,
             phone: self.phone,
-            undergraduate_school: self.undergraduate_school,
+            undergraduate_school: None,
         }
     }
 }
