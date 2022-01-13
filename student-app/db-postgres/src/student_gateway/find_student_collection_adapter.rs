@@ -1,7 +1,7 @@
 use crate::student_gateway::find_one_student_by_id_adapter::from_pg_row_to_student_db_response;
 use crate::student_gateway::repository::StudentRepository;
 use async_trait::async_trait;
-use chrono::{DateTime, NaiveDate, Utc};
+use chrono::NaiveDate;
 use domain::ports::find_student_collection_port::FindStudentCollectionPort;
 use domain::ports::student_db_gateway::{
     StudentCollectionDbResponse, StudentDbResponse, StudentQueryDbRequest,

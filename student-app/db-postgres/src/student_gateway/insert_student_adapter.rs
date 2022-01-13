@@ -1,7 +1,7 @@
 use std::ops::Add;
 
 use async_trait::async_trait;
-use chrono::{DateTime, NaiveDate, Utc};
+use chrono::NaiveDate;
 use tokio_postgres::types::ToSql;
 use tokio_postgres::{Error, Transaction};
 use uuid::Uuid;

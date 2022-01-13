@@ -166,7 +166,6 @@ impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
         if let Some(title_usecase_input) = title_usecase_input {
             title = Some(title_usecase_input.to_entity());
         }
-        let title_test = title.clone().unwrap();
         StudentEntity {
             id: Some(Uuid::new_v4()),
             polity_id: self.polity_id,

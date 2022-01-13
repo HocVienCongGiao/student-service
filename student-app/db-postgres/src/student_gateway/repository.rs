@@ -1,8 +1,6 @@
 use async_trait::async_trait;
-use domain::ports::student_db_gateway::{
-    StudentDbGateway, StudentDbResponse, StudentMutationDbRequest, StudentQueryDbRequest,
-};
-use tokio_postgres::{Client, Error, Row};
+use domain::ports::student_db_gateway::StudentDbGateway;
+use tokio_postgres::Client;
 
 pub struct StudentRepository {
     pub client: Client,
