@@ -1,3 +1,6 @@
+use async_trait::async_trait;
+use uuid::Uuid;
+
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
 use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
@@ -5,9 +8,6 @@ use crate::usecases::student_usecase_shared_models::{
     QueryStudentUsecaseOutput, WithChristianName, WithPolity,
 };
 use crate::usecases::ToUsecaseOutput;
-use async_trait::async_trait;
-use chrono::Utc;
-use uuid::Uuid;
 
 pub struct QueryOneStudentByIdUsecaseInteractor<
     A: StudentDbGateway,

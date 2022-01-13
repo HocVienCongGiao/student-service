@@ -35,9 +35,7 @@ impl FindStudentCollectionPort for StudentRepository {
         let undergraduate_school = db_request
             .undergraduate_school
             .unwrap_or_else(|| "".to_string());
-        let date_of_birth = db_request
-            .date_of_birth
-            .map(|date_time| date_time.date().naive_utc());
+        let date_of_birth = db_request.date_of_birth;
         let place_of_birth = db_request.place_of_birth.unwrap_or_else(|| "".to_string());
         let polity_name = db_request.polity_name.unwrap_or_else(|| "".to_string());
         let offset = db_request.offset.unwrap_or(0);

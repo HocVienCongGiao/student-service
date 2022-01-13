@@ -6,7 +6,6 @@ use crate::entities::student::{Student as StudentEntity, StudentTitle};
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
 use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
-use crate::ports::DbError;
 use crate::usecases::student_usecase_shared_models::{
     StudentUsecaseSharedTitle, WithChristianName, WithPolity,
 };

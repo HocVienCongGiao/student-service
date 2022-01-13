@@ -3,9 +3,6 @@ pub mod query_one_student_by_id_usecase;
 pub mod query_student_collection_usecase;
 pub mod student_usecase_shared_models;
 
-use chrono::{DateTime, Utc};
-use uuid::Uuid;
-
 pub(crate) trait ToEntity<T> {
     fn to_entity(self) -> T;
 }

@@ -1,5 +1,5 @@
 use crate::Error;
-use chrono::DateTime;
+use chrono::NaiveDate;
 use controller::StudentCollectionQuery;
 use domain::usecases::UsecaseError;
 use hvcg_academics_openapi_student::models::{
@@ -39,8 +39,7 @@ pub fn from_request_to_collection_query(req: &Request) -> StudentCollectionQuery
     let param_date_of_birth = query.get("dateOfBirth");
     let param_date_of_birth = match param_date_of_birth {
         Some(param_date_of_birth) => {
-            let param_date_of_birth =
-                <DateTime<chrono::Utc> as FromStr>::from_str(param_date_of_birth);
+            let param_date_of_birth = <NaiveDate as FromStr>::from_str(param_date_of_birth);
             match param_date_of_birth {
                 Ok(param_date_of_birth) => Some(param_date_of_birth),
                 Err(e) => {

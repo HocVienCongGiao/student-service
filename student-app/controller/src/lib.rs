@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::NaiveDate;
 use domain::usecases::UsecaseError;
 use hvcg_academics_openapi_student::models::{
     StudentSortCriteria, StudentUpsert as StudentUpsertOpenApi, StudentView as StudentViewOpenApi,
@@ -40,7 +40,7 @@ pub struct StudentCollectionQuery {
     pub email: Option<String>,
     pub phone: Option<String>,
     pub undergraduate_school: Option<String>,
-    pub date_of_birth: Option<DateTime<Utc>>,
+    pub date_of_birth: Option<NaiveDate>,
     pub place_of_birth: Option<String>,
     pub polity_name: Option<String>,
     //pub specialism: Option<String>,
