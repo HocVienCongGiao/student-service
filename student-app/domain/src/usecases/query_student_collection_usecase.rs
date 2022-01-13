@@ -9,6 +9,7 @@ use crate::usecases::student_usecase_shared_models::QueryStudentUsecaseOutput;
 use crate::usecases::student_usecase_shared_models::{WithChristianName, WithPolity};
 use crate::usecases::ToUsecaseOutput;
 use crate::SortDirection;
+use async_trait::async_trait;
 
 pub struct QueryStudentCollectionUsecaseInteractor<
     A: StudentDbGateway,
