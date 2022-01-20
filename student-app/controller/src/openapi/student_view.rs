@@ -82,9 +82,9 @@ impl ToOpenApi<StudentView> for CreateStudentUsecaseOutput {
             christian_name: self.christian_name.map(|saint_names| saint_names.join(" ")),
             name: Some(format!(
                 "{} {} {}",
-                self.last_name.unwrap_or_default(),
-                self.middle_name.unwrap_or_default(),
-                self.first_name.unwrap_or_default(),
+                self.first_name.unwrap(),
+                self.middle_name.unwrap(),
+                self.last_name.unwrap(),
             )),
         }
     }
@@ -115,9 +115,9 @@ impl ToOpenApi<StudentView> for UpdateStudentUsecaseOutput {
             christian_name: self.christian_name.map(|saint_names| saint_names.join(" ")),
             name: Some(format!(
                 "{} {} {}",
-                self.last_name.unwrap_or_default(),
-                self.middle_name.unwrap_or_default(),
-                self.first_name.unwrap_or_default(),
+                self.first_name.unwrap(),
+                self.middle_name.unwrap(),
+                self.last_name.unwrap(),
             )),
         }
     }

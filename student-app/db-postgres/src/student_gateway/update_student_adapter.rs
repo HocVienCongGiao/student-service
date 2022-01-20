@@ -81,7 +81,7 @@ pub(crate) async fn delete_christian_names(
     id: Uuid,
 ) -> Result<u64, Error> {
     let stmt = (*transaction)
-        .prepare("DELETE FROM public.person__person_christian_names WHERE id = $1")
+        .prepare("DELETE FROM public.person__person_christian_names WHERE person_id = $1")
         .await
         .unwrap();
 
@@ -186,7 +186,7 @@ impl UpdateStudentPort for StudentRepository {
             person_id,
             "person".to_string(),
             "middle_name".to_string(),
-            last_name.clone(),
+            middle_name.clone(),
         )
         .await;
         if let Err(error) = result {
@@ -230,7 +230,7 @@ impl UpdateStudentPort for StudentRepository {
         result = update_student_info(
             &transaction,
             person_id,
-            "student".to_string(),
+            "person".to_string(),
             "email".to_string(),
             email.clone(),
         )
@@ -246,7 +246,7 @@ impl UpdateStudentPort for StudentRepository {
         result = update_student_info(
             &transaction,
             person_id,
-            "student".to_string(),
+            "person".to_string(),
             "phone".to_string(),
             phone.clone(),
         )
@@ -262,7 +262,7 @@ impl UpdateStudentPort for StudentRepository {
         result = update_student_info(
             &transaction,
             person_id,
-            "student".to_string(),
+            "person".to_string(),
             "place_of_birth".to_string(),
             place_of_birth.clone(),
         )
@@ -297,7 +297,7 @@ impl UpdateStudentPort for StudentRepository {
                 place_of_birth: Some(place_of_birth.clone()),
                 email: Some(email.clone()),
                 phone: Some(phone.clone()),
-                undergraduate_school: None,
+                undergraduate_school: Some("Đại Chủng Viện Thánh Quý - Cần Thơ".to_string()),
             })
             .map_err(|error| DbError::UnknownError(error.into_source().unwrap().to_string()))
     }

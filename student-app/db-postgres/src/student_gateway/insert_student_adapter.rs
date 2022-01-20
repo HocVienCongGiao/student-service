@@ -190,7 +190,7 @@ impl InsertStudentPort for StudentRepository {
             id,
             "person".to_string(),
             "middle_name".to_string(),
-            last_name.clone(),
+            middle_name.clone(),
         )
         .await;
         if let Err(error) = result {
