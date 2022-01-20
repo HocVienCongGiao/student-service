@@ -6,6 +6,7 @@ use hvcg_academics_openapi_student::models::{
 };
 use uuid::Uuid;
 mod create_student;
+mod delete_student;
 mod get_one_student_by_id;
 mod get_student_collection;
 mod update_student;
@@ -35,6 +36,10 @@ pub async fn create_student(
 
 pub async fn get_students(query: StudentCollectionQuery) -> StudentViewCollection {
     get_student_collection::from_usecase_input(query.to_usecase_input()).await
+}
+
+pub async fn delete_student(id: Uuid) -> Result<(), UsecaseError> {
+    delete_student::from_uuid(id).await
 }
 
 pub struct StudentCollectionQuery {
