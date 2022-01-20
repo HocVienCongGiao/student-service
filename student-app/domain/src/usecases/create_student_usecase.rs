@@ -3,6 +3,7 @@ use chrono::NaiveDate;
 use uuid::Uuid;
 
 use crate::entities::student::{Student as StudentEntity, StudentTitle};
+use crate::ports::person_db_gateway::PersonDbGateway;
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
 use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
@@ -15,23 +16,32 @@ pub struct CreateStudentUsecaseInteractor<
     A: StudentDbGateway,
     B: PolityDbGateway,
     C: SaintDbGateway,
+    D: PersonDbGateway,
 > {
     student_db_gateway: A,
     polity_db_gateway: B,
     saint_db_gateway: C,
+    person_db_gateway: D,
 }
 
-impl<A, B, C> CreateStudentUsecaseInteractor<A, B, C>
+impl<A, B, C, D> CreateStudentUsecaseInteractor<A, B, C, D>
 where
     A: StudentDbGateway + Sync + Send,
     B: PolityDbGateway + Sync + Send,
     C: SaintDbGateway + Sync + Send,
+    D: PersonDbGateway + Sync + Send,
 {
-    pub fn new(student_db_gateway: A, polity_db_gateway: B, saint_db_gateway: C) -> Self {
+    pub fn new(
+        student_db_gateway: A,
+        polity_db_gateway: B,
+        saint_db_gateway: C,
+        person_db_gateway: D,
+    ) -> Self {
         CreateStudentUsecaseInteractor {
             student_db_gateway,
             polity_db_gateway,
             saint_db_gateway,
+            person_db_gateway,
         }
     }
 }
@@ -46,16 +56,18 @@ pub trait CreateStudentUsecase {
 }
 
 #[async_trait]
-impl<A, B, C> CreateStudentUsecase for CreateStudentUsecaseInteractor<A, B, C>
+impl<A, B, C, D> CreateStudentUsecase for CreateStudentUsecaseInteractor<A, B, C, D>
 where
     A: StudentDbGateway + Sync + Send,
     B: PolityDbGateway + Sync + Send,
     C: SaintDbGateway + Sync + Send,
+    D: PersonDbGateway + Sync + Send,
 {
     async fn execute(
         &mut self,
         request: CreateStudentUsecaseInput,
     ) -> Result<CreateStudentUsecaseOutput, UsecaseError> {
+        // TODO: cheat convert student -> person
         let student = request.to_entity();
         if student.is_valid() {
             println!("This student is valid");
@@ -140,7 +152,8 @@ pub struct CreateStudentUsecaseInput {
 
 #[derive(Clone)]
 pub struct CreateStudentUsecaseOutput {
-    pub id: Uuid,
+    pub person_id: Uuid,
+    pub student_id: Option<Uuid>,
     pub polity_id: Option<Uuid>,
     pub polity_name: Option<String>,
     pub polity_location_name: Option<String>,
@@ -156,7 +169,6 @@ pub struct CreateStudentUsecaseOutput {
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
 }
 
 impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
@@ -167,7 +179,8 @@ impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
             title = Some(title_usecase_input.to_entity());
         }
         StudentEntity {
-            id: Some(Uuid::new_v4()),
+            person_id: Some(Uuid::new_v4()),
+            student_id: Some(Uuid::new_v4()),
             polity_id: self.polity_id,
             saint_ids: self.saint_ids,
             title,
@@ -196,7 +209,8 @@ impl ToEntity<StudentTitle> for StudentUsecaseSharedTitle {
 impl ToUsecaseOutput<CreateStudentUsecaseOutput> for StudentDbResponse {
     fn to_usecase_output(self) -> CreateStudentUsecaseOutput {
         CreateStudentUsecaseOutput {
-            id: self.id,
+            person_id: self.id,
+            student_id: None,
             polity_id: self.polity_id,
             polity_name: None,
             polity_location_name: None,
@@ -212,7 +226,6 @@ impl ToUsecaseOutput<CreateStudentUsecaseOutput> for StudentDbResponse {
             place_of_birth: self.place_of_birth.clone(),
             email: self.email.clone(),
             phone: self.phone.clone(),
-            undergraduate_school: self.undergraduate_school,
         }
     }
 }

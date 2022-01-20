@@ -1,12 +1,11 @@
 use chrono::NaiveDate;
 use uuid::Uuid;
 
-pub(crate) struct Student {
-    pub person_id: Option<Uuid>,
-    pub student_id: Option<Uuid>,
+pub(crate) struct Person {
+    pub id: Option<Uuid>,
     pub polity_id: Option<Uuid>,
     pub saint_ids: Option<Vec<uuid::Uuid>>,
-    pub title: Option<StudentTitle>,
+    pub title: Option<PersonTitle>,
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
@@ -14,10 +13,9 @@ pub(crate) struct Student {
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
 }
 
-impl Student {
+impl Person {
     pub(crate) fn is_valid(&self) -> bool {
         true
     }
@@ -25,30 +23,30 @@ impl Student {
 
 #[derive(PartialEq, Clone)]
 #[repr(C)]
-pub(crate) enum StudentTitle {
+pub(crate) enum PersonTitle {
     Priest,
     Monk,
     Nun,
 }
 
-impl std::fmt::Display for StudentTitle {
+impl std::fmt::Display for PersonTitle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
-            StudentTitle::Priest => write!(f, "PRIEST"),
-            StudentTitle::Monk => write!(f, "MONK"),
-            StudentTitle::Nun => write!(f, "NUN"),
+            PersonTitle::Priest => write!(f, "PRIEST"),
+            PersonTitle::Monk => write!(f, "MONK"),
+            PersonTitle::Nun => write!(f, "NUN"),
         }
     }
 }
 
-impl std::str::FromStr for StudentTitle {
+impl std::str::FromStr for PersonTitle {
     type Err = String;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         match s.to_uppercase().as_str() {
-            "PRIEST" => std::result::Result::Ok(StudentTitle::Priest),
-            "MONK" => std::result::Result::Ok(StudentTitle::Monk),
-            "NUN" => std::result::Result::Ok(StudentTitle::Nun),
+            "PRIEST" => std::result::Result::Ok(PersonTitle::Priest),
+            "MONK" => std::result::Result::Ok(PersonTitle::Monk),
+            "NUN" => std::result::Result::Ok(PersonTitle::Nun),
             _ => std::result::Result::Err(format!("Value not valid: {}", s)),
         }
     }

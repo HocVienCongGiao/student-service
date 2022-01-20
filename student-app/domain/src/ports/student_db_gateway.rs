@@ -58,7 +58,9 @@ pub enum StudentSortFieldDbRequest {
 }
 
 pub struct StudentMutationDbRequest {
-    pub id: Option<Uuid>,
+    // TODO: ask do we need to split person_id and student_id into 2 DbRequest
+    pub person_id: Option<Uuid>,
+    pub student_id: Option<Uuid>,
     pub polity_id: Option<Uuid>,
     pub saint_ids: Option<Vec<uuid::Uuid>>,
     pub title: Option<String>,
@@ -96,7 +98,8 @@ pub struct StudentCollectionDbResponse {
 impl Student {
     pub fn to_mutation_db_request(&self) -> StudentMutationDbRequest {
         StudentMutationDbRequest {
-            id: self.id,
+            person_id: self.person_id,
+            student_id: self.student_id,
             polity_id: self.polity_id,
             saint_ids: self.saint_ids.clone(),
             title: self.title.clone().map(|title| title.to_string()),
