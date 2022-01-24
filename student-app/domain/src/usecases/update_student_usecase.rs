@@ -272,8 +272,8 @@ impl UpdateStudentUsecaseInput {
 }
 
 impl StudentEntity {
-    pub fn to_person_entity(self, id: Uuid) -> PersonEntity {
-        let student_title = self.title;
+    pub fn to_person_entity(&self, id: Uuid) -> PersonEntity {
+        let student_title = &self.title;
         let mut person_title: Option<PersonTitle> = None;
         if let Some(student_title) = student_title {
             let title = match student_title {
@@ -286,15 +286,15 @@ impl StudentEntity {
         PersonEntity {
             id: Some(id),
             polity_id: self.polity_id,
-            saint_ids: self.saint_ids,
+            saint_ids: self.saint_ids.clone(),
             title: person_title,
-            first_name: self.first_name,
-            middle_name: self.middle_name,
-            last_name: self.last_name,
+            first_name: self.first_name.clone(),
+            middle_name: self.middle_name.clone(),
+            last_name: self.last_name.clone(),
             date_of_birth: self.date_of_birth,
-            place_of_birth: self.place_of_birth,
-            email: self.email,
-            phone: self.phone,
+            place_of_birth: self.place_of_birth.clone(),
+            email: self.email.clone(),
+            phone: self.phone.clone(),
         }
     }
 }
