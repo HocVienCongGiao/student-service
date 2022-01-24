@@ -2,7 +2,9 @@ use async_trait::async_trait;
 use chrono::NaiveDate;
 use uuid::Uuid;
 
+use crate::entities::person::{Person as PersonEntity, PersonTitle};
 use crate::entities::student::{Student as StudentEntity, StudentTitle};
+use crate::ports::person_db_gateway::{PersonDbGateway, PersonDbResponse};
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
 use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
@@ -15,23 +17,32 @@ pub struct UpdateStudentUsecaseInteractor<
     A: StudentDbGateway,
     B: PolityDbGateway,
     C: SaintDbGateway,
+    D: PersonDbGateway,
 > {
     student_db_gateway: A,
     polity_db_gateway: B,
     saint_db_gateway: C,
+    person_db_gateway: D,
 }
 
-impl<A, B, C> UpdateStudentUsecaseInteractor<A, B, C>
+impl<A, B, C, D> UpdateStudentUsecaseInteractor<A, B, C, D>
 where
     A: StudentDbGateway + Sync + Send,
     B: PolityDbGateway + Sync + Send,
     C: SaintDbGateway + Sync + Send,
+    D: PersonDbGateway + Sync + Send,
 {
-    pub fn new(student_db_gateway: A, polity_db_gateway: B, saint_db_gateway: C) -> Self {
+    pub fn new(
+        student_db_gateway: A,
+        polity_db_gateway: B,
+        saint_db_gateway: C,
+        person_db_gateway: D,
+    ) -> Self {
         UpdateStudentUsecaseInteractor {
             student_db_gateway,
             polity_db_gateway,
             saint_db_gateway,
+            person_db_gateway,
         }
     }
 }
@@ -46,24 +57,25 @@ pub trait UpdateStudentUsecase {
 }
 
 #[async_trait]
-impl<A, B, C> UpdateStudentUsecase for UpdateStudentUsecaseInteractor<A, B, C>
+impl<A, B, C, D> UpdateStudentUsecase for UpdateStudentUsecaseInteractor<A, B, C, D>
 where
     A: StudentDbGateway + Sync + Send,
     B: PolityDbGateway + Sync + Send,
     C: SaintDbGateway + Sync + Send,
+    D: PersonDbGateway + Sync + Send,
 {
     async fn execute(
         &mut self,
         request: UpdateStudentUsecaseInput,
     ) -> Result<UpdateStudentUsecaseOutput, UsecaseError> {
         // id not exists
-        if request.id.is_none() {
+        if request.student_id.is_none() {
             println!("student not exists");
             return Err(UsecaseError::ResourceNotFound);
         }
         let student_db_response = (*self)
             .student_db_gateway
-            .find_one_by_id(request.id.unwrap())
+            .find_one_by_id(request.student_id.unwrap())
             .await;
         if student_db_response.is_none() {
             println!("student not exists");
@@ -74,9 +86,19 @@ where
         let student = request.to_entity();
         if student.is_valid() {
             println!("This student is valid");
-            let usecase_output: Result<UpdateStudentUsecaseOutput, UsecaseError> = (*self)
+            let student_id = student.id.unwrap();
+
+            let person_id = (*self)
                 .student_db_gateway
-                .update(student.to_mutation_db_request())
+                .find_person_id_by_student_id(student_id)
+                .await
+                .map_err(|err| err.to_usecase_error())?;
+
+            let person = student.to_person_entity(person_id);
+
+            let usecase_output: Result<UpdateStudentUsecaseOutput, UsecaseError> = (*self)
+                .person_db_gateway
+                .update(person.to_mutation_db_request())
                 .await
                 .map(|response| response.to_usecase_output())
                 .map_err(|err| err.to_usecase_error());
@@ -112,6 +134,7 @@ where
                             }
                         }
                     }
+                    output = output.with_student_id(student_id);
                     Ok(output)
                 }
                 Err(error) => {
@@ -127,7 +150,7 @@ where
 }
 
 pub struct UpdateStudentUsecaseInput {
-    pub id: Option<Uuid>,
+    pub student_id: Option<Uuid>,
     pub polity_id: Option<Uuid>,
     pub saint_ids: Option<Vec<uuid::Uuid>>,
     pub title: Option<StudentUsecaseSharedTitle>,
@@ -142,7 +165,8 @@ pub struct UpdateStudentUsecaseInput {
 
 #[derive(Clone)]
 pub struct UpdateStudentUsecaseOutput {
-    pub id: Uuid,
+    pub student_id: Option<Uuid>,
+    pub person_id: Option<Uuid>,
     pub polity_id: Option<Uuid>,
     pub polity_name: Option<String>,
     pub polity_location_name: Option<String>,
@@ -158,7 +182,6 @@ pub struct UpdateStudentUsecaseOutput {
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
 }
 
 impl ToEntity<StudentEntity> for UpdateStudentUsecaseInput {
@@ -169,7 +192,7 @@ impl ToEntity<StudentEntity> for UpdateStudentUsecaseInput {
             title = Some(title_usecase_input.to_entity());
         }
         StudentEntity {
-            id: self.id,
+            id: self.student_id,
             polity_id: self.polity_id,
             saint_ids: self.saint_ids,
             title,
@@ -185,10 +208,11 @@ impl ToEntity<StudentEntity> for UpdateStudentUsecaseInput {
     }
 }
 
-impl ToUsecaseOutput<UpdateStudentUsecaseOutput> for StudentDbResponse {
+impl ToUsecaseOutput<UpdateStudentUsecaseOutput> for PersonDbResponse {
     fn to_usecase_output(self) -> UpdateStudentUsecaseOutput {
         UpdateStudentUsecaseOutput {
-            id: self.id,
+            student_id: None,
+            person_id: Some(self.id),
             polity_id: self.polity_id,
             polity_name: None,
             polity_location_name: None,
@@ -203,8 +227,7 @@ impl ToUsecaseOutput<UpdateStudentUsecaseOutput> for StudentDbResponse {
             date_of_birth: self.date_of_birth,
             place_of_birth: self.place_of_birth.clone(),
             email: self.email.clone(),
-            phone: self.phone.clone(),
-            undergraduate_school: self.undergraduate_school,
+            phone: self.phone,
         }
     }
 }
@@ -242,8 +265,43 @@ impl WithChristianName<UpdateStudentUsecaseOutput> for UpdateStudentUsecaseOutpu
 }
 
 impl UpdateStudentUsecaseInput {
-    pub fn with_id(mut self, id: Uuid) -> UpdateStudentUsecaseInput {
-        self.id = Some(id);
+    pub fn with_student_id(mut self, id: Uuid) -> UpdateStudentUsecaseInput {
+        self.student_id = Some(id);
+        self
+    }
+}
+
+impl StudentEntity {
+    pub fn to_person_entity(self, id: Uuid) -> PersonEntity {
+        let student_title = self.title;
+        let mut person_title: Option<PersonTitle> = None;
+        if let Some(student_title) = student_title {
+            let title = match student_title {
+                StudentTitle::Monk => PersonTitle::Monk,
+                StudentTitle::Nun => PersonTitle::Nun,
+                StudentTitle::Priest => PersonTitle::Priest,
+            };
+            person_title = Some(title);
+        }
+        PersonEntity {
+            id: Some(id),
+            polity_id: self.polity_id,
+            saint_ids: self.saint_ids,
+            title: person_title,
+            first_name: self.first_name,
+            middle_name: self.middle_name,
+            last_name: self.last_name,
+            date_of_birth: self.date_of_birth,
+            place_of_birth: self.place_of_birth,
+            email: self.email,
+            phone: self.phone,
+        }
+    }
+}
+
+impl UpdateStudentUsecaseOutput {
+    pub fn with_student_id(mut self, student_id: Uuid) -> UpdateStudentUsecaseOutput {
+        self.student_id = Some(student_id);
         self
     }
 }

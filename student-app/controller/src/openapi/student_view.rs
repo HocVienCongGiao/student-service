@@ -101,7 +101,7 @@ impl ToOpenApi<StudentView> for UpdateStudentUsecaseOutput {
         // }
 
         StudentView {
-            id: self.id,
+            id: self.student_id.unwrap(),
             polity_name: self.polity_name,
             polity_location_name: self.polity_location_name,
             polity_location_address: self.polity_location_address,
@@ -111,7 +111,7 @@ impl ToOpenApi<StudentView> for UpdateStudentUsecaseOutput {
             place_of_birth: self.place_of_birth,
             email: self.email,
             phone: self.phone,
-            undergraduate_school: self.undergraduate_school,
+            undergraduate_school: Some("Đại Chủng Viện Thánh Quý - Cần Thơ".to_string()),
             christian_name: self.christian_name.map(|saint_names| saint_names.join(" ")),
             name: Some(format!(
                 "{} {} {}",

@@ -1,5 +1,6 @@
 use crate::openapi::ToOpenApi;
 use crate::ToUsecaseInput;
+use db_postgres::person_gateway::repository::PersonRepository;
 use db_postgres::polity_gateway::repository::PolityRepository;
 use db_postgres::saint_gateway::repository::SaintRepository;
 use db_postgres::student_gateway::repository::StudentRepository;
@@ -31,14 +32,20 @@ pub(crate) async fn from_openapi(
         client: saint_client,
     };
 
+    let person_client = db_postgres::connect().await;
+    let person_repository = PersonRepository {
+        client: person_client,
+    };
+
     let usecase_input: UpdateStudentUsecaseInput = student.to_usecase_input();
-    let usecase_input = usecase_input.with_id(id);
+    let usecase_input = usecase_input.with_student_id(id);
 
     // Inject dependencies to Interactor and invoke func
     let result = UpdateStudentUsecaseInteractor::new(
         student_repository,
         polity_repository,
         saint_repository,
+        person_repository,
     )
     .execute(usecase_input)
     .await;
@@ -58,7 +65,7 @@ impl ToUsecaseInput<UpdateStudentUsecaseInput> for StudentUpsertOpenApi {
         }
 
         UpdateStudentUsecaseInput {
-            id: None,
+            student_id: None,
             polity_id: self.polity_id,
             saint_ids: self.saint_id_array.clone(),
             title,
