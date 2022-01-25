@@ -2,13 +2,14 @@ use async_trait::async_trait;
 use chrono::NaiveDate;
 use uuid::Uuid;
 
-use crate::entities::student::{Student as StudentEntity, StudentTitle};
-use crate::ports::person_db_gateway::PersonDbGateway;
+use crate::entities::person::{Person as PersonEntity, PersonTitle};
+use crate::entities::student::Student as StudentEntity;
+use crate::ports::person_db_gateway::{PersonDbGateway, PersonDbResponse};
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
-use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
+use crate::ports::student_db_gateway::{StudentDbGateway, StudentInsertDbResponse};
 use crate::usecases::student_usecase_shared_models::{
-    StudentUsecaseSharedTitle, WithChristianName, WithPolity,
+    StudentUsecaseSharedTitle, WithChristianName, WithPolity, WithStudentId,
 };
 use crate::usecases::{ToEntity, ToUsecaseOutput, UsecaseError};
 
@@ -71,16 +72,25 @@ where
         let student = request.to_entity();
         if student.is_valid() {
             println!("This student is valid");
+            let person = student.person.clone().unwrap();
             let usecase_output: Result<CreateStudentUsecaseOutput, UsecaseError> = (*self)
-                .student_db_gateway
-                .insert(student.to_mutation_db_request())
+                .person_db_gateway
+                .insert(person.to_mutation_db_request())
                 .await
                 .map(|response| response.to_usecase_output())
                 .map_err(|err| err.to_usecase_error());
 
+            let student_result: Result<StudentInsertDbResponse, UsecaseError> = (*self)
+                .student_db_gateway
+                .insert(student.to_mutation_db_request())
+                .await
+                .map_err(|err| err.to_usecase_error());
+
             return match usecase_output {
                 Ok(output) => {
-                    let mut output = output.with_polity(
+                    let mut output =
+                        output.with_student_id(Some(student_result.unwrap().student_id));
+                    output = output.with_polity(
                         Some("1".to_string()),
                         Some("1".to_string()),
                         Some("1".to_string()),
@@ -148,12 +158,12 @@ pub struct CreateStudentUsecaseInput {
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
+    // TODO: add more fields
 }
 
 #[derive(Clone)]
 pub struct CreateStudentUsecaseOutput {
-    pub person_id: Uuid,
-    pub student_id: Option<Uuid>,
+    pub student_id: Uuid,
     pub polity_id: Option<Uuid>,
     pub polity_name: Option<String>,
     pub polity_location_name: Option<String>,
@@ -174,13 +184,12 @@ pub struct CreateStudentUsecaseOutput {
 impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
     fn to_entity(self) -> StudentEntity {
         let title_usecase_input = self.title;
-        let mut title: Option<StudentTitle> = None;
+        let mut title: Option<PersonTitle> = None;
         if let Some(title_usecase_input) = title_usecase_input {
             title = Some(title_usecase_input.to_entity());
         }
-        StudentEntity {
-            person_id: Some(Uuid::new_v4()),
-            student_id: Some(Uuid::new_v4()),
+        let person = PersonEntity {
+            id: Some(Uuid::new_v4()),
             polity_id: self.polity_id,
             saint_ids: self.saint_ids,
             title,
@@ -191,26 +200,28 @@ impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
             place_of_birth: self.place_of_birth,
             email: self.email,
             phone: self.phone,
-            undergraduate_school: None,
+        };
+        StudentEntity {
+            person: Some(person),
+            student_id: Some(Uuid::new_v4()),
         }
     }
 }
 
-impl ToEntity<StudentTitle> for StudentUsecaseSharedTitle {
-    fn to_entity(self) -> StudentTitle {
+impl ToEntity<PersonTitle> for StudentUsecaseSharedTitle {
+    fn to_entity(self) -> PersonTitle {
         match self {
-            StudentUsecaseSharedTitle::Monk => StudentTitle::Monk,
-            StudentUsecaseSharedTitle::Nun => StudentTitle::Nun,
-            StudentUsecaseSharedTitle::Priest => StudentTitle::Priest,
+            StudentUsecaseSharedTitle::Monk => PersonTitle::Monk,
+            StudentUsecaseSharedTitle::Nun => PersonTitle::Nun,
+            StudentUsecaseSharedTitle::Priest => PersonTitle::Priest,
         }
     }
 }
 
-impl ToUsecaseOutput<CreateStudentUsecaseOutput> for StudentDbResponse {
+impl ToUsecaseOutput<CreateStudentUsecaseOutput> for PersonDbResponse {
     fn to_usecase_output(self) -> CreateStudentUsecaseOutput {
         CreateStudentUsecaseOutput {
-            person_id: self.id,
-            student_id: None,
+            student_id: self.id,
             polity_id: self.polity_id,
             polity_name: None,
             polity_location_name: None,
@@ -225,7 +236,7 @@ impl ToUsecaseOutput<CreateStudentUsecaseOutput> for StudentDbResponse {
             date_of_birth: self.date_of_birth,
             place_of_birth: self.place_of_birth.clone(),
             email: self.email.clone(),
-            phone: self.phone.clone(),
+            phone: self.phone,
         }
     }
 }
@@ -257,6 +268,15 @@ impl WithChristianName<CreateStudentUsecaseOutput> for CreateStudentUsecaseOutpu
             }
             saint_names.push(name);
             self.christian_name = Some(saint_names);
+        }
+        self
+    }
+}
+
+impl WithStudentId<CreateStudentUsecaseOutput> for CreateStudentUsecaseOutput {
+    fn with_student_id(mut self, student_id: Option<Uuid>) -> CreateStudentUsecaseOutput {
+        if let Some(student_id) = student_id {
+            self.student_id = student_id
         }
         self
     }

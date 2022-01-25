@@ -1,6 +1,7 @@
 use chrono::NaiveDate;
 use uuid::Uuid;
 
+#[derive(Clone)]
 pub(crate) struct Person {
     pub id: Option<Uuid>,
     pub polity_id: Option<Uuid>,

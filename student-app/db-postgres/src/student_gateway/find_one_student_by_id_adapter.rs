@@ -36,6 +36,7 @@ pub(crate) fn from_pg_row_to_student_db_response(row: Row) -> StudentDbResponse 
         place_of_birth: Some(db_column::get_string(&row, "place_of_birth")),
         email: Some(db_column::get_string(&row, "email")),
         phone: Some(db_column::get_string(&row, "phone")),
-        undergraduate_school: Some("Đại Chủng Viện Thánh Quý - Cần Thơ".to_string()),
+        // TODO: refactor this (undergraduate school: educational stage(level = bachelor)
+        undergraduate_school: None,
     }
 }

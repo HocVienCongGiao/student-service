@@ -67,7 +67,7 @@ impl ToOpenApi<StudentView> for CreateStudentUsecaseOutput {
         // }
 
         StudentView {
-            id: self.student_id.unwrap_or_default(),
+            id: self.student_id,
             polity_name: self.polity_name,
             polity_location_name: self.polity_location_name,
             polity_location_address: self.polity_location_address,
