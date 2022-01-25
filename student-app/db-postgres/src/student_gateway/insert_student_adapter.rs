@@ -29,7 +29,7 @@ impl InsertStudentPort for StudentRepository {
         &mut self,
         db_request: StudentMutationDbRequest,
     ) -> Result<StudentInsertDbResponse, DbError> {
-        let mut result: Result<u64, Error>;
+        let result: Result<u64, Error>;
 
         let transaction = (*self)
             .client

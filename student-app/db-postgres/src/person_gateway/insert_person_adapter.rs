@@ -54,21 +54,21 @@ pub(crate) async fn save_date_of_birth(
     transaction.execute(&stmt, params).await
 }
 
-pub(crate) async fn save_date_of_issue(
-    transaction: &Transaction<'_>,
-    id: Uuid,
-    date_of_birth: NaiveDate,
-) -> Result<u64, Error> {
-    let stmt = (*transaction)
-        .prepare(
-            "INSERT into public.person__person_date_of_issue (id, date_of_issue) VAlUES ($1, $2)",
-        )
-        .await
-        .unwrap();
-
-    let params: &[&(dyn ToSql + Sync)] = &[&id, &date_of_birth];
-    transaction.execute(&stmt, params).await
-}
+// pub(crate) async fn save_date_of_issue(
+//     transaction: &Transaction<'_>,
+//     id: Uuid,
+//     date_of_birth: NaiveDate,
+// ) -> Result<u64, Error> {
+//     let stmt = (*transaction)
+//         .prepare(
+//             "INSERT into public.person__person_date_of_issue (id, date_of_issue) VAlUES ($1, $2)",
+//         )
+//         .await
+//         .unwrap();
+//
+//     let params: &[&(dyn ToSql + Sync)] = &[&id, &date_of_birth];
+//     transaction.execute(&stmt, params).await
+// }
 
 pub(crate) async fn save_polity(
     transaction: &Transaction<'_>,
@@ -92,7 +92,8 @@ pub(crate) async fn save_christian_names(
     // TODO: refactor this into 1 query
     // TODO: result and then
     let mut result: Result<u64, Error> = Ok(1_u64);
-    let ordering: i16 = 1;
+    let mut ordering: i16 = 1;
+    // TODO: use enumerate instead
     for christian_name in christian_names {
         let params: &[&(dyn ToSql + Sync)] = &[&id, &christian_name, &ordering];
         let stmt = (*transaction)
@@ -100,7 +101,7 @@ pub(crate) async fn save_christian_names(
             .await
             .unwrap();
         result = transaction.execute(&stmt, params).await;
-        ordering.add(1);
+        ordering = ordering.add(1);
     }
     result
 }
