@@ -1,5 +1,4 @@
 use crate::entities::person::Person;
-use crate::entities::student::Student;
 use crate::ports::insert_person_port::InsertPersonPort;
 use async_trait::async_trait;
 use chrono::NaiveDate;

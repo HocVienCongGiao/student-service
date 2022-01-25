@@ -16,11 +16,11 @@ pub(crate) struct Person {
     pub phone: Option<String>,
 }
 
-impl Person {
-    pub(crate) fn is_valid(&self) -> bool {
-        true
-    }
-}
+// impl Person {
+//     pub(crate) fn is_valid(&self) -> bool {
+//         true
+//     }
+// }
 
 #[derive(PartialEq, Clone)]
 #[repr(C)]

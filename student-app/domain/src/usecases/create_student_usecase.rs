@@ -68,7 +68,6 @@ where
         &mut self,
         request: CreateStudentUsecaseInput,
     ) -> Result<CreateStudentUsecaseOutput, UsecaseError> {
-        // TODO: cheat convert student -> person
         let student = request.to_entity();
         if student.is_valid() {
             println!("This student is valid");

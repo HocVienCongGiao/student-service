@@ -53,8 +53,8 @@ impl InsertStudentPort for StudentRepository {
             .map_err(|error| DbError::UnknownError(error.into_source().unwrap().to_string()));
 
         Ok(StudentInsertDbResponse {
-            student_id: student_id,
-            person_id: person_id,
+            student_id,
+            person_id,
         })
     }
 }

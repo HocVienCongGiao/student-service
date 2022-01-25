@@ -8,7 +8,6 @@ use uuid::Uuid;
 
 use domain::ports::insert_person_port::InsertPersonPort;
 use domain::ports::person_db_gateway::{PersonDbResponse, PersonMutationDbRequest};
-use domain::ports::student_db_gateway::StudentMutationDbRequest;
 use domain::ports::DbError;
 
 use crate::person_gateway::repository::PersonRepository;

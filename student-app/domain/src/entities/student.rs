@@ -1,5 +1,4 @@
 use crate::entities::person::Person;
-use chrono::NaiveDate;
 use uuid::Uuid;
 
 pub(crate) struct Student {
