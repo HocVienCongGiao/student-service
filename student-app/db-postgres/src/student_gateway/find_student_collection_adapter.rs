@@ -111,7 +111,7 @@ fn to_query_string(sort_criteria: &StudentSortCriteriaDbRequest) -> String {
     format!(
         "{} {}",
         field_str_sc.to_lowercase(),
-        sort_criteria.direction.to_string()
+        sort_criteria.direction
     )
 }
 
