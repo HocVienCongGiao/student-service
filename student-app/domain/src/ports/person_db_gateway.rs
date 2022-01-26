@@ -1,11 +1,15 @@
 use crate::entities::person::Person;
 use crate::ports::update_person_port::UpdatePersonPort;
+use crate::ports::insert_person_port::InsertPersonPort;
 use async_trait::async_trait;
 use chrono::NaiveDate;
 use uuid::Uuid;
 
-#[async_trait]
-pub trait PersonDbGateway: UpdatePersonPort {}
+pub trait PersonDbGateway: 
+    InsertPersonPort 
+    + UpdatePersonPort
+{
+}
 
 pub struct PersonMutationDbRequest {
     pub id: Option<Uuid>,

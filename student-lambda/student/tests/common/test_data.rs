@@ -19,7 +19,8 @@ pub fn prepare_student_view_openapi(uuid: Option<Uuid>) -> StudentView {
         place_of_birth: Some("Trà Vinh".to_string()),
         email: Some("binh@sunrise.vn".to_string()),
         phone: Some("+84 1228019700".to_string()),
-        undergraduate_school: Some("Đại Chủng Viện Thánh Quý - Cần Thơ".to_string()),
+        // TODO: refactor this, no more undergrate_school
+        undergraduate_school: None,
     }
 }
 

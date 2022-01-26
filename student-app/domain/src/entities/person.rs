@@ -1,6 +1,7 @@
 use chrono::NaiveDate;
 use uuid::Uuid;
 
+#[derive(Clone)]
 pub(crate) struct Person {
     pub id: Option<Uuid>,
     pub polity_id: Option<Uuid>,
@@ -15,11 +16,11 @@ pub(crate) struct Person {
     pub phone: Option<String>,
 }
 
-impl Person {
-    pub(crate) fn is_valid(&self) -> bool {
-        true
-    }
-}
+// impl Person {
+//     pub(crate) fn is_valid(&self) -> bool {
+//         true
+//     }
+// }
 
 #[derive(PartialEq, Clone)]
 #[repr(C)]
