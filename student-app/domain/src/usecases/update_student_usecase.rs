@@ -3,13 +3,13 @@ use chrono::NaiveDate;
 use uuid::Uuid;
 
 use crate::entities::person::{Person as PersonEntity, PersonTitle};
-use crate::entities::student::{Student as StudentEntity, StudentTitle};
+use crate::entities::student::Student as StudentEntity;
 use crate::ports::person_db_gateway::{PersonDbGateway, PersonDbResponse};
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
-use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
+use crate::ports::student_db_gateway::StudentDbGateway;
 use crate::usecases::student_usecase_shared_models::{
-    StudentUsecaseSharedTitle, WithChristianName, WithPolity,
+    StudentUsecaseSharedTitle, WithChristianName, WithPolity, WithStudentId,
 };
 use crate::usecases::{ToEntity, ToUsecaseOutput, UsecaseError};
 
@@ -86,7 +86,7 @@ where
         let student = request.to_entity();
         if student.is_valid() {
             println!("This student is valid");
-            let student_id = student.id.unwrap();
+            let student_id = student.student_id.unwrap();
 
             let person_id = (*self)
                 .student_db_gateway
@@ -134,7 +134,7 @@ where
                             }
                         }
                     }
-                    output = output.with_student_id(student_id);
+                    output = output.with_student_id(Some(student_id));
                     Ok(output)
                 }
                 Err(error) => {
@@ -187,12 +187,12 @@ pub struct UpdateStudentUsecaseOutput {
 impl ToEntity<StudentEntity> for UpdateStudentUsecaseInput {
     fn to_entity(self) -> StudentEntity {
         let title_usecase_input = self.title;
-        let mut title: Option<StudentTitle> = None;
+        let mut title: Option<PersonTitle> = None;
         if let Some(title_usecase_input) = title_usecase_input {
             title = Some(title_usecase_input.to_entity());
         }
-        StudentEntity {
-            id: self.student_id,
+        let person = PersonEntity {
+            id: None,
             polity_id: self.polity_id,
             saint_ids: self.saint_ids,
             title,
@@ -203,7 +203,10 @@ impl ToEntity<StudentEntity> for UpdateStudentUsecaseInput {
             place_of_birth: self.place_of_birth,
             email: self.email,
             phone: self.phone,
-            undergraduate_school: None,
+        };
+        StudentEntity {
+            person: Some(person),
+            student_id: self.student_id,
         }
     }
 }
@@ -273,35 +276,17 @@ impl UpdateStudentUsecaseInput {
 
 impl StudentEntity {
     pub fn to_person_entity(&self, id: Uuid) -> PersonEntity {
-        let student_title = &self.title;
-        let mut person_title: Option<PersonTitle> = None;
-        if let Some(student_title) = student_title {
-            let title = match student_title {
-                StudentTitle::Monk => PersonTitle::Monk,
-                StudentTitle::Nun => PersonTitle::Nun,
-                StudentTitle::Priest => PersonTitle::Priest,
-            };
-            person_title = Some(title);
-        }
-        PersonEntity {
-            id: Some(id),
-            polity_id: self.polity_id,
-            saint_ids: self.saint_ids.clone(),
-            title: person_title,
-            first_name: self.first_name.clone(),
-            middle_name: self.middle_name.clone(),
-            last_name: self.last_name.clone(),
-            date_of_birth: self.date_of_birth,
-            place_of_birth: self.place_of_birth.clone(),
-            email: self.email.clone(),
-            phone: self.phone.clone(),
-        }
+        let mut person = self.person.clone().unwrap();
+        person.id = Some(id);
+        person
     }
 }
 
-impl UpdateStudentUsecaseOutput {
-    pub fn with_student_id(mut self, student_id: Uuid) -> UpdateStudentUsecaseOutput {
-        self.student_id = Some(student_id);
+impl WithStudentId<UpdateStudentUsecaseOutput> for UpdateStudentUsecaseOutput {
+    fn with_student_id(mut self, student_id: Option<Uuid>) -> UpdateStudentUsecaseOutput {
+        if let Some(student_id) = student_id {
+            self.student_id = Some(student_id)
+        }
         self
     }
 }

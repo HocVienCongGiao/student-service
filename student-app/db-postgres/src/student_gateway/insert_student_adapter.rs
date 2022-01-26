@@ -51,11 +51,10 @@ impl InsertStudentPort for StudentRepository {
         transaction
             .commit()
             .await
-            .map_err(|error| DbError::UnknownError(error.into_source().unwrap().to_string()));
-
-        Ok(StudentInsertDbResponse {
-            student_id,
-            person_id,
-        })
+            .map(|_| StudentInsertDbResponse {
+                person_id,
+                student_id,
+            })
+            .map_err(|error| DbError::UnknownError(error.into_source().unwrap().to_string()))
     }
 }
