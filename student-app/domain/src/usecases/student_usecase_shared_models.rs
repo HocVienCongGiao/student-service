@@ -15,6 +15,10 @@ pub(crate) trait WithChristianName<T> {
     fn with_christian_name(self, name: Option<String>) -> T;
 }
 
+pub(crate) trait WithStudentId<T> {
+    fn with_student_id(self, student_id: Option<Uuid>) -> T;
+}
+
 #[derive(PartialEq, Clone)]
 #[allow(non_camel_case_types)]
 #[repr(C)]

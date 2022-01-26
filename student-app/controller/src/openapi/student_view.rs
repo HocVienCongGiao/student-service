@@ -67,7 +67,7 @@ impl ToOpenApi<StudentView> for CreateStudentUsecaseOutput {
         // }
 
         StudentView {
-            id: self.id,
+            id: self.student_id,
             polity_name: self.polity_name,
             polity_location_name: self.polity_location_name,
             polity_location_address: self.polity_location_address,
@@ -77,7 +77,7 @@ impl ToOpenApi<StudentView> for CreateStudentUsecaseOutput {
             place_of_birth: self.place_of_birth,
             email: self.email,
             phone: self.phone,
-            undergraduate_school: self.undergraduate_school,
+            undergraduate_school: None,
             christian_name: self.christian_name.map(|saint_names| saint_names.join(" ")),
             name: Some(format!(
                 "{} {} {}",

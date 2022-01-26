@@ -1,3 +1,4 @@
+use db_postgres::person_gateway::repository::PersonRepository;
 use db_postgres::polity_gateway::repository::PolityRepository;
 use db_postgres::saint_gateway::repository::SaintRepository;
 use db_postgres::student_gateway::repository::StudentRepository;
@@ -29,11 +30,18 @@ pub(crate) async fn from_openapi(
     let saint_repository = SaintRepository {
         client: saint_client,
     };
+
+    let person_client = db_postgres::connect().await;
+    let person_repository = PersonRepository {
+        client: person_client,
+    };
+
     // Inject dependencies to Interactor and invoke func
     let result = CreateStudentUsecaseInteractor::new(
         student_repository,
         polity_repository,
         saint_repository,
+        person_repository,
     )
     .execute(student.to_usecase_input())
     .await;

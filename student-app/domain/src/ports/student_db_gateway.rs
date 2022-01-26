@@ -58,18 +58,13 @@ pub enum StudentSortFieldDbRequest {
 }
 
 pub struct StudentMutationDbRequest {
-    pub id: Option<Uuid>,
-    pub polity_id: Option<Uuid>,
-    pub saint_ids: Option<Vec<uuid::Uuid>>,
-    pub title: Option<String>,
-    pub first_name: Option<String>,
-    pub middle_name: Option<String>,
-    pub last_name: Option<String>,
-    pub date_of_birth: Option<NaiveDate>,
-    pub place_of_birth: Option<String>,
-    pub email: Option<String>,
-    pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
+    pub student_id: Option<Uuid>,
+    pub person_id: Option<Uuid>,
+}
+
+pub struct StudentInsertDbResponse {
+    pub person_id: Uuid,
+    pub student_id: Uuid,
 }
 
 pub struct StudentDbResponse {
@@ -96,18 +91,8 @@ pub struct StudentCollectionDbResponse {
 impl Student {
     pub fn to_mutation_db_request(&self) -> StudentMutationDbRequest {
         StudentMutationDbRequest {
-            id: self.id,
-            polity_id: self.polity_id,
-            saint_ids: self.saint_ids.clone(),
-            title: self.title.clone().map(|title| title.to_string()),
-            first_name: self.first_name.clone(),
-            middle_name: self.middle_name.clone(),
-            last_name: self.last_name.clone(),
-            date_of_birth: self.date_of_birth,
-            place_of_birth: self.place_of_birth.clone(),
-            email: self.email.clone(),
-            phone: self.phone.clone(),
-            undergraduate_school: self.undergraduate_school.clone(),
+            person_id: self.person.clone().map(|person| person.id).unwrap(),
+            student_id: self.student_id,
         }
     }
 }
