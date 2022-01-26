@@ -1,6 +1,6 @@
-use chrono::{DateTime, NaiveDate};
+use chrono::NaiveDate;
 use hvcg_academics_openapi_student::models::{
-    StudentTitle, StudentUpsert, StudentView, StudentViewCollection,
+    IdNumberProvider, StudentTitle, StudentUpsert, StudentView, StudentViewCollection,
 };
 use std::str::FromStr;
 use uuid::Uuid;
@@ -39,16 +39,15 @@ pub fn prepare_student_upsert_openapi() -> StudentUpsert {
         place_of_birth: Some("Trà Vinh".to_string()),
         email: Some("binh@sunrise.vn".to_string()),
         phone: Some("+84 1228019700".to_string()),
-        address: None,
-        nationality: None,
+        nationality: Some("Vietnamese".to_string()),
         educational_stage: None,
         foreign_language: None,
-        race: None,
-        id_number: None,
-        id_number_provider: None,
-        date_of_issue: None,
-        // undergraduate_school: Some("Đại Chủng Viện Thánh Quý - Cần Thơ".to_string()),
-        place_of_issue: None,
+        race: Some("Kinh".to_string()),
+        id_number: Some("837837655557".to_string()),
+        id_number_provider: Some(IdNumberProvider::NATIONAL_ID),
+        date_of_issue: Some(NaiveDate::parse_from_str("2011-05-05", "%Y-%m-%d").unwrap()),
+        place_of_issue: Some("TP.HCM".to_string()),
+        address: Some("1000 CMT8 phường 3 quận Tân Bình, TP HCM".to_string()),
     }
 }
 

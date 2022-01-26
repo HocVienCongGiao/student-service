@@ -1,3 +1,4 @@
+use crate::entities::personal_id_number::PersonalIdNumber;
 use chrono::NaiveDate;
 use uuid::Uuid;
 
@@ -14,6 +15,12 @@ pub(crate) struct Person {
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
+    // pub educational_stages: Option<Vec<PersonUsecaseSharedEducationalStage>>,
+    pub nationality: Option<String>,
+    pub race: Option<String>,
+    pub personal_id_number: Option<PersonalIdNumber>,
+    pub address: Option<String>,
+    // pub languages: Option<Vec<PersonUsecaseSharedLanguage>>,
 }
 
 // impl Person {

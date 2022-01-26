@@ -38,6 +38,23 @@ pub(crate) async fn save_person_info(
     transaction.execute(&stmt, params).await
 }
 
+pub(crate) async fn save_personal_id_number(
+    transaction: &Transaction<'_>,
+    person_id: Uuid,
+    personal_id_number_id: Uuid,
+    personal_id_number: String,
+) -> Result<u64, Error> {
+    let stmt = (*transaction)
+        .prepare(
+            "INSERT INTO public.person__person_id_number (id, person_id, person_id_number) VAlUES ($1, $2, $3)",
+        )
+        .await
+        .unwrap();
+
+    let params: &[&(dyn ToSql + Sync)] = &[&personal_id_number_id, &person_id, &personal_id_number];
+    transaction.execute(&stmt, params).await
+}
+
 pub(crate) async fn save_date_of_birth(
     transaction: &Transaction<'_>,
     id: Uuid,
@@ -54,21 +71,38 @@ pub(crate) async fn save_date_of_birth(
     transaction.execute(&stmt, params).await
 }
 
-// pub(crate) async fn save_date_of_issue(
-//     transaction: &Transaction<'_>,
-//     id: Uuid,
-//     date_of_birth: NaiveDate,
-// ) -> Result<u64, Error> {
-//     let stmt = (*transaction)
-//         .prepare(
-//             "INSERT into public.person__person_date_of_issue (id, date_of_issue) VAlUES ($1, $2)",
-//         )
-//         .await
-//         .unwrap();
-//
-//     let params: &[&(dyn ToSql + Sync)] = &[&id, &date_of_birth];
-//     transaction.execute(&stmt, params).await
-// }
+pub(crate) async fn save_date_of_issue(
+    transaction: &Transaction<'_>,
+    personal_id_number_id: Uuid,
+    date_of_issue: NaiveDate,
+) -> Result<u64, Error> {
+    let stmt = (*transaction)
+        .prepare(
+            "INSERT INTO public.person__person_id_number_date_of_issue (id, date_of_issue) VAlUES ($1, $2)",
+        )
+        .await
+        .unwrap();
+
+    let params: &[&(dyn ToSql + Sync)] = &[&personal_id_number_id, &date_of_issue];
+    transaction.execute(&stmt, params).await
+}
+
+pub(crate) async fn save_personal_id_number_info(
+    transaction: &Transaction<'_>,
+    personal_id_number_id: Uuid,
+    table_name: String,
+    field_name: String,
+    value: String,
+) -> Result<u64, Error> {
+    let statement = format!(
+        "INSERT INTO public.person__person_id_number_{} (id, {}) VAlUES ($1, $2)",
+        table_name, field_name
+    );
+    let stmt = (*transaction).prepare(&statement).await.unwrap();
+
+    let params: &[&(dyn ToSql + Sync)] = &[&personal_id_number_id, &value];
+    transaction.execute(&stmt, params).await
+}
 
 pub(crate) async fn save_polity(
     transaction: &Transaction<'_>,
@@ -216,13 +250,13 @@ impl InsertPersonPort for PersonRepository {
         }
 
         // insert address
-        // let address = db_request.address.unwrap();
-        // result = save_person_info(&transaction, id, "address".to_string(), address.clone()).await;
-        // if let Err(error) = result {
-        //     return Err(DbError::UnknownError(
-        //         error.into_source().unwrap().to_string(),
-        //     ));
-        // }
+        let address = db_request.address.unwrap();
+        result = save_person_info(&transaction, id, "address".to_string(), address.clone()).await;
+        if let Err(error) = result {
+            return Err(DbError::UnknownError(
+                error.into_source().unwrap().to_string(),
+            ));
+        }
 
         // insert christian names
         let christian_names = db_request.saint_ids.unwrap();
@@ -285,52 +319,81 @@ impl InsertPersonPort for PersonRepository {
         }
 
         // insert nationality
-        // let nationality = db_request.nationality.unwrap();
-        // result = save_person_info(
-        //     &transaction,
-        //     id,
-        //     "nationality".to_string(),
-        //     nationality.clone(),
-        // )
-        // .await;
-        // if let Err(error) = result {
-        //     return Err(DbError::UnknownError(
-        //         error.into_source().unwrap().to_string(),
-        //     ));
-        // }
+        let nationality = db_request.nationality.unwrap();
+        result = save_person_info(
+            &transaction,
+            id,
+            "nationality".to_string(),
+            nationality.clone(),
+        )
+        .await;
+        if let Err(error) = result {
+            return Err(DbError::UnknownError(
+                error.into_source().unwrap().to_string(),
+            ));
+        }
 
         // insert race
-        // let race = db_request.race.unwrap();
-        // result = save_person_info(&transaction, id, "race".to_string(), race.clone()).await;
-        // if let Err(error) = result {
-        //     return Err(DbError::UnknownError(
-        //         error.into_source().unwrap().to_string(),
-        //     ));
-        // }
+        let race = db_request.race.unwrap();
+        result = save_person_info(&transaction, id, "race".to_string(), race.clone()).await;
+        if let Err(error) = result {
+            return Err(DbError::UnknownError(
+                error.into_source().unwrap().to_string(),
+            ));
+        }
+
+        // insert id for personal id number
+        let personal_id_number_id = db_request.id_number_id.unwrap();
+        let personal_id_number = db_request.id_number.unwrap();
+        result =
+            save_personal_id_number(&transaction, id, personal_id_number_id, personal_id_number)
+                .await;
+        if let Err(error) = result {
+            return Err(DbError::UnknownError(
+                error.into_source().unwrap().to_string(),
+            ));
+        }
 
         // insert date of issue
-        // let date_of_issue = db_request.date_of_issue.unwrap();
-        // result = save_date_of_issue(&transaction, id, date_of_issue.clone()).await;
-        // if let Err(error) = result {
-        //     return Err(DbError::UnknownError(
-        //         error.into_source().unwrap().to_string(),
-        //     ));
-        // }
+        let date_of_issue = db_request.date_of_issue.unwrap();
+        result = save_date_of_issue(&transaction, personal_id_number_id, date_of_issue).await;
+        if let Err(error) = result {
+            return Err(DbError::UnknownError(
+                error.into_source().unwrap().to_string(),
+            ));
+        }
 
         // insert place of issue
-        // let place_of_issue = db_request.place_of_issue.unwrap();
-        // result = save_person_info(
-        //     &transaction,
-        //     id,
-        //     "place_of_issue".to_string(),
-        //     place_of_issue.clone(),
-        // )
-        // .await;
-        // if let Err(error) = result {
-        //     return Err(DbError::UnknownError(
-        //         error.into_source().unwrap().to_string(),
-        //     ));
-        // }
+        let place_of_issue = db_request.place_of_issue.unwrap();
+        result = save_personal_id_number_info(
+            &transaction,
+            personal_id_number_id,
+            "place_of_issue".to_string(),
+            "place_of_issue".to_string(),
+            place_of_issue,
+        )
+        .await;
+        if let Err(error) = result {
+            return Err(DbError::UnknownError(
+                error.into_source().unwrap().to_string(),
+            ));
+        }
+
+        // insert id number provider
+        let id_number_provider = db_request.id_number_provider.unwrap();
+        result = save_personal_id_number_info(
+            &transaction,
+            personal_id_number_id,
+            "provider".to_string(),
+            "code".to_string(),
+            id_number_provider.clone(),
+        )
+        .await;
+        if let Err(error) = result {
+            return Err(DbError::UnknownError(
+                error.into_source().unwrap().to_string(),
+            ));
+        }
 
         // insert languages
         // let languages = db_request.languages.unwrap();
