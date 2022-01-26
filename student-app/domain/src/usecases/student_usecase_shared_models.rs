@@ -41,6 +41,28 @@ impl std::str::FromStr for StudentUsecaseSharedTitle {
     }
 }
 
+#[derive(PartialEq, Clone)]
+#[allow(non_camel_case_types)]
+#[repr(C)]
+pub enum StudentUsecaseSharedIdNumberProvider {
+    NationalId,
+    Passport,
+}
+
+impl std::str::FromStr for StudentUsecaseSharedIdNumberProvider {
+    type Err = String;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        match s.to_uppercase().as_str() {
+            "NATIONAL_ID" => {
+                std::result::Result::Ok(StudentUsecaseSharedIdNumberProvider::NationalId)
+            }
+            "PASSPORT" => std::result::Result::Ok(StudentUsecaseSharedIdNumberProvider::Passport),
+            _ => std::result::Result::Err(format!("Value not valid: {}", s)),
+        }
+    }
+}
+
 pub struct QueryStudentUsecaseOutput {
     pub id: Uuid,
     pub polity_id: Option<Uuid>,
