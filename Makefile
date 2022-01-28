@@ -18,8 +18,9 @@ download-contracts: clean
   https://api.github.com/repos/$(organisation)/$(contract_repo)/contents/contracts/academics/openapi/student.yaml | jq ".download_url" --raw-output | xargs curl -s -X GET > ./contracts/${bounded_context}/openapi/${entity_name}.yaml
 
 unpack:	download-contracts
-	echo "hello world $(env)"
+	echo "Unpacking ... [$(env)]"
+	cp -R ./bin/custom_templates/* ./bin/rust-server/
 	mkdir -p $(entity_name)-openapi
-	java -jar ./bin/openapi-generator-cli.jar generate -i ./contracts/$(bounded_context)/openapi/$(entity_name).yaml -g rust-server -o $(entity_name)-openapi --package-name=hvcg_$(bounded_context)_openapi_$(entity_name) -c ./bin/config.yaml --type-mappings=date=NaiveDate
-
+	java -jar ./bin/openapi-generator-cli.jar generate -i ./contracts/$(bounded_context)/openapi/$(entity_name).yaml -o $(entity_name)-openapi --package-name=hvcg_$(bounded_context)_openapi_$(entity_name) -g rust-server -t ./bin/rust-server -c ./bin/config.yaml --type-mappings=date=NaiveDate
+	rm -fr $(entity_name)-openapi/examples
 	
