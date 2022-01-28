@@ -150,6 +150,12 @@ jobs:
           sudo make depend
           sudo make -j$(nproc)
           sudo make install
+      - name: Unpack
+        run: |
+          source $HOME/.cargo/env
+          mkdir -p ~/.peterbean
+          echo ${{ secrets.GH_PAT }} > ~/.peterbean/.gh_pat 
+          make unpack
       - name: Build
         working-directory: student-lambda
         run: |
