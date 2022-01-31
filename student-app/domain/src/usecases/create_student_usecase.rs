@@ -5,7 +5,8 @@ use uuid::Uuid;
 
 use crate::entities::person::{Person as PersonEntity, PersonTitle};
 use crate::entities::student::Student as StudentEntity;
-use crate::ports::person_db_gateway::{PersonDbGateway, PersonDbResponse};
+use crate::ports::person::models::person_dbresponse::Person as PersonDbResponse;
+use crate::ports::person::person_db_gateway::PersonDbGateway;
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
 use crate::ports::student_db_gateway::{StudentDbGateway, StudentInsertDbResponse};

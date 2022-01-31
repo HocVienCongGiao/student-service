@@ -6,8 +6,9 @@ use tokio_postgres::types::ToSql;
 use tokio_postgres::{Error, Transaction};
 use uuid::Uuid;
 
-use domain::ports::insert_person_port::InsertPersonPort;
-use domain::ports::person_db_gateway::{PersonDbResponse, PersonMutationDbRequest};
+use domain::ports::person::insert_person_port::InsertPersonPort;
+use domain::ports::person::models::person_dbresponse::Person as PersonDbResponse;
+use domain::ports::person::models::person_mutation_dbrequest::Person as PersonMutationDbRequest;
 use domain::ports::DbError;
 
 use crate::person_gateway::repository::PersonRepository;
@@ -342,12 +343,11 @@ impl InsertPersonPort for PersonRepository {
             ));
         }
 
+        let person_id_number = db_request.personal_id_number.unwrap();
         // insert id for personal id number
-        let personal_id_number_id = db_request.id_number_id.unwrap();
-        let personal_id_number = db_request.id_number.unwrap();
-        result =
-            save_personal_id_number(&transaction, id, personal_id_number_id, personal_id_number)
-                .await;
+        let id_number_id = person_id_number.id.unwrap();
+        let id_number = person_id_number.id_number.unwrap();
+        result = save_personal_id_number(&transaction, id, id_number_id, id_number).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -355,8 +355,8 @@ impl InsertPersonPort for PersonRepository {
         }
 
         // insert date of issue
-        let date_of_issue = db_request.date_of_issue.unwrap();
-        result = save_date_of_issue(&transaction, personal_id_number_id, date_of_issue).await;
+        let date_of_issue = person_id_number.date_of_issue.unwrap();
+        result = save_date_of_issue(&transaction, id_number_id, date_of_issue).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -364,10 +364,10 @@ impl InsertPersonPort for PersonRepository {
         }
 
         // insert place of issue
-        let place_of_issue = db_request.place_of_issue.unwrap();
+        let place_of_issue = person_id_number.place_of_issue.unwrap();
         result = save_personal_id_number_info(
             &transaction,
-            personal_id_number_id,
+            id_number_id,
             "place_of_issue".to_string(),
             "place_of_issue".to_string(),
             place_of_issue,
@@ -380,10 +380,10 @@ impl InsertPersonPort for PersonRepository {
         }
 
         // insert id number provider
-        let id_number_provider = db_request.id_number_provider.unwrap();
+        let id_number_provider = person_id_number.code.unwrap();
         result = save_personal_id_number_info(
             &transaction,
-            personal_id_number_id,
+            id_number_id,
             "provider".to_string(),
             "code".to_string(),
             id_number_provider.clone(),
