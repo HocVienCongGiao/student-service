@@ -2,7 +2,7 @@ use crate::db_column;
 use crate::student_gateway::repository::StudentRepository;
 use async_trait::async_trait;
 use domain::ports::find_one_student_by_id_port::FindOneStudentByIdPort;
-use domain::ports::student_db_gateway::StudentDbResponse;
+use domain::ports::student::models::student_dbresponse::Student as StudentDbResponse;
 use tokio_postgres::types::ToSql;
 use tokio_postgres::Row;
 use uuid::Uuid;

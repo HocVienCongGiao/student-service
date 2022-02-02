@@ -3,10 +3,11 @@ use crate::student_gateway::repository::StudentRepository;
 use async_trait::async_trait;
 use chrono::NaiveDate;
 use domain::ports::find_student_collection_port::FindStudentCollectionPort;
-use domain::ports::student_db_gateway::{
-    StudentCollectionDbResponse, StudentDbResponse, StudentQueryDbRequest,
-    StudentSortCriteriaDbRequest, StudentSortFieldDbRequest,
-};
+use domain::ports::student::models::student_dbrequest::StudentQuery as StudentQueryDbRequest;
+use domain::ports::student::models::student_dbrequest::StudentSortCriteria as StudentSortCriteriaDbRequest;
+use domain::ports::student::models::student_dbrequest::StudentSortField as StudentSortFieldDbRequest;
+use domain::ports::student::models::student_dbresponse::Student as StudentDbResponse;
+use domain::ports::student::models::student_dbresponse::StudentCollection as StudentCollectionDbResponse;
 use domain::SortDirection;
 use tokio_postgres::types::ToSql;
 use tokio_postgres::{Client, Error, Row};

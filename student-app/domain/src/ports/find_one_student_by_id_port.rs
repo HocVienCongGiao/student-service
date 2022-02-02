@@ -1,4 +1,4 @@
-use crate::ports::student_db_gateway::StudentDbResponse;
+use crate::ports::student::models::student_dbresponse::Student as StudentDbResponse;
 use async_trait::async_trait;
 use uuid::Uuid;
 

@@ -9,7 +9,8 @@ use crate::ports::person::models::person_dbresponse::Person as PersonDbResponse;
 use crate::ports::person::person_db_gateway::PersonDbGateway;
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
-use crate::ports::student_db_gateway::{StudentDbGateway, StudentInsertDbResponse};
+use crate::ports::student::models::student_dbresponse::StudentInsert as StudentInsertDbResponse;
+use crate::ports::student::student_db_gateway::StudentDbGateway;
 use crate::usecases::student_usecase_shared_models::{
     StudentUsecaseSharedIdNumberProvider, StudentUsecaseSharedTitle, WithChristianName, WithPolity,
     WithStudentId,

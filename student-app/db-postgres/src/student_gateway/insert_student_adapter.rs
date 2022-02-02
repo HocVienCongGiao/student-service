@@ -3,8 +3,9 @@ use tokio_postgres::types::ToSql;
 use tokio_postgres::{Error, Transaction};
 use uuid::Uuid;
 
-use domain::ports::insert_student_port::InsertStudentPort;
-use domain::ports::student_db_gateway::{StudentInsertDbResponse, StudentMutationDbRequest};
+use domain::ports::student::insert_student_port::InsertStudentPort;
+use domain::ports::student::models::student_dbresponse::StudentInsert as StudentInsertDbResponse;
+use domain::ports::student::models::student_mutation_dbrequest::Student as StudentMutationDbRequest;
 use domain::ports::DbError;
 
 use crate::student_gateway::repository::StudentRepository;

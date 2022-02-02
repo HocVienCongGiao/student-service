@@ -3,7 +3,8 @@ use uuid::Uuid;
 
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
-use crate::ports::student_db_gateway::{StudentDbGateway, StudentDbResponse};
+use crate::ports::student::models::student_dbresponse::Student as StudentDbResponse;
+use crate::ports::student::student_db_gateway::StudentDbGateway;
 use crate::usecases::student_usecase_shared_models::{
     QueryStudentUsecaseOutput, WithChristianName, WithPolity,
 };
