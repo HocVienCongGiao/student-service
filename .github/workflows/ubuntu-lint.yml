@@ -14,27 +14,36 @@ jobs:
 #         with:
 #           components: rustfmt
       - uses: actions/checkout@v2
+      - name: Unpack
+        run: |
+          source $HOME/.cargo/env
+          mkdir -p ~/.peterbean
+          echo ${{ secrets.GH_PAT }} > ~/.peterbean/.gh_pat 
+          make unpack
+
       - name: Cargo version
         working-directory: student-lambda      
         run: |
           source $HOME/.cargo/env
           cargo version
-      - name: Lambda Cargo fmt
-        working-directory: student-lambda
-        run: |
-          source $HOME/.cargo/env
-          cargo fmt --all -- --check
+
+      # - name: Lambda Cargo fmt
+      #   working-directory: student-lambda
+      #   run: |
+      #     source $HOME/.cargo/env
+      #     cargo fmt --all -- --check
+
       - name: Check App Cargo fmt
         working-directory: student-app
         run: |
           source $HOME/.cargo/env
           cargo fmt --all -- --check
           
-      - name: Lambda Cargo lint
-        working-directory: student-lambda
-        run: |
-          source $HOME/.cargo/env
-          cargo clippy --all-targets -- -D clippy::all
+      # - name: Lambda Cargo lint
+      #   working-directory: student-lambda
+      #   run: |
+      #     source $HOME/.cargo/env
+      #     cargo clippy --all-targets -- -D clippy::all
       - name: App Cargo lint
         working-directory: student-app
         run: |
