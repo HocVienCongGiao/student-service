@@ -11,6 +11,7 @@ pub mod person_db_gateway;
 pub mod polity_db_gateway;
 pub mod saint_db_gateway;
 pub mod student_db_gateway;
+pub mod update_person_port;
 pub mod update_student_port;
 
 #[derive(Debug)]

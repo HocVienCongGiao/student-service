@@ -339,19 +339,19 @@ impl InsertPersonPort for PersonRepository {
         transaction
             .commit()
             .await
-            .map_err(|error| DbError::UnknownError(error.into_source().unwrap().to_string()));
-        Ok(PersonDbResponse {
-            id,
-            polity_id: Some(polity_id),
-            saint_ids: Some(christian_names.clone()),
-            title: Some(title.to_string()),
-            first_name: Some(first_name.clone()),
-            middle_name: Some(middle_name.clone()),
-            last_name: Some(last_name.clone()),
-            date_of_birth: Some(date_of_birth),
-            place_of_birth: Some(place_of_birth.clone()),
-            email: Some(email.clone()),
-            phone: Some(phone.clone()),
-        })
+            .map(|_| PersonDbResponse {
+                id,
+                polity_id: Some(polity_id),
+                saint_ids: Some(christian_names.clone()),
+                title: Some(title.to_string()),
+                first_name: Some(first_name.clone()),
+                middle_name: Some(middle_name.clone()),
+                last_name: Some(last_name.clone()),
+                date_of_birth: Some(date_of_birth),
+                place_of_birth: Some(place_of_birth.clone()),
+                email: Some(email.clone()),
+                phone: Some(phone.clone()),
+            })
+            .map_err(|error| DbError::UnknownError(error.into_source().unwrap().to_string()))
     }
 }

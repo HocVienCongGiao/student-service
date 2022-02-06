@@ -51,6 +51,24 @@ pub fn build_http_request_to_get_student_collection(offset: String, count: i32) 
     build_http_get_request(uri, query_param, path_param)
 }
 
+pub fn build_http_request_to_put_student(
+    student_upsert: StudentUpsert,
+    uuid: String,
+) -> Request<Body> {
+    let mut query_param = HashMap::new();
+    let mut path_param = HashMap::new();
+
+    let uri = format!(
+        "https://dev-sg.portal.hocvienconggiao.com/mutation-api/student-service/students/{}",
+        uuid
+    );
+
+    path_param.insert("id".to_string(), vec![uuid]);
+    let serialized = serde_json::to_string(&student_upsert).unwrap();
+
+    build_http_put_request(uri, query_param, path_param, Some(serialized))
+}
+
 fn build_http_get_request(
     uri: String,
     query_param: HashMap<String, Vec<String>>,
@@ -66,6 +84,15 @@ fn build_http_post_request(
     body: Option<String>,
 ) -> Request<Body> {
     build_http_request("POST".to_string(), uri, query_param, path_param, body)
+}
+
+fn build_http_put_request(
+    uri: String,
+    query_param: HashMap<String, Vec<String>>,
+    path_param: HashMap<String, Vec<String>>,
+    body: Option<String>,
+) -> Request<Body> {
+    build_http_request("PUT".to_string(), uri, query_param, path_param, body)
 }
 
 fn build_http_request(

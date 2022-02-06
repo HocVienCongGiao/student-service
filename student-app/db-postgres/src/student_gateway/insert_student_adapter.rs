@@ -41,6 +41,7 @@ impl InsertStudentPort for StudentRepository {
         let person_id = db_request.person_id.unwrap();
         let student_id = db_request.student_id.unwrap();
         result = save_student_id(&transaction, student_id, person_id).await;
+
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),
@@ -50,11 +51,10 @@ impl InsertStudentPort for StudentRepository {
         transaction
             .commit()
             .await
-            .map_err(|error| DbError::UnknownError(error.into_source().unwrap().to_string()));
-
-        Ok(StudentInsertDbResponse {
-            student_id,
-            person_id,
-        })
+            .map(|_| StudentInsertDbResponse {
+                person_id,
+                student_id,
+            })
+            .map_err(|error| DbError::UnknownError(error.into_source().unwrap().to_string()))
     }
 }

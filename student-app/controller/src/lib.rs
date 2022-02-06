@@ -8,6 +8,7 @@ use uuid::Uuid;
 mod create_student;
 mod get_one_student_by_id;
 mod get_student_collection;
+mod update_student;
 
 pub mod openapi;
 
@@ -20,9 +21,10 @@ pub async fn get_one_student_by_id(id: Uuid) -> Option<StudentViewOpenApi> {
 }
 
 pub async fn update_student(
-    student_request: Option<StudentUpsertOpenApi>,
-) -> Option<StudentViewOpenApi> {
-    todo!()
+    student_request: StudentUpsertOpenApi,
+    id: Uuid,
+) -> Result<StudentViewOpenApi, UsecaseError> {
+    update_student::from_openapi(student_request, id).await
 }
 
 pub async fn create_student(

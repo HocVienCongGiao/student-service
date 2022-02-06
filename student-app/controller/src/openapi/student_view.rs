@@ -2,6 +2,7 @@ use crate::openapi::ToOpenApi;
 use domain::usecases::create_student_usecase::CreateStudentUsecaseOutput;
 use domain::usecases::query_student_collection_usecase::QueryStudentCollectionUsecaseOutput;
 use domain::usecases::student_usecase_shared_models::QueryStudentUsecaseOutput;
+use domain::usecases::update_student_usecase::UpdateStudentUsecaseOutput;
 use hvcg_academics_openapi_student::models::{StudentView, StudentViewCollection};
 use uuid::Uuid;
 
@@ -81,9 +82,42 @@ impl ToOpenApi<StudentView> for CreateStudentUsecaseOutput {
             christian_name: self.christian_name.map(|saint_names| saint_names.join(" ")),
             name: Some(format!(
                 "{} {} {}",
-                self.last_name.unwrap_or_default(),
-                self.middle_name.unwrap_or_default(),
-                self.first_name.unwrap_or_default(),
+                self.first_name.unwrap(),
+                self.middle_name.unwrap(),
+                self.last_name.unwrap(),
+            )),
+        }
+    }
+}
+
+impl ToOpenApi<StudentView> for UpdateStudentUsecaseOutput {
+    fn to_openapi(self) -> StudentView {
+        // TODO Optimise
+        let polity_id: Option<Uuid> = self.polity_id;
+        // if self.polity.is_some() {
+        //     polity_id = Some(self.polity.unwrap().id);
+        // } else {
+        //     polity_id = None;
+        // }
+
+        StudentView {
+            id: self.student_id.unwrap(),
+            polity_name: self.polity_name,
+            polity_location_name: self.polity_location_name,
+            polity_location_address: self.polity_location_address,
+            polity_location_email: self.polity_location_email,
+            title: self.title.map(|t| t.to_openapi()),
+            date_of_birth: self.date_of_birth,
+            place_of_birth: self.place_of_birth,
+            email: self.email,
+            phone: self.phone,
+            undergraduate_school: None,
+            christian_name: self.christian_name.map(|saint_names| saint_names.join(" ")),
+            name: Some(format!(
+                "{} {} {}",
+                self.first_name.unwrap(),
+                self.middle_name.unwrap(),
+                self.last_name.unwrap(),
             )),
         }
     }
