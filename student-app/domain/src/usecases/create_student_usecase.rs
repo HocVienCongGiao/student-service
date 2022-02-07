@@ -1,15 +1,19 @@
+use crate::entities::personal_id_number::{PersonIdNumberProvider, PersonalIdNumber};
 use async_trait::async_trait;
 use chrono::NaiveDate;
 use uuid::Uuid;
 
 use crate::entities::person::{Person as PersonEntity, PersonTitle};
 use crate::entities::student::Student as StudentEntity;
-use crate::ports::person_db_gateway::{PersonDbGateway, PersonDbResponse};
+use crate::ports::person::models::person_dbresponse::Person as PersonDbResponse;
+use crate::ports::person::person_db_gateway::PersonDbGateway;
 use crate::ports::polity_db_gateway::PolityDbGateway;
 use crate::ports::saint_db_gateway::SaintDbGateway;
-use crate::ports::student_db_gateway::{StudentDbGateway, StudentInsertDbResponse};
+use crate::ports::student::models::student_dbresponse::StudentInsert as StudentInsertDbResponse;
+use crate::ports::student::student_db_gateway::StudentDbGateway;
 use crate::usecases::student_usecase_shared_models::{
-    StudentUsecaseSharedTitle, WithChristianName, WithPolity, WithStudentId,
+    StudentUsecaseSharedIdNumberProvider, StudentUsecaseSharedTitle, WithChristianName, WithPolity,
+    WithStudentId,
 };
 use crate::usecases::{ToEntity, ToUsecaseOutput, UsecaseError};
 
@@ -157,7 +161,15 @@ pub struct CreateStudentUsecaseInput {
     pub place_of_birth: Option<String>,
     pub email: Option<String>,
     pub phone: Option<String>,
-    // TODO: add more fields
+    // pub educational_stages: Option<Vec<PersonUsecaseSharedEducationalStage>>,
+    pub nationality: Option<String>,
+    pub race: Option<String>,
+    pub id_number: Option<String>,
+    pub id_number_provider: Option<StudentUsecaseSharedIdNumberProvider>,
+    pub date_of_issue: Option<NaiveDate>,
+    pub place_of_issue: Option<String>,
+    pub address: Option<String>,
+    // pub languages: Option<Vec<PersonUsecaseSharedLanguage>>,
 }
 
 #[derive(Clone)]
@@ -187,6 +199,18 @@ impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
         if let Some(title_usecase_input) = title_usecase_input {
             title = Some(title_usecase_input.to_entity());
         }
+        let id_number_provider_usecase_input = self.id_number_provider;
+        let mut id_number_provider: Option<PersonIdNumberProvider> = None;
+        if let Some(id_number_provider_usecase_input) = id_number_provider_usecase_input {
+            id_number_provider = Some(id_number_provider_usecase_input.to_entity());
+        }
+        let personal_id_number = PersonalIdNumber {
+            id: Some(Uuid::new_v4()),
+            id_number: self.id_number,
+            code: id_number_provider,
+            date_of_issue: self.date_of_issue,
+            place_of_issue: self.place_of_issue,
+        };
         let person = PersonEntity {
             id: Some(Uuid::new_v4()),
             polity_id: self.polity_id,
@@ -199,6 +223,10 @@ impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
             place_of_birth: self.place_of_birth,
             email: self.email,
             phone: self.phone,
+            nationality: self.nationality.clone(),
+            race: self.race,
+            address: self.address,
+            personal_id_number: Some(personal_id_number),
         };
         StudentEntity {
             person: Some(person),
@@ -213,6 +241,15 @@ impl ToEntity<PersonTitle> for StudentUsecaseSharedTitle {
             StudentUsecaseSharedTitle::Monk => PersonTitle::Monk,
             StudentUsecaseSharedTitle::Nun => PersonTitle::Nun,
             StudentUsecaseSharedTitle::Priest => PersonTitle::Priest,
+        }
+    }
+}
+
+impl ToEntity<PersonIdNumberProvider> for StudentUsecaseSharedIdNumberProvider {
+    fn to_entity(self) -> PersonIdNumberProvider {
+        match self {
+            StudentUsecaseSharedIdNumberProvider::NationalId => PersonIdNumberProvider::NationalId,
+            StudentUsecaseSharedIdNumberProvider::Passport => PersonIdNumberProvider::Passport,
         }
     }
 }

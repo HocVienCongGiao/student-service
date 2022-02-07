@@ -1,4 +1,5 @@
-use crate::ports::student_db_gateway::{StudentCollectionDbResponse, StudentQueryDbRequest};
+use crate::ports::student::models::student_dbrequest::StudentQuery as StudentQueryDbRequest;
+use crate::ports::student::models::student_dbresponse::StudentCollection as StudentCollectionDbResponse;
 use async_trait::async_trait;
 
 #[async_trait]

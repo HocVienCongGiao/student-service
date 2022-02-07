@@ -2,16 +2,19 @@ use crate::entities::student::Student;
 use crate::ports::delete_student_port::DeleteStudentPort;
 use crate::ports::find_one_student_by_id_port::FindOneStudentByIdPort;
 use crate::ports::find_student_collection_port::FindStudentCollectionPort;
-use crate::ports::insert_student_port::InsertStudentPort;
-use crate::ports::update_student_port::UpdateStudentPort;
+use crate::ports::student::insert_student_port::InsertStudentPort;
+use crate::ports::student::models::student_dbrequest::{
+    StudentQuery as StudentQueryDbRequest, StudentSort as StudentSortDbRequest,
+    StudentSortCriteria as StudentSortCriteriaDbRequest,
+    StudentSortField as StudentSortFieldDbRequest,
+};
+use crate::ports::student::models::student_mutation_dbrequest::Student as StudentMutationDbRequest;
+use crate::ports::student::update_student_port::UpdateStudentPort;
 use crate::usecases::query_student_collection_usecase::{
     QueryStudentCollectionUsecaseInput, QueryStudentCollectionUsecaseInputSort,
     QueryStudentCollectionUsecaseInputSortCriteria, QueryStudentCollectionUsecaseInputSortField,
 };
-use crate::SortDirection;
 use async_trait::async_trait;
-use chrono::NaiveDate;
-use uuid::Uuid;
 
 #[async_trait]
 pub trait StudentDbGateway:
@@ -21,71 +24,6 @@ pub trait StudentDbGateway:
     + FindStudentCollectionPort
     + FindOneStudentByIdPort
 {
-}
-
-pub struct StudentQueryDbRequest {
-    pub id: Option<Uuid>,
-    pub name: Option<String>,
-    pub email: Option<String>,
-    pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
-    pub date_of_birth: Option<NaiveDate>,
-    pub place_of_birth: Option<String>,
-    pub polity_name: Option<String>,
-    //pub specialism: Option<String>,
-    pub sort_request: Option<StudentSortDbRequest>,
-    pub offset: Option<i64>,
-    pub count: Option<i64>,
-}
-
-pub struct StudentSortDbRequest {
-    pub sort_criteria: Vec<StudentSortCriteriaDbRequest>,
-}
-
-pub struct StudentSortCriteriaDbRequest {
-    pub field: StudentSortFieldDbRequest,
-    pub direction: SortDirection,
-}
-#[derive(strum_macros::Display)]
-pub enum StudentSortFieldDbRequest {
-    FirstName,
-    MiddleName,
-    LastName,
-    ChristianName,
-    PolityName,
-    LocationName,
-    PlaceOfBirth,
-}
-
-pub struct StudentMutationDbRequest {
-    pub student_id: Option<Uuid>,
-    pub person_id: Option<Uuid>,
-}
-
-pub struct StudentInsertDbResponse {
-    pub person_id: Uuid,
-    pub student_id: Uuid,
-}
-
-pub struct StudentDbResponse {
-    pub id: Uuid,
-    pub polity_id: Option<uuid::Uuid>,
-    pub saint_ids: Option<Vec<uuid::Uuid>>,
-    pub title: Option<String>,
-    pub first_name: Option<String>,
-    pub middle_name: Option<String>,
-    pub last_name: Option<String>,
-    pub date_of_birth: Option<NaiveDate>,
-    pub place_of_birth: Option<String>,
-    pub email: Option<String>,
-    pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
-}
-
-pub struct StudentCollectionDbResponse {
-    pub collection: Vec<StudentDbResponse>,
-    pub has_more: Option<bool>,
-    pub total: i64,
 }
 
 impl Student {

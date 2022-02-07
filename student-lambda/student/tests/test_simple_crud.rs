@@ -60,7 +60,7 @@ async fn when_post_a_student_upsert_then_student_is_correctly_saved_and_student_
 
     // Then
     // assert_eq!(actual_student_view_openapi.is_some());
-    let mut actual_id: Option<Uuid> = actual_student_view_openapi.clone().map(|t| t.id);
+    let actual_id: Option<Uuid> = actual_student_view_openapi.clone().map(|t| t.id);
     let expected_student_view_openapi = test_data::prepare_student_view_openapi(actual_id);
     assert_eq!(
         expected_student_view_openapi,

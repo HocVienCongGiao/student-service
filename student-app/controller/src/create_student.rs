@@ -5,10 +5,13 @@ use db_postgres::student_gateway::repository::StudentRepository;
 use domain::usecases::create_student_usecase::{
     CreateStudentUsecase, CreateStudentUsecaseInput, CreateStudentUsecaseInteractor,
 };
-use domain::usecases::student_usecase_shared_models::StudentUsecaseSharedTitle;
+use domain::usecases::student_usecase_shared_models::{
+    StudentUsecaseSharedIdNumberProvider, StudentUsecaseSharedTitle,
+};
 use domain::usecases::UsecaseError;
 use hvcg_academics_openapi_student::models::{
-    StudentTitle, StudentUpsert as StudentUpsertOpenApi, StudentView as StudentViewOpenApi,
+    IdNumberProvider, StudentTitle, StudentUpsert as StudentUpsertOpenApi,
+    StudentView as StudentViewOpenApi,
 };
 
 use crate::openapi::ToOpenApi;
@@ -60,6 +63,15 @@ impl ToUsecaseInput<CreateStudentUsecaseInput> for StudentUpsertOpenApi {
             })
         }
 
+        let mut id_number_provider: Option<StudentUsecaseSharedIdNumberProvider> = None;
+        let id_number_provider_openapi = self.id_number_provider;
+        if let Some(id_number_provider_openapi) = id_number_provider_openapi {
+            id_number_provider = Some(match id_number_provider_openapi {
+                IdNumberProvider::NATIONAL_ID => StudentUsecaseSharedIdNumberProvider::NationalId,
+                IdNumberProvider::PASSPORT => StudentUsecaseSharedIdNumberProvider::Passport,
+            })
+        }
+
         CreateStudentUsecaseInput {
             polity_id: self.polity_id,
             saint_ids: self.saint_id_array.clone(),
@@ -71,6 +83,13 @@ impl ToUsecaseInput<CreateStudentUsecaseInput> for StudentUpsertOpenApi {
             place_of_birth: self.place_of_birth.clone(),
             email: self.email.clone(),
             phone: self.phone,
+            nationality: self.nationality.clone(),
+            race: self.race,
+            id_number: self.id_number,
+            id_number_provider,
+            date_of_issue: self.date_of_issue,
+            place_of_issue: self.place_of_issue,
+            address: self.address,
         }
     }
 }

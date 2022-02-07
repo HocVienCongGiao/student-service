@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use domain::ports::person_db_gateway::PersonDbGateway;
+use domain::ports::person::person_db_gateway::PersonDbGateway;
 use tokio_postgres::Client;
 
 pub struct PersonRepository {
