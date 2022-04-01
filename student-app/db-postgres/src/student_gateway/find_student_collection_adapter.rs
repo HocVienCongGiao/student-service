@@ -42,12 +42,11 @@ impl FindStudentCollectionPort for StudentRepository {
         let offset = db_request.offset.unwrap_or(0);
         let count = db_request.count.unwrap_or(20);
 
-        let order_by_string: String;
-        if let Some(sort_db_request) = db_request.sort_request {
-            order_by_string = build_order_string(sort_db_request.sort_criteria);
+        let order_by_string: String = if let Some(sort_db_request) = db_request.sort_request {
+            build_order_string(sort_db_request.sort_criteria)
         } else {
-            order_by_string = default_order_string();
-        }
+            default_order_string()
+        };
 
         let filtering_string = build_filtering_query_statement_string();
 
@@ -70,17 +69,14 @@ impl FindStudentCollectionPort for StudentRepository {
             order_by_string.clone(),
         )
         .await;
-        let collection: Vec<StudentDbResponse>;
-        if let Ok(result) = result {
-            collection = result
+        let collection: Vec<StudentDbResponse> = if let Ok(result) = result {
+            result
                 .into_iter()
                 .map(from_pg_row_to_student_db_response) //fn in find one by id
-                .collect();
+                .collect()
         } else {
-            collection = vec![];
-        }
-
-        let has_more: Option<bool>;
+            vec![]
+        };
         let total_from_offset = count_without_limit(
             &(*self).client,
             &student_filter,
@@ -90,11 +86,13 @@ impl FindStudentCollectionPort for StudentRepository {
         )
         .await
         .unwrap();
-        if total_from_offset > count {
-            has_more = Some(true);
+
+        let has_more: Option<bool> = if total_from_offset > count {
+            Some(true)
         } else {
-            has_more = Some(false);
-        }
+            Some(false)
+        };
+
         let total = count_total(&(*self).client, &student_filter, filtering_string)
             .await
             .unwrap();

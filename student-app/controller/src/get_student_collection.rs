@@ -62,76 +62,76 @@ impl StudentCollectionQuery {
 pub fn from_openapi_to_usecase_input(
     openapi: Option<Vec<StudentSortCriteria>>,
 ) -> Option<QueryStudentCollectionUsecaseInputSort> {
-    let sort_request: Option<QueryStudentCollectionUsecaseInputSort>;
     let sort_criteria_dto = openapi;
 
-    if let Some(sort_criteria_dto) = sort_criteria_dto {
-        let mut sort_criteria = Vec::new();
-        sort_criteria_dto.iter().for_each(|criterion| {
-            let sort_criteria_request = match criterion {
-                StudentSortCriteria::NAME_ASC => build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::LastName,
-                    SortDirection::Asc,
-                ),
-                StudentSortCriteria::NAME_DESC => build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::LastName,
-                    SortDirection::Desc,
-                ),
-                StudentSortCriteria::CHRISTIAN_NAME_ASC => build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::ChristianName,
-                    SortDirection::Asc,
-                ),
-                StudentSortCriteria::CHRISTIAN_NAME_DESC => build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::ChristianName,
-                    SortDirection::Desc,
-                ),
-                StudentSortCriteria::POLITY_NAME_ASC => build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::PolityName,
-                    SortDirection::Asc,
-                ),
-                StudentSortCriteria::POLITY_NAME_DESC => build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::PolityName,
-                    SortDirection::Desc,
-                ),
-                StudentSortCriteria::LOCATION_NAME_ASC => build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::LocationName,
-                    SortDirection::Asc,
-                ),
-                StudentSortCriteria::LOCATION_NAME_DESC => build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::LocationName,
-                    SortDirection::Desc,
-                ),
-                StudentSortCriteria::PLACE_OF_BIRTH_ASC => build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::PlaceOfBirth,
-                    SortDirection::Asc,
-                ),
-                StudentSortCriteria::PLACE_OF_BIRTH_DESC => build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::PlaceOfBirth,
-                    SortDirection::Desc,
-                ),
-            };
+    let sort_request: Option<QueryStudentCollectionUsecaseInputSort> =
+        if let Some(sort_criteria_dto) = sort_criteria_dto {
+            let mut sort_criteria = Vec::new();
+            sort_criteria_dto.iter().for_each(|criterion| {
+                let sort_criteria_request = match criterion {
+                    StudentSortCriteria::NAME_ASC => build_sort_criteria_request(
+                        QueryStudentCollectionUsecaseInputSortField::LastName,
+                        SortDirection::Asc,
+                    ),
+                    StudentSortCriteria::NAME_DESC => build_sort_criteria_request(
+                        QueryStudentCollectionUsecaseInputSortField::LastName,
+                        SortDirection::Desc,
+                    ),
+                    StudentSortCriteria::CHRISTIAN_NAME_ASC => build_sort_criteria_request(
+                        QueryStudentCollectionUsecaseInputSortField::ChristianName,
+                        SortDirection::Asc,
+                    ),
+                    StudentSortCriteria::CHRISTIAN_NAME_DESC => build_sort_criteria_request(
+                        QueryStudentCollectionUsecaseInputSortField::ChristianName,
+                        SortDirection::Desc,
+                    ),
+                    StudentSortCriteria::POLITY_NAME_ASC => build_sort_criteria_request(
+                        QueryStudentCollectionUsecaseInputSortField::PolityName,
+                        SortDirection::Asc,
+                    ),
+                    StudentSortCriteria::POLITY_NAME_DESC => build_sort_criteria_request(
+                        QueryStudentCollectionUsecaseInputSortField::PolityName,
+                        SortDirection::Desc,
+                    ),
+                    StudentSortCriteria::LOCATION_NAME_ASC => build_sort_criteria_request(
+                        QueryStudentCollectionUsecaseInputSortField::LocationName,
+                        SortDirection::Asc,
+                    ),
+                    StudentSortCriteria::LOCATION_NAME_DESC => build_sort_criteria_request(
+                        QueryStudentCollectionUsecaseInputSortField::LocationName,
+                        SortDirection::Desc,
+                    ),
+                    StudentSortCriteria::PLACE_OF_BIRTH_ASC => build_sort_criteria_request(
+                        QueryStudentCollectionUsecaseInputSortField::PlaceOfBirth,
+                        SortDirection::Asc,
+                    ),
+                    StudentSortCriteria::PLACE_OF_BIRTH_DESC => build_sort_criteria_request(
+                        QueryStudentCollectionUsecaseInputSortField::PlaceOfBirth,
+                        SortDirection::Desc,
+                    ),
+                };
 
-            let sort_field = sort_criteria_request.field.clone();
-            let sort_direction = sort_criteria_request.direction.clone();
+                let sort_field = sort_criteria_request.field.clone();
+                let sort_direction = sort_criteria_request.direction.clone();
 
-            sort_criteria.push(sort_criteria_request);
+                sort_criteria.push(sort_criteria_request);
 
-            if QueryStudentCollectionUsecaseInputSortField::LastName == sort_field {
-                sort_criteria.push(build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::MiddleName,
-                    sort_direction.clone(),
-                ));
-                sort_criteria.push(build_sort_criteria_request(
-                    QueryStudentCollectionUsecaseInputSortField::FirstName,
-                    sort_direction,
-                ));
-            }
-        });
+                if QueryStudentCollectionUsecaseInputSortField::LastName == sort_field {
+                    sort_criteria.push(build_sort_criteria_request(
+                        QueryStudentCollectionUsecaseInputSortField::MiddleName,
+                        sort_direction.clone(),
+                    ));
+                    sort_criteria.push(build_sort_criteria_request(
+                        QueryStudentCollectionUsecaseInputSortField::FirstName,
+                        sort_direction,
+                    ));
+                }
+            });
 
-        sort_request = Option::from(QueryStudentCollectionUsecaseInputSort { sort_criteria });
-    } else {
-        sort_request = None;
-    }
+            Option::from(QueryStudentCollectionUsecaseInputSort { sort_criteria })
+        } else {
+            None
+        };
     sort_request
 }
 
