@@ -18,8 +18,11 @@ impl FindOneStudentByIdPort for StudentRepository {
 
         // let stmt = block_on(stmt_future).unwrap();
         let name_param: &[&(dyn ToSql + Sync)] = &[&id];
-        let row = (*self).client.query_one(&stmt, name_param).await.unwrap();
-        Some(from_pg_row_to_student_db_response(row))
+        let row = (*self).client.query_one(&stmt, name_param).await;
+        match row {
+            Ok(data) => Some(from_pg_row_to_student_db_response(data)),
+            Err(e) => None,
+        }
     }
 }
 

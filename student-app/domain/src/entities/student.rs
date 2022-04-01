@@ -1,9 +1,8 @@
-use crate::entities::person::Person;
 use uuid::Uuid;
 
-pub(crate) struct Student {
+pub struct Student {
     pub student_id: Option<Uuid>,
-    pub person: Option<Person>,
+    pub person_id: Option<Uuid>,
 }
 
 impl Student {

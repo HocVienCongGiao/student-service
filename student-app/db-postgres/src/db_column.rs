@@ -1,4 +1,5 @@
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
+use tokio_postgres::Error;
 use tokio_postgres::Row;
 use uuid::Uuid;
 
@@ -12,6 +13,13 @@ pub fn get_uuid_collection(row: &Row, col: &str) -> Vec<Uuid> {
 
 pub fn get_string(row: &Row, col: &str) -> String {
     row.get::<&str, String>(col)
+}
+
+pub fn get_result_of_string(row: &Row, col: &str) -> Option<String> {
+    match row.try_get::<&str, String>(col) {
+        Ok(string) => Some(string),
+        _ => None,
+    }
 }
 
 // unused because we have fixed OpenAPIGen Date -> Rust Datetime

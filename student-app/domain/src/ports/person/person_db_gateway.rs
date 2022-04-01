@@ -1,4 +1,5 @@
 use crate::entities::person::Person;
+use crate::ports::person::find_one_person_by_id_port::FindOnePersonByIdPort;
 use crate::ports::person::insert_person_port::InsertPersonPort;
 use crate::ports::person::models;
 use crate::ports::person::models::person_mutation_dbrequest::PersonalIdNumber;
@@ -6,7 +7,7 @@ use async_trait::async_trait;
 use models::person_mutation_dbrequest::Person as PersonMutationDbRequest;
 
 #[async_trait]
-pub trait PersonDbGateway: InsertPersonPort {}
+pub trait PersonDbGateway: InsertPersonPort + FindOnePersonByIdPort {}
 
 impl Person {
     pub fn to_mutation_db_request(&self) -> PersonMutationDbRequest {
@@ -19,7 +20,7 @@ impl Person {
             place_of_issue: personal_id_number.place_of_issue,
         };
         PersonMutationDbRequest {
-            id: self.id,
+            id: self.person_id,
             polity_id: self.polity_id,
             saint_ids: self.saint_ids.clone(),
             title: self.title.clone().map(|title| title.to_string()),

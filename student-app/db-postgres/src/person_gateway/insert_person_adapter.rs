@@ -167,8 +167,6 @@ impl InsertPersonPort for PersonRepository {
         &mut self,
         db_request: PersonMutationDbRequest,
     ) -> Result<PersonDbResponse, DbError> {
-        let mut result: Result<u64, Error>;
-
         let transaction = (*self)
             .client
             .transaction()
@@ -177,7 +175,8 @@ impl InsertPersonPort for PersonRepository {
 
         // insert id
         let id = db_request.id.unwrap();
-        result = save_id(&transaction, id).await;
+
+        let mut result: Result<u64, Error> = save_id(&transaction, id).await;
         if let Err(error) = result {
             return Err(DbError::UnknownError(
                 error.into_source().unwrap().to_string(),

@@ -135,10 +135,8 @@ impl WithPolity<QueryStudentUsecaseOutput> for QueryStudentUsecaseOutput {
 impl WithChristianName<QueryStudentUsecaseOutput> for QueryStudentUsecaseOutput {
     fn with_christian_name(mut self, name: Option<String>) -> QueryStudentUsecaseOutput {
         if let Some(name) = name {
-            let mut saint_names: Vec<String>;
-            if self.christian_name.is_none() {
-                saint_names = vec![];
-            } else {
+            let mut saint_names: Vec<String> = vec![];
+            if self.christian_name.is_some() {
                 saint_names = self.christian_name.unwrap();
             }
             saint_names.push(name);

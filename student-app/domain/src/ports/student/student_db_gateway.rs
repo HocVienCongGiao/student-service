@@ -29,7 +29,7 @@ pub trait StudentDbGateway:
 impl Student {
     pub fn to_mutation_db_request(&self) -> StudentMutationDbRequest {
         StudentMutationDbRequest {
-            person_id: self.person.clone().map(|person| person.id).unwrap(),
+            person_id: self.person_id,
             student_id: self.student_id,
         }
     }

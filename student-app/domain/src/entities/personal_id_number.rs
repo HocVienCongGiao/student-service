@@ -2,7 +2,7 @@ use chrono::NaiveDate;
 use uuid::Uuid;
 
 #[derive(Clone)]
-pub(crate) struct PersonalIdNumber {
+pub struct PersonalIdNumber {
     pub id: Option<Uuid>,
     pub id_number: Option<String>,
     pub code: Option<PersonIdNumberProvider>,
@@ -12,7 +12,7 @@ pub(crate) struct PersonalIdNumber {
 
 #[derive(PartialEq, Clone)]
 #[repr(C)]
-pub(crate) enum PersonIdNumberProvider {
+pub enum PersonIdNumberProvider {
     NationalId,
     Passport,
 }

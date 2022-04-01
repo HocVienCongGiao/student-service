@@ -3,8 +3,8 @@ use chrono::NaiveDate;
 use uuid::Uuid;
 
 #[derive(Clone)]
-pub(crate) struct Person {
-    pub id: Option<Uuid>,
+pub struct Person {
+    pub person_id: Option<Uuid>,
     pub polity_id: Option<Uuid>,
     pub saint_ids: Option<Vec<uuid::Uuid>>,
     pub title: Option<PersonTitle>,
@@ -31,7 +31,7 @@ pub(crate) struct Person {
 
 #[derive(PartialEq, Clone)]
 #[repr(C)]
-pub(crate) enum PersonTitle {
+pub enum PersonTitle {
     Priest,
     Monk,
     Nun,
