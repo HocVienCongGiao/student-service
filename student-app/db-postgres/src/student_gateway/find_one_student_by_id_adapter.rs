@@ -21,7 +21,7 @@ impl FindOneStudentByIdPort for StudentRepository {
         let row = (*self).client.query_one(&stmt, name_param).await;
         match row {
             Ok(data) => Some(from_pg_row_to_student_db_response(data)),
-            Err(e) => None
+            Err(e) => None,
         }
     }
 }

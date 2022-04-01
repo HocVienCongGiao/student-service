@@ -8,7 +8,6 @@ use domain::usecases::create_student_usecase::{
 use domain::usecases::UsecaseError;
 use hvcg_academics_openapi_student::models::StudentView as StudentViewOpenApi;
 
-
 use crate::openapi::ToOpenApi;
 use crate::{StudentUpsertOpenApi, ToUsecaseInput};
 

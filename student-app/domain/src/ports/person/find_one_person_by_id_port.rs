@@ -1,6 +1,6 @@
+use crate::entities::person::Person;
 use async_trait::async_trait;
 use uuid::Uuid;
-use crate::entities::person::Person;
 
 #[async_trait]
 pub trait FindOnePersonByIdPort {

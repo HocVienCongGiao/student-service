@@ -3,18 +3,15 @@ use tokio_postgres::types::ToSql;
 use tokio_postgres::{Error, Transaction};
 use uuid::Uuid;
 
+use domain::entities::student::Student;
 use domain::ports::student::insert_student_port::InsertStudentPort;
 use domain::ports::DbError;
-use domain::entities::student::Student;
 
 use crate::student_gateway::repository::StudentRepository;
 
 #[async_trait]
 impl InsertStudentPort for StudentRepository {
-    async fn insert(
-        &mut self,
-        db_request: Student,
-    ) -> Result<Student, DbError> {
+    async fn insert(&mut self, db_request: Student) -> Result<Student, DbError> {
         // insert student_id
         let person_id = db_request.person_id.unwrap();
         let student_id = db_request.student_id.unwrap();

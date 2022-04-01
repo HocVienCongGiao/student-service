@@ -1,10 +1,10 @@
 use crate::entities::person::Person;
+use crate::ports::person::find_one_person_by_id_port::FindOnePersonByIdPort;
 use crate::ports::person::insert_person_port::InsertPersonPort;
 use crate::ports::person::models;
 use crate::ports::person::models::person_mutation_dbrequest::PersonalIdNumber;
 use async_trait::async_trait;
 use models::person_mutation_dbrequest::Person as PersonMutationDbRequest;
-use crate::ports::person::find_one_person_by_id_port::FindOnePersonByIdPort;
 
 #[async_trait]
 pub trait PersonDbGateway: InsertPersonPort + FindOnePersonByIdPort {}

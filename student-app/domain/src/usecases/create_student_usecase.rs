@@ -3,33 +3,23 @@ use uuid::Uuid;
 
 use crate::entities::student::Student as StudentEntity;
 use crate::ports::person::person_db_gateway::PersonDbGateway;
-use crate::ports::polity_db_gateway::PolityDbGateway;
-use crate::ports::saint_db_gateway::SaintDbGateway;
-use crate::ports::student::models::student_dbresponse::StudentInsert as StudentInsertDbResponse;
 use crate::ports::student::student_db_gateway::StudentDbGateway;
 use crate::usecases::student_usecase_shared_models::{
-    StudentUsecaseSharedIdNumberProvider, StudentUsecaseSharedTitle, WithChristianName, WithPolity,
-    WithStudentId,
-}
+    WithChristianName, WithPolity, WithStudentId,
+};
 use crate::usecases::{ToEntity, ToUsecaseOutput, UsecaseError};
 
-pub struct CreateStudentUsecaseInteractor<
-    A: StudentDbGateway,
-    B: PersonDbGateway,
-> {
+pub struct CreateStudentUsecaseInteractor<A: StudentDbGateway, B: PersonDbGateway> {
     student_db_gateway: A,
     person_db_gateway: B,
 }
 
 impl<A, B> CreateStudentUsecaseInteractor<A, B>
-    where
-        A: StudentDbGateway + Sync + Send,
-        B: PersonDbGateway + Sync + Send,
+where
+    A: StudentDbGateway + Sync + Send,
+    B: PersonDbGateway + Sync + Send,
 {
-    pub fn new(
-        student_db_gateway: A,
-        person_db_gateway: B,
-    ) -> Self {
+    pub fn new(student_db_gateway: A, person_db_gateway: B) -> Self {
         CreateStudentUsecaseInteractor {
             student_db_gateway,
             person_db_gateway,
@@ -48,9 +38,9 @@ pub trait CreateStudentUsecase {
 
 #[async_trait]
 impl<A, B> CreateStudentUsecase for CreateStudentUsecaseInteractor<A, B>
-    where
-        A: StudentDbGateway + Sync + Send,
-        B: PersonDbGateway + Sync + Send,
+where
+    A: StudentDbGateway + Sync + Send,
+    B: PersonDbGateway + Sync + Send,
 {
     async fn execute(
         &mut self,
@@ -60,7 +50,10 @@ impl<A, B> CreateStudentUsecase for CreateStudentUsecaseInteractor<A, B>
         if student.is_valid() {
             println!("This student is valid");
 
-            let person = (*self).person_db_gateway.find_one_by_id(student.person_id.unwrap()).await;
+            let person = (*self)
+                .person_db_gateway
+                .find_one_by_id(student.person_id.unwrap())
+                .await;
             if person.is_none() {
                 eprintln!("This person id is not valid");
                 Err(UsecaseError::ResourceNotFound)
@@ -88,7 +81,7 @@ pub struct CreateStudentUsecaseInput {
 #[derive(Clone)]
 pub struct CreateStudentUsecaseOutput {
     pub student_id: Uuid,
-    pub person_id: Uuid
+    pub person_id: Uuid,
 }
 
 impl ToEntity<StudentEntity> for CreateStudentUsecaseInput {
