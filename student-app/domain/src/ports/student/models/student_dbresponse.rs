@@ -1,3 +1,4 @@
+use crate::entities::student::Student as StudentEntity;
 use chrono::NaiveDate;
 use uuid::Uuid;
 
@@ -22,7 +23,7 @@ pub struct Student {
 }
 
 pub struct StudentCollection {
-    pub collection: Vec<Student>,
+    pub collection: Vec<StudentEntity>,
     pub has_more: Option<bool>,
     pub total: i64,
 }

@@ -29,8 +29,8 @@ fn initialise() {
 #[tokio::test]
 async fn crud_should_work() {
     initialise();
-    // given_a_student_when_get_one_by_id_then_return_correct_student_view_openapi().await;
-    when_post_a_student_upsert_then_student_is_correctly_saved_and_student_view_returned().await;
+    given_a_student_when_get_one_by_id_then_return_correct_student_view_openapi().await;
+    // when_post_a_student_upsert_then_student_is_correctly_saved_and_student_view_returned().await;
     // given_3_students_when_find_without_filtering_then_return_collection_with_the_right_size().await;
     test_get_collection().await;
 }
@@ -38,7 +38,10 @@ async fn crud_should_work() {
 async fn given_a_student_when_get_one_by_id_then_return_correct_student_view_openapi() {
     // Given
     let expected_student_view_openapi: StudentView = test_data::prepare_student_view_openapi(None);
-    let given_uuid = expected_student_view_openapi.student_id.unwrap().to_string();
+    let given_uuid = expected_student_view_openapi
+        .student_id
+        .unwrap()
+        .to_string();
 
     // When
     let actual_student_view_openapi = getter::get_one_student_by_id(given_uuid).await;

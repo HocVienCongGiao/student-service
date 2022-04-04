@@ -33,8 +33,8 @@ impl ToOpenApi<StudentViewCollection> for QueryStudentCollectionUsecaseOutput {
 impl ToOpenApi<StudentView> for QueryStudentUsecaseOutput {
     fn to_openapi(self) -> StudentView {
         StudentView {
-            person_id: None,
-            student_id: None,
+            person_id: Some(self.person_id),
+            student_id: Some(self.student_id),
         }
     }
 }

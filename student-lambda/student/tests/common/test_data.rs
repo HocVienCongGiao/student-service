@@ -1,13 +1,14 @@
-use hvcg_academics_openapi_student::models::{
-    StudentUpsert, StudentView, StudentViewCollection,
-};
+use hvcg_academics_openapi_student::models::{StudentUpsert, StudentView, StudentViewCollection};
 use std::str::FromStr;
 use uuid::Uuid;
 
 pub fn prepare_student_view_openapi(student_id: Option<Uuid>) -> StudentView {
     StudentView {
         person_id: Some(Uuid::from_str("53f549b9-99bf-4e12-88e3-c2f868953283").unwrap()),
-        student_id,
+        student_id: Some(
+            student_id
+                .unwrap_or_else(|| Uuid::from_str("ccb45678-69bb-4b54-9f09-3c8ab3c30999").unwrap()),
+        ),
     }
 }
 

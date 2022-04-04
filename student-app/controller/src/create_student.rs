@@ -1,6 +1,4 @@
 use db_postgres::person_gateway::repository::PersonRepository;
-use db_postgres::polity_gateway::repository::PolityRepository;
-use db_postgres::saint_gateway::repository::SaintRepository;
 use db_postgres::student_gateway::repository::StudentRepository;
 use domain::usecases::create_student_usecase::{
     CreateStudentUsecase, CreateStudentUsecaseInput, CreateStudentUsecaseInteractor,

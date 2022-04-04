@@ -6,12 +6,12 @@ use domain::ports::find_student_collection_port::FindStudentCollectionPort;
 use domain::ports::student::models::student_dbrequest::StudentQuery as StudentQueryDbRequest;
 use domain::ports::student::models::student_dbrequest::StudentSortCriteria as StudentSortCriteriaDbRequest;
 use domain::ports::student::models::student_dbrequest::StudentSortField as StudentSortFieldDbRequest;
-use domain::ports::student::models::student_dbresponse::Student as StudentDbResponse;
 use domain::ports::student::models::student_dbresponse::StudentCollection as StudentCollectionDbResponse;
 use domain::SortDirection;
 use tokio_postgres::types::ToSql;
 use tokio_postgres::{Client, Error, Row};
 
+use domain::entities::student::Student as StudentEntity;
 use heck::SnakeCase;
 
 pub struct StudentFilter {
@@ -69,7 +69,7 @@ impl FindStudentCollectionPort for StudentRepository {
             order_by_string.clone(),
         )
         .await;
-        let collection: Vec<StudentDbResponse> = if let Ok(result) = result {
+        let collection: Vec<StudentEntity> = if let Ok(result) = result {
             result
                 .into_iter()
                 .map(from_pg_row_to_student_db_response) //fn in find one by id
