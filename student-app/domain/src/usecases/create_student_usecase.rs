@@ -4,9 +4,6 @@ use uuid::Uuid;
 use crate::entities::student::Student as StudentEntity;
 use crate::ports::person::person_db_gateway::PersonDbGateway;
 use crate::ports::student::student_db_gateway::StudentDbGateway;
-use crate::usecases::student_usecase_shared_models::{
-    WithChristianName, WithPolity, WithStudentId,
-};
 use crate::usecases::{ToEntity, ToUsecaseOutput, UsecaseError};
 
 pub struct CreateStudentUsecaseInteractor<A: StudentDbGateway, B: PersonDbGateway> {
@@ -101,44 +98,3 @@ impl ToUsecaseOutput<CreateStudentUsecaseOutput> for StudentEntity {
         }
     }
 }
-
-// impl WithPolity<CreateStudentUsecaseOutput> for CreateStudentUsecaseOutput {
-//     fn with_polity(
-//         mut self,
-//         name: Option<String>,
-//         location_name: Option<String>,
-//         location_address: Option<String>,
-//         location_email: Option<String>,
-//     ) -> CreateStudentUsecaseOutput {
-//         self.polity_name = name;
-//         self.polity_location_name = location_name;
-//         self.polity_location_address = location_address;
-//         self.polity_location_email = location_email;
-//         self
-//     }
-// }
-//
-// impl WithChristianName<CreateStudentUsecaseOutput> for CreateStudentUsecaseOutput {
-//     fn with_christian_name(mut self, name: Option<String>) -> CreateStudentUsecaseOutput {
-//         if let Some(name) = name {
-//             let mut saint_names: Vec<String>;
-//             if self.christian_name.is_none() {
-//                 saint_names = vec![];
-//             } else {
-//                 saint_names = self.christian_name.unwrap();
-//             }
-//             saint_names.push(name);
-//             self.christian_name = Some(saint_names);
-//         }
-//         self
-//     }
-// }
-//
-// impl WithStudentId<CreateStudentUsecaseOutput> for CreateStudentUsecaseOutput {
-//     fn with_student_id(mut self, student_id: Option<Uuid>) -> CreateStudentUsecaseOutput {
-//         if let Some(student_id) = student_id {
-//             self.student_id = student_id
-//         }
-//         self
-//     }
-// }

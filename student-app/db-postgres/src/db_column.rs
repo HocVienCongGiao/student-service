@@ -7,6 +7,13 @@ pub fn get_uuid(row: &Row, col: &str) -> Uuid {
     row.get::<&str, Uuid>(col)
 }
 
+pub fn get_result_of_uuid(row: &Row, col: &str) -> Option<String> {
+    match row.try_get::<&str, String>(col) {
+        Ok(uuid) => Some(uuid),
+        _ => None,
+    }
+}
+
 pub fn get_uuid_collection(row: &Row, col: &str) -> Vec<Uuid> {
     row.get::<&str, Vec<Uuid>>(col)
 }

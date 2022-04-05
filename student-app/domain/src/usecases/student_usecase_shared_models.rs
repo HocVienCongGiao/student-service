@@ -1,4 +1,3 @@
-use chrono::NaiveDate;
 use uuid::Uuid;
 
 pub(crate) trait WithPolity<T> {
@@ -64,21 +63,6 @@ impl std::str::FromStr for StudentUsecaseSharedIdNumberProvider {
 }
 
 pub struct QueryStudentUsecaseOutput {
-    pub id: Uuid,
-    pub polity_id: Option<Uuid>,
-    pub polity_name: Option<String>,
-    pub polity_location_name: Option<String>,
-    pub polity_location_address: Option<String>,
-    pub polity_location_email: Option<String>,
-    pub saint_ids: Option<Vec<Uuid>>,
-    pub christian_name: Option<Vec<String>>,
-    pub title: Option<String>,
-    pub first_name: Option<String>,
-    pub middle_name: Option<String>,
-    pub last_name: Option<String>,
-    pub date_of_birth: Option<NaiveDate>,
-    pub place_of_birth: Option<String>,
-    pub email: Option<String>,
-    pub phone: Option<String>,
-    pub undergraduate_school: Option<String>,
+    pub student_id: Uuid,
+    pub person_id: Uuid,
 }
