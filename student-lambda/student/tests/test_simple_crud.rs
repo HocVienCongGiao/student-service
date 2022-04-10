@@ -1,3 +1,4 @@
+use crate::common::deleter;
 use chrono::DateTime;
 use common::getter;
 use common::poster;
@@ -13,6 +14,7 @@ use std::sync::Once;
 use uuid::Uuid;
 
 use crate::common::poster::post_student_upsert;
+use crate::http::StatusCode;
 
 mod common;
 
@@ -33,6 +35,22 @@ async fn crud_should_work() {
     // when_post_a_student_upsert_then_student_is_correctly_saved_and_student_view_returned().await;
     // given_3_students_when_find_without_filtering_then_return_collection_with_the_right_size().await;
     test_get_collection().await;
+    delete_a_student_when_given_one_student_id().await;
+}
+
+async fn delete_a_student_when_given_one_student_id() {
+    // Given
+    let expected_student_view_openapi: StudentView = test_data::prepare_student_view_openapi(None);
+    let given_uuid = expected_student_view_openapi
+        .student_id
+        .unwrap()
+        .to_string();
+
+    // When
+    let status_code = deleter::delete_one_student_by_id(given_uuid).await;
+
+    // THen
+    assert_eq!(status_code, StatusCode::NO_CONTENT)
 }
 
 async fn given_a_student_when_get_one_by_id_then_return_correct_student_view_openapi() {

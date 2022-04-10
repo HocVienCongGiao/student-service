@@ -1,11 +1,14 @@
 use chrono::NaiveDate;
-use domain::usecases::UsecaseError;
 use hvcg_academics_openapi_student::models::{
     StudentSortCriteria, StudentUpsert as StudentUpsertOpenApi, StudentView as StudentViewOpenApi,
     StudentViewCollection,
 };
 use uuid::Uuid;
+
+use domain::usecases::UsecaseError;
+
 mod create_student;
+mod delete_one_student_by_id;
 mod get_one_student_by_id;
 mod get_student_collection;
 
@@ -47,4 +50,8 @@ pub struct StudentCollectionQuery {
     pub sorts: Option<Vec<StudentSortCriteria>>,
     pub offset: Option<i64>,
     pub count: Option<i64>,
+}
+
+pub async fn delete_one_student_by_id(id: Uuid) -> Result<(), UsecaseError> {
+    delete_one_student_by_id::from_uuid(id).await
 }

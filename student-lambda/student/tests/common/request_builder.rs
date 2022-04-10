@@ -9,6 +9,27 @@ use std::str::FromStr;
 use std::sync::Once;
 use uuid::Uuid;
 
+pub fn build_http_request_to_delete_one_student(uuid: String) -> Request<Body> {
+    let mut query_param = HashMap::new();
+    let mut path_param = HashMap::new();
+
+    let uri = format!(
+        "https://dev-sg.portal.hocvienconggiao.com/mutation-api/student-service//{}",
+        uuid
+    );
+
+    path_param.insert("id".to_string(), vec![uuid]);
+    build_http_delete_request(uri, query_param, path_param)
+}
+
+fn build_http_delete_request(
+    uri: String,
+    query_param: HashMap<String, Vec<String>>,
+    path_param: HashMap<String, Vec<String>>,
+) -> Request<Body> {
+    build_http_request("DELETE".to_string(), uri, query_param, path_param, None)
+}
+
 pub fn build_http_request_to_post_student_upsert(student_upsert: StudentUpsert) -> Request<Body> {
     let mut query_param = HashMap::new();
     let mut path_param = HashMap::new();
