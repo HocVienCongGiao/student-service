@@ -1,3 +1,4 @@
+pub mod deleter;
 pub mod getter;
 pub mod poster;
 pub mod request_builder;
